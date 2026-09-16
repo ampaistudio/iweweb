@@ -46,7 +46,7 @@ $defaultConfig = [
         'ig_user_id'        => getenv('META_IG_USER_ID') ?: '',
         'app_id'            => getenv('META_APP_ID') ?: '',
         'app_secret'        => getenv('META_APP_SECRET') ?: '',
-        'verify_token'      => getenv('META_VERIFY_TOKEN') ?: 'iwe_webhook_verify_token_secure_string',
+        'verify_token'      => getenv('META_VERIFY_TOKEN') ?: '',
         'api_version'       => 'v21.0',
     ],
 ];

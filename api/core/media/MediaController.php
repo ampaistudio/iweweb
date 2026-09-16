@@ -3,15 +3,26 @@
  * iWE Dashboard API - Media Controller
  * 
  * Handles secure file uploads, media library listing, and safe deletion.
+ * Fully decoupled from domain models (uses registered usage checkers for referential checks).
  */
 
 class MediaController {
     private PDO $pdo;
     private array $config;
+    /** @var callable[] */
+    private array $usageCheckers = [];
 
     public function __construct(PDO $pdo, array $config) {
         $this->pdo = $pdo;
         $this->config = $config;
+    }
+
+    /**
+     * Register a domain-level callback to verify if a media file is in use before deletion.
+     * Callback signature: function(array $media, PDO $pdo): ?string (returns conflict error string or null)
+     */
+    public function addUsageChecker(callable $checker): void {
+        $this->usageCheckers[] = $checker;
     }
 
     /**
@@ -140,7 +151,7 @@ class MediaController {
 
     /**
      * DELETE /api/media/:id
-     * Delete an image if it is not currently referenced by activities or posts
+     * Delete an image if it is not currently referenced by core or domain entities
      */
     public function delete(int $id): void {
         requireAuth($this->pdo);
@@ -153,7 +164,7 @@ class MediaController {
             jsonError('Archivo multimedia no encontrado.', 404);
         }
 
-        // Check if referenced in posts
+        // 1. Check core references (posts)
         $stmtPost = $this->pdo->prepare('SELECT id, title FROM posts WHERE cover_media_id = :id LIMIT 1');
         $stmtPost->execute(['id' => $id]);
         $postRef = $stmtPost->fetch();
@@ -161,22 +172,22 @@ class MediaController {
             jsonError("No se puede eliminar la imagen porque está en uso como portada en el post '{$postRef['title']}'.", 409);
         }
 
-        // Check if referenced in activities
-        $stmtAct = $this->pdo->prepare('SELECT id, title FROM activities WHERE image_url LIKE :pattern LIMIT 1');
-        $stmtAct->execute(['pattern' => '%' . $media['filename'] . '%']);
-        $actRef = $stmtAct->fetch();
-        if ($actRef) {
-            jsonError("No se puede eliminar la imagen porque está en uso en la actividad '{$actRef['title']}'.", 409);
+        // 2. Check registered domain usage checkers (e.g. domain entities)
+        foreach ($this->usageCheckers as $checker) {
+            $conflict = $checker($media, $this->pdo);
+            if ($conflict !== null) {
+                jsonError($conflict, 409);
+            }
         }
 
-        // Remove from disk
+        // 3. Remove from disk
         $uploadDir = rtrim($this->config['media']['upload_dir'] ?? (__DIR__ . '/../../uploads'), '/');
         $filePath = $uploadDir . '/' . $media['filename'];
         if (file_exists($filePath)) {
             @unlink($filePath);
         }
 
-        // Delete from database
+        // 4. Delete from database
         $stmtDel = $this->pdo->prepare('DELETE FROM media WHERE id = :id');
         $stmtDel->execute(['id' => $id]);
 

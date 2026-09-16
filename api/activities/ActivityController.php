@@ -26,6 +26,20 @@ class ActivityController {
     }
 
     /**
+     * Domain usage checker registered in MediaController.
+     * Checks if a media filename is currently referenced by any activity.
+     */
+    public static function checkMediaUsage(array $media, PDO $pdo): ?string {
+        $stmt = $pdo->prepare('SELECT id, title FROM activities WHERE image_url LIKE :pattern LIMIT 1');
+        $stmt->execute(['pattern' => '%' . $media['filename'] . '%']);
+        $activity = $stmt->fetch();
+        if ($activity) {
+            return "No se puede eliminar la imagen porque está en uso en la actividad '{$activity['title']}'.";
+        }
+        return null;
+    }
+
+    /**
      * GET /api/activities
      * List all activities (public shows published only; auth shows all or filtered)
      */

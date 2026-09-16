@@ -40,7 +40,11 @@ class WebhookController {
 
         $configuredToken = $this->config['meta']['verify_token'] ?? '';
 
-        if ($mode === 'subscribe' && !empty($configuredToken) && $token === $configuredToken) {
+        if (empty($configuredToken)) {
+            jsonError('Servicio de webhook no configurado: falta META_VERIFY_TOKEN en el servidor.', 403);
+        }
+
+        if ($mode === 'subscribe' && $token === $configuredToken) {
             http_response_code(200);
             header('Content-Type: text/plain; charset=utf-8');
             echo $challenge;
@@ -52,6 +56,7 @@ class WebhookController {
 
     /**
      * POST events from Meta Graph API
+     * Enforces unconditional HMAC SHA-256 signature verification (fail-closed security)
      */
     private function receiveEvents(): void {
         $rawPayload = file_get_contents('php://input');
@@ -59,18 +64,20 @@ class WebhookController {
 
         $appSecret = $this->config['meta']['app_secret'] ?? '';
 
-        // Validate HMAC SHA-256 signature if app secret is configured
-        if (!empty($appSecret)) {
-            if (empty($signatureHeader) || !str_starts_with($signatureHeader, 'sha256=')) {
-                jsonError('Firma X-Hub-Signature-256 faltante o con formato inválido.', 403);
-            }
+        // Unconditional signature check (fail-closed)
+        if (empty($appSecret)) {
+            jsonError('Configuración de seguridad incompleta: falta META_APP_SECRET para validar firmas de webhooks.', 403);
+        }
 
-            $expectedSignature = hash_hmac('sha256', $rawPayload, $appSecret);
-            $receivedSignature = substr($signatureHeader, 7);
+        if (empty($signatureHeader) || !str_starts_with($signatureHeader, 'sha256=')) {
+            jsonError('Firma X-Hub-Signature-256 faltante o con formato inválido.', 403);
+        }
 
-            if (!hash_equals($expectedSignature, $receivedSignature)) {
-                jsonError('Firma criptográfica de webhook inválida. Petición rechazada.', 403);
-            }
+        $expectedSignature = hash_hmac('sha256', $rawPayload, $appSecret);
+        $receivedSignature = substr($signatureHeader, 7);
+
+        if (!hash_equals($expectedSignature, $receivedSignature)) {
+            jsonError('Firma criptográfica de webhook inválida. Petición rechazada.', 403);
         }
 
         $data = json_decode($rawPayload, true);
@@ -94,8 +101,16 @@ class WebhookController {
     private function processEntries(array $payload): void {
         $objectType = $payload['object'] ?? 'page'; // 'page' or 'instagram'
 
-        // Default author for ingested posts (Christian / Admin #1)
-        $authorId = 1;
+        // Resolve active author from database dynamically (first available admin)
+        $stmtAuthor = $this->pdo->query('SELECT id FROM users ORDER BY id ASC LIMIT 1');
+        $authorId = (int)$stmtAuthor->fetchColumn();
+
+        if ($authorId <= 0) {
+            error_log('Webhook error: no users found in database to assign imported post.');
+            http_response_code(500);
+            echo 'NO_AUTHOR_AVAILABLE';
+            exit;
+        }
 
         foreach ($payload['entry'] as $entry) {
             $changes = $entry['changes'] ?? [];

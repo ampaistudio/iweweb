@@ -156,6 +156,7 @@ try {
     // --- Media Endpoints ---
     if ($resource === 'media') {
         $mediaController = new MediaController($pdo, $config);
+        $mediaController->addUsageChecker([ActivityController::class, 'checkMediaUsage']);
 
         if ($id === null) {
             if ($method === 'GET') {
