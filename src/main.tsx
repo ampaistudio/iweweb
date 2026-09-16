@@ -5,19 +5,26 @@ import "./index.css";
 import App from "./App";
 import Home from "./pages/Home";
 import TourDetail from "./pages/TourDetail";
+import NewsList from "./pages/NewsList";
+import NewsDetail from "./pages/NewsDetail";
 import { PreferencesProvider } from "./context/PreferencesContext";
+import { SiteDataProvider } from "./context/SiteDataContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <PreferencesProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<App />}>
-            <Route index element={<Home />} />
-            <Route path="tour/:tourId" element={<TourDetail />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <SiteDataProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<App />}>
+              <Route index element={<Home />} />
+              <Route path="tour/:tourId" element={<TourDetail />} />
+              <Route path="novedades" element={<NewsList />} />
+              <Route path="novedades/:slug" element={<NewsDetail />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </SiteDataProvider>
     </PreferencesProvider>
   </StrictMode>
 );

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { activities, packages, reviews } from "../data/activities";
+import { packages, reviews, type Activity, type ActivityType } from "../data/activities";
 import HeroSlideshow, { type HeroSlide } from "../components/HeroSlideshow";
+import { useSiteData } from "../context/SiteDataContext";
 
 const heroSlides: HeroSlide[] = [
   {
@@ -34,24 +35,28 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   );
 }
 
-function ActivityGrid({ type }: { type: (typeof activities)[number]["type"] }) {
+function ActivityGrid({ type, activities }: { type: ActivityType; activities: Activity[] }) {
+  const filtered = activities.filter((activity) => activity.type === type);
+
+  if (filtered.length === 0) {
+    return null;
+  }
+
   return (
     <div className="tour-grid">
-      {activities
-        .filter((activity) => activity.type === type)
-        .map((activity) => (
-          <Link className="tour-item" id={activity.id} to={`/tour/${activity.id}`} key={activity.id}>
-            <div className="tour-image-wrap">
-              <img src={activity.image} alt={activity.alt} />
-              <span className="tour-arrow"><ArrowIcon /></span>
-            </div>
-            <div className="tour-details">
-              <div className="tour-meta"><span>{activity.region}</span><span>{activity.type}</span></div>
-              <h3>{activity.title}</h3>
-              <div className="tour-submeta"><span>{activity.country}</span><span>{activity.level} / {activity.duration}</span></div>
-            </div>
-          </Link>
-        ))}
+      {filtered.map((activity) => (
+        <Link className="tour-item" id={activity.id} to={`/tour/${activity.id}`} key={activity.id}>
+          <div className="tour-image-wrap">
+            <img src={activity.image} alt={activity.alt} />
+            <span className="tour-arrow"><ArrowIcon /></span>
+          </div>
+          <div className="tour-details">
+            <div className="tour-meta"><span>{activity.region}</span><span>{activity.type}</span></div>
+            <h3>{activity.title}</h3>
+            <div className="tour-submeta"><span>{activity.country}</span><span>{activity.level} / {activity.duration}</span></div>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
@@ -60,6 +65,7 @@ function Home() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const { activities, getContent } = useSiteData();
 
   const handleNewsletter = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -69,6 +75,20 @@ function Home() {
   const moveReview = (direction: number) => {
     setReviewIndex((current) => (current + direction + reviews.length) % reviews.length);
   };
+
+  const heroTagline = getContent("hero_tagline", "Fabricamos experiencias.");
+  const missionEyebrow = getContent("mission_eyebrow", "Nuestra empresa");
+  const missionTitle = getContent("mission_title", "Líderes en turismo de experiencias en Andorra y los Pirineos.");
+  const missionText = getContent(
+    "mission_text",
+    "Descubre un mundo de experiencias únicas con un solo operador turístico. Esquí, snowboard, raquetas de nieve, tours culturales y todo lo que te puedas imaginar para vivir la montaña, guiado por expertos locales como Charly Paredes."
+  );
+  const teamEyebrow = getContent("team_eyebrow", "Nuestro equipo");
+  const teamTitle = getContent("team_title", "Fundada en 2018. Guiada por expertos locales.");
+  const teamBio = getContent(
+    "team_bio",
+    "iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés.\n\nCada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto."
+  );
 
   return (
     <main id="top">
@@ -93,12 +113,12 @@ function Home() {
             src="https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg"
             alt="Roc del Quer, Andorra"
           />
-          <span className="image-caption">Fabricamos experiencias.</span>
+          <span className="image-caption">{heroTagline}</span>
         </div>
         <div className="mission-copy">
-          <p className="eyebrow">Nuestra empresa</p>
-          <h2>Líderes en turismo de experiencias en Andorra y los Pirineos.</h2>
-          <p className="large-copy">Descubre un mundo de experiencias únicas con un solo operador turístico. Esquí, snowboard, raquetas de nieve, tours culturales y todo lo que te puedas imaginar para vivir la montaña, guiado por expertos locales como Charly Paredes.</p>
+          <p className="eyebrow">{missionEyebrow}</p>
+          <h2>{missionTitle}</h2>
+          <p className="large-copy">{missionText}</p>
           <a className="text-link dark-link" href="#team">Nuestro equipo <ArrowIcon /></a>
           <div className="mission-numbers" aria-label="iWE de un vistazo">
             <div><strong>2018</strong><span>año de fundación</span></div>
@@ -117,10 +137,11 @@ function Home() {
           <div className="why-image-note"><span>01</span><span>Conocimiento local.<br />Experiencia real.</span></div>
         </div>
         <div className="why-copy-panel">
-          <p className="eyebrow">Nuestro equipo</p>
-          <h2>Fundada en 2018.<br /><em>Guiada por expertos locales.</em></h2>
-          <p>iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés.</p>
-          <p>Cada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto.</p>
+          <p className="eyebrow">{teamEyebrow}</p>
+          <h2>{teamTitle}</h2>
+          {teamBio.split(/\n\s*\n/).map((para, idx) => (
+            <p key={idx}>{para}</p>
+          ))}
           <a className="button button-dark" href="#contact">Cómo trabajamos <ArrowIcon /></a>
         </div>
       </section>
@@ -133,7 +154,7 @@ function Home() {
               <h2>Bike</h2>
             </div>
           </div>
-          <ActivityGrid type="BTT" />
+          <ActivityGrid type="BTT" activities={activities} />
         </div>
       </section>
 
@@ -145,7 +166,7 @@ function Home() {
               <h2>Vía Ferrata</h2>
             </div>
           </div>
-          <ActivityGrid type="Vía Ferrata" />
+          <ActivityGrid type="Vía Ferrata" activities={activities} />
         </div>
       </section>
 
@@ -157,7 +178,7 @@ function Home() {
               <h2>4×4</h2>
             </div>
           </div>
-          <ActivityGrid type="4x4" />
+          <ActivityGrid type="4x4" activities={activities} />
         </div>
       </section>
 
@@ -169,7 +190,7 @@ function Home() {
               <h2>Senderismo</h2>
             </div>
           </div>
-          <ActivityGrid type="Senderismo" />
+          <ActivityGrid type="Senderismo" activities={activities} />
         </div>
       </section>
 
@@ -181,7 +202,7 @@ function Home() {
               <h2>Esquí-Snow</h2>
             </div>
           </div>
-          <ActivityGrid type="Esquí-Snow" />
+          <ActivityGrid type="Esquí-Snow" activities={activities} />
         </div>
       </section>
 

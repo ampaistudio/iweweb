@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { navSections } from "./data/activities";
+import { useSiteData } from "./context/SiteDataContext";
 import { languages, usePreferences } from "./context/PreferencesContext";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
@@ -47,6 +47,7 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme, fontScale, cycleFontScale, language, setLanguage } = usePreferences();
+  const { navSections, getContent } = useSiteData();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -55,6 +56,8 @@ function App() {
   }, []);
 
   const fontScaleLabel = { normal: "A", large: "A+", xlarge: "A++" }[fontScale];
+  const contactAddress = getContent("contact_address", "Av. de Sant Antoni, 12, AD400 La Massana, Andorra");
+  const contactPhone = getContent("contact_phone", "+376 344 870");
 
   return (
     <div className="site-shell bg-stone-50 text-ink">
@@ -79,6 +82,7 @@ function App() {
             </div>
           ))}
           <a href="/#tours">Tours en Andorra</a>
+          <Link to="/novedades">Novedades</Link>
         </nav>
 
         <div className="header-actions">
@@ -143,6 +147,7 @@ function App() {
               </div>
             ))}
             <a href="/#tours" onClick={() => setMenuOpen(false)}>Tours en Andorra</a>
+            <Link to="/novedades" onClick={() => setMenuOpen(false)}>Novedades</Link>
             <a href="/#contact" onClick={() => setMenuOpen(false)}>Contacto <ArrowIcon /></a>
           </nav>
         )}
@@ -157,9 +162,22 @@ function App() {
             <span className="brand-name">Wildland Experience</span>
           </Link>
           <p>Turismo activo y experiencias de montaña<br />en Andorra y los Pirineos.</p>
-          <div className="footer-links"><a href="/#bike">Bike</a><a href="/#tours">Tours en Andorra</a><a href="/#stories">Opiniones</a><a href="/#contact">Contacto</a></div>
+          <div className="footer-links">
+            <a href="/#bike">Bike</a>
+            <a href="/#tours">Tours en Andorra</a>
+            <Link to="/novedades">Novedades</Link>
+            <a href="/#stories">Opiniones</a>
+            <a href="/#contact">Contacto</a>
+          </div>
         </div>
-        <div className="page-width footer-bottom"><span>© 2026 iWE — Isard Wildland Experience</span><span>Av. de Sant Antoni, 12, AD400 La Massana, Andorra · Tel: +376-653-769</span><div><a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a></div></div>
+        <div className="page-width footer-bottom">
+          <span>© 2026 iWE — {getContent("business_name", "Isard Wildland Experience")}</span>
+          <span>{contactAddress} · Tel: {contactPhone}</span>
+          <div>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a>
+          </div>
+        </div>
       </footer>
     </div>
   );

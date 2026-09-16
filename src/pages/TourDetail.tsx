@@ -1,5 +1,5 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { activities } from "../data/activities";
+import { useSiteData } from "../context/SiteDataContext";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -16,13 +16,32 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
 
 function TourDetail() {
   const { tourId } = useParams<{ tourId: string }>();
-  const activity = activities.find((item) => item.id === tourId);
+  const { getActivity, activities, loading } = useSiteData();
 
-  if (!activity) {
+  if (!tourId) {
     return <Navigate to="/" replace />;
   }
 
-  const related = activities.filter((item) => item.type === activity.type && item.id !== activity.id).slice(0, 3);
+  const activity = getActivity(tourId);
+
+  if (!activity && !loading) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!activity && loading) {
+    return (
+      <main className="tour-detail page-width section-space">
+        <div className="news-loading-state">
+          <div className="news-spinner" />
+          <p>Cargando experiencia...</p>
+        </div>
+      </main>
+    );
+  }
+
+  const related = activities
+    .filter((item) => item.type === activity!.type && item.id !== activity!.id)
+    .slice(0, 3);
 
   return (
     <main className="tour-detail page-width section-space">
@@ -32,25 +51,27 @@ function TourDetail() {
 
       <div className="tour-detail-layout">
         <div className="tour-detail-image">
-          <img src={activity.image} alt={activity.alt} />
+          <img src={activity!.image} alt={activity!.alt} />
         </div>
 
         <div className="tour-detail-copy">
-          <p className="eyebrow">{activity.type} · {activity.region}</p>
-          <h1>{activity.title}</h1>
+          <p className="eyebrow">{activity!.type} · {activity!.region}</p>
+          <h1>{activity!.title}</h1>
           <div className="tour-detail-meta">
-            <span>{activity.country}</span>
-            <span>{activity.level}</span>
-            <span>{activity.duration}</span>
-            {activity.price && <span className="tour-detail-price">{activity.price}</span>}
+            <span>{activity!.country}</span>
+            <span>{activity!.level}</span>
+            <span>{activity!.duration}</span>
+            {activity!.price && <span className="tour-detail-price">{activity!.price}</span>}
           </div>
-          <p className="large-copy">{activity.description}</p>
+          <p className="large-copy">{activity!.description}</p>
 
-          <ul className="tour-detail-highlights">
-            {activity.highlights.map((highlight) => (
-              <li key={highlight}>{highlight}</li>
-            ))}
-          </ul>
+          {activity!.highlights && activity!.highlights.length > 0 && (
+            <ul className="tour-detail-highlights">
+              {activity!.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+          )}
 
           <a className="button button-dark" href="mailto:info@i-wildland.com">
             Reservar esta experiencia <ArrowIcon />
