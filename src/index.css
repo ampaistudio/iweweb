@@ -269,6 +269,10 @@ blockquote { font-family: "Space Grotesk", sans-serif; font-size: clamp(28px, 3.
   .desktop-nav { display: none; }
   .menu-toggle { display: block; }
   .header-contact { display: none; }
+  .header-actions { gap: 14px; }
+  .preferences-controls { gap: 6px; }
+  .preferences-button, .preferences-language-select { height: 32px; }
+  .preferences-language-select { max-width: 84px; }
   .hero-section { min-height: 760px; padding-bottom: 105px; }
   .hero-image { object-position: 56% center; }
   .hero-scroll { display: none; }
@@ -301,6 +305,13 @@ blockquote { font-family: "Space Grotesk", sans-serif; font-size: clamp(28px, 3.
   .mobile-nav { padding: 28px 20px 35px; top: 68px; }
   .brand-symbol { font-size: 24px; }
   .brand-name { font-size: 9px; }
+  .brand-logo-placeholder { font-size: 9px; height: 36px; padding: 0 12px; }
+  .header-actions { gap: 8px; }
+  .preferences-controls { gap: 5px; }
+  .preferences-button { height: 30px; width: 30px; }
+  .preferences-button svg { height: 14px; width: 14px; }
+  .preferences-font-button { font-size: 10px; padding: 0 7px; }
+  .preferences-language-select { font-size: 11px; height: 30px; max-width: 62px; padding: 0 6px; }
   .hero-section { min-height: 720px; padding-bottom: 84px; }
   .hero-copy { font-size: 16px; max-width: 350px; }
   .hero-actions { align-items: flex-start; flex-direction: column; gap: 24px; }

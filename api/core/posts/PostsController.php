@@ -1,0 +1,332 @@
+<?php
+/**
+ * iWE Dashboard API - Posts Controller
+ * 
+ * CRUD for blog/news posts with automated Meta social sync dispatch.
+ */
+
+class PostsController {
+    private PDO $pdo;
+    private array $config;
+    private MetaGraphService $metaService;
+
+    public function __construct(PDO $pdo, array $config) {
+        $this->pdo = $pdo;
+        $this->config = $config;
+        $this->metaService = new MetaGraphService($pdo, $config);
+    }
+
+    /**
+     * GET /api/posts
+     * List posts (public sees only published; authenticated user sees all)
+     */
+    public function list(): void {
+        $user = getAuthenticatedUser($this->pdo);
+
+        $sql = '
+            SELECT p.id, p.title, p.slug, p.body, p.cover_media_id, p.status, p.origin, 
+                   p.created_by, p.published_at, p.created_at, p.updated_at,
+                   u.display_name AS author_name,
+                   m.filename AS cover_filename
+            FROM posts p
+            LEFT JOIN users u ON p.created_by = u.id
+            LEFT JOIN media m ON p.cover_media_id = m.id
+        ';
+
+        if (!$user) {
+            $sql .= ' WHERE p.status = "published" ';
+        }
+
+        $sql .= ' ORDER BY COALESCE(p.published_at, p.created_at) DESC ';
+
+        $stmt = $this->pdo->query($sql);
+        $posts = $stmt->fetchAll();
+
+        $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
+
+        // Fetch social links for these posts
+        $postIds = array_column($posts, 'id');
+        $socialLinksByPost = [];
+
+        if (!empty($postIds)) {
+            $inClause = implode(',', array_map('intval', $postIds));
+            $stmtLinks = $this->pdo->query("
+                SELECT post_id, platform, external_post_id, external_permalink, sync_status, sync_error, synced_at
+                FROM post_social_links
+                WHERE post_id IN ({$inClause})
+            ");
+            while ($link = $stmtLinks->fetch()) {
+                $socialLinksByPost[$link['post_id']][] = $link;
+            }
+        }
+
+        $formatted = array_map(function ($post) use ($publicBase, $socialLinksByPost) {
+            $post['cover_image_url'] = $post['cover_filename'] ? $publicBase . '/' . $post['cover_filename'] : null;
+            $post['social_links'] = $socialLinksByPost[$post['id']] ?? [];
+            return $post;
+        }, $posts);
+
+        jsonSuccess($formatted);
+    }
+
+    /**
+     * GET /api/posts/:id (or slug)
+     */
+    public function get($idOrSlug): void {
+        $user = getAuthenticatedUser($this->pdo);
+
+        $isNumeric = is_numeric($idOrSlug);
+        $column = $isNumeric ? 'p.id' : 'p.slug';
+
+        $sql = "
+            SELECT p.id, p.title, p.slug, p.body, p.cover_media_id, p.status, p.origin, 
+                   p.created_by, p.published_at, p.created_at, p.updated_at,
+                   u.display_name AS author_name,
+                   m.filename AS cover_filename
+            FROM posts p
+            LEFT JOIN users u ON p.created_by = u.id
+            LEFT JOIN media m ON p.cover_media_id = m.id
+            WHERE {$column} = :identifier
+        ";
+
+        if (!$user) {
+            $sql .= ' AND p.status = "published" ';
+        }
+        $sql .= ' LIMIT 1';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['identifier' => $idOrSlug]);
+        $post = $stmt->fetch();
+
+        if (!$post) {
+            jsonError('Publicación no encontrada.', 404);
+        }
+
+        $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
+        $post['cover_image_url'] = $post['cover_filename'] ? $publicBase . '/' . $post['cover_filename'] : null;
+
+        $stmtLinks = $this->pdo->prepare('
+            SELECT platform, external_post_id, external_permalink, sync_status, sync_error, synced_at
+            FROM post_social_links
+            WHERE post_id = :post_id
+        ');
+        $stmtLinks->execute(['post_id' => $post['id']]);
+        $post['social_links'] = $stmtLinks->fetchAll();
+
+        jsonSuccess($post);
+    }
+
+    /**
+     * POST /api/posts
+     * Create a post (requires authentication)
+     */
+    public function create(): void {
+        $user = requireAuth($this->pdo);
+        $body = getRequestBody();
+
+        $title = trim($body['title'] ?? '');
+        $postBody = trim($body['body'] ?? '');
+        $status = in_array($body['status'] ?? '', ['draft', 'published'], true) ? $body['status'] : 'draft';
+        $coverMediaId = !empty($body['cover_media_id']) ? (int)$body['cover_media_id'] : null;
+
+        if (empty($title)) {
+            jsonError('El título del post es obligatorio.', 422);
+        }
+        if (empty($postBody)) {
+            jsonError('El contenido del post es obligatorio.', 422);
+        }
+
+        // Generate clean unique slug
+        $baseSlug = !empty($body['slug']) ? slugify($body['slug']) : slugify($title);
+        $slug = $this->generateUniqueSlug($baseSlug);
+
+        $publishedAt = ($status === 'published') ? date('Y-m-d H:i:s') : null;
+
+        $stmt = $this->pdo->prepare('
+            INSERT INTO posts (title, slug, body, cover_media_id, status, origin, created_by, published_at, created_at)
+            VALUES (:title, :slug, :body, :cover_media_id, :status, "web", :created_by, :published_at, NOW())
+        ');
+
+        $stmt->execute([
+            'title'          => $title,
+            'slug'           => $slug,
+            'body'           => $postBody,
+            'cover_media_id' => $coverMediaId,
+            'status'         => $status,
+            'created_by'     => $user['id'],
+            'published_at'   => $publishedAt,
+        ]);
+
+        $postId = (int)$this->pdo->lastInsertId();
+
+        // Social dispatch if requested and post is published
+        $publishFb = !empty($body['publish_to_facebook']);
+        $publishIg = !empty($body['publish_to_instagram']);
+        $socialResults = [];
+
+        if ($status === 'published' && ($publishFb || $publishIg)) {
+            $imageUrl = null;
+            if ($coverMediaId) {
+                $imageUrl = $this->getPublicMediaUrl($coverMediaId);
+            }
+            $socialResults = $this->metaService->publishPost($postId, $title, $postBody, $imageUrl, $publishFb, $publishIg);
+        }
+
+        jsonSuccess([
+            'id'             => $postId,
+            'title'          => $title,
+            'slug'           => $slug,
+            'status'         => $status,
+            'social_sync'    => $socialResults,
+        ], 'Publicación creada exitosamente.', 201);
+    }
+
+    /**
+     * PUT /api/posts/:id
+     * Update a post (requires authentication)
+     */
+    public function update(int $id): void {
+        requireAuth($this->pdo);
+
+        $stmt = $this->pdo->prepare('SELECT id, title, slug, status, cover_media_id FROM posts WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $existing = $stmt->fetch();
+
+        if (!$existing) {
+            jsonError('Publicación no encontrada.', 404);
+        }
+
+        $body = getRequestBody();
+        $title = trim($body['title'] ?? $existing['title']);
+        $postBody = isset($body['body']) ? trim($body['body']) : null;
+        $status = in_array($body['status'] ?? '', ['draft', 'published'], true) ? $body['status'] : $existing['status'];
+        $coverMediaId = array_key_exists('cover_media_id', $body) ? ($body['cover_media_id'] ? (int)$body['cover_media_id'] : null) : $existing['cover_media_id'];
+
+        if (empty($title)) {
+            jsonError('El título no puede estar vacío.', 422);
+        }
+
+        $slug = $existing['slug'];
+        if (!empty($body['slug']) && $body['slug'] !== $existing['slug']) {
+            $slug = $this->generateUniqueSlug(slugify($body['slug']), $id);
+        }
+
+        $publishedAt = null;
+        if ($status === 'published' && $existing['status'] === 'draft') {
+            $publishedAt = date('Y-m-d H:i:s');
+        }
+
+        $sql = '
+            UPDATE posts 
+            SET title = :title, slug = :slug, status = :status, cover_media_id = :cover_media_id, updated_at = NOW()
+        ';
+        $params = [
+            'id'             => $id,
+            'title'          => $title,
+            'slug'           => $slug,
+            'status'         => $status,
+            'cover_media_id' => $coverMediaId,
+        ];
+
+        if ($postBody !== null) {
+            $sql .= ', body = :body';
+            $params['body'] = $postBody;
+        }
+
+        if ($publishedAt !== null) {
+            $sql .= ', published_at = :published_at';
+            $params['published_at'] = $publishedAt;
+        }
+
+        $sql .= ' WHERE id = :id';
+
+        $stmtUpdate = $this->pdo->prepare($sql);
+        $stmtUpdate->execute($params);
+
+        // Handle social dispatch (new publish or retry)
+        $publishFb = !empty($body['publish_to_facebook']);
+        $publishIg = !empty($body['publish_to_instagram']);
+        $retryPlatform = $body['retry_platform'] ?? null;
+        $socialResults = [];
+
+        $imageUrl = null;
+        if ($coverMediaId) {
+            $imageUrl = $this->getPublicMediaUrl($coverMediaId);
+        }
+
+        $fullBodyText = $postBody ?? '';
+        if (empty($fullBodyText)) {
+            $stmtFull = $this->pdo->prepare('SELECT body FROM posts WHERE id = :id');
+            $stmtFull->execute(['id' => $id]);
+            $fullBodyText = $stmtFull->fetchColumn() ?: '';
+        }
+
+        if ($status === 'published' && ($publishFb || $publishIg)) {
+            $socialResults = $this->metaService->publishPost($id, $title, $fullBodyText, $imageUrl, $publishFb, $publishIg);
+        } elseif ($retryPlatform === 'facebook') {
+            $socialResults['facebook'] = $this->metaService->publishToFacebook($id, $title . "\n\n" . strip_tags($fullBodyText), $imageUrl);
+        } elseif ($retryPlatform === 'instagram') {
+            $socialResults['instagram'] = $this->metaService->publishToInstagram($id, $title . "\n\n" . strip_tags($fullBodyText), $imageUrl);
+        }
+
+        jsonSuccess([
+            'id'          => $id,
+            'title'       => $title,
+            'slug'        => $slug,
+            'status'      => $status,
+            'social_sync' => $socialResults,
+        ], 'Publicación actualizada correctamente.');
+    }
+
+    /**
+     * DELETE /api/posts/:id
+     * Delete a post (requires authentication)
+     */
+    public function delete(int $id): void {
+        requireAuth($this->pdo);
+
+        $stmt = $this->pdo->prepare('SELECT id FROM posts WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        if (!$stmt->fetch()) {
+            jsonError('Publicación no encontrada.', 404);
+        }
+
+        $stmtDel = $this->pdo->prepare('DELETE FROM posts WHERE id = :id');
+        $stmtDel->execute(['id' => $id]);
+
+        jsonSuccess(null, 'Publicación eliminada correctamente.');
+    }
+
+    private function generateUniqueSlug(string $baseSlug, ?int $ignorePostId = null): string {
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $sql = 'SELECT id FROM posts WHERE slug = :slug';
+            $params = ['slug' => $slug];
+            if ($ignorePostId !== null) {
+                $sql .= ' AND id != :ignore_id';
+                $params['ignore_id'] = $ignorePostId;
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            if (!$stmt->fetch()) {
+                return $slug;
+            }
+            $slug = "{$baseSlug}-{$counter}";
+            $counter++;
+        }
+    }
+
+    private function getPublicMediaUrl(int $mediaId): ?string {
+        $stmt = $this->pdo->prepare('SELECT filename FROM media WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $mediaId]);
+        $filename = $stmt->fetchColumn();
+        if (!$filename) {
+            return null;
+        }
+
+        $baseUrl = rtrim($this->config['app']['base_url'] ?? '', '/');
+        return $baseUrl . '/uploads/' . $filename;
+    }
+}

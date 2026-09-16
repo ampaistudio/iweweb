@@ -1,0 +1,5 @@
+# Ignore local config files containing sensitive credentials
+config.local.php
+.env
+.env.local
+*.log

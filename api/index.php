@@ -1,0 +1,212 @@
+<?php
+/**
+ * iWE Dashboard API - Front Controller & Router
+ * 
+ * Dispatches all /api/* requests with security headers, CORS, session handling,
+ * and standard REST routing.
+ */
+
+declare(strict_types=1);
+
+// Error reporting: Log errors without breaking JSON responses
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
+// Load configurations and dependencies
+$config = require __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/core/helpers.php';
+
+// Load Core Controllers
+require_once __DIR__ . '/core/auth/AuthController.php';
+require_once __DIR__ . '/core/media/MediaController.php';
+require_once __DIR__ . '/core/content/ContentController.php';
+require_once __DIR__ . '/core/social/MetaGraphService.php';
+require_once __DIR__ . '/core/social/WebhookController.php';
+require_once __DIR__ . '/core/posts/PostsController.php';
+
+// Load Domain Controllers (iWE Tourism)
+require_once __DIR__ . '/activities/ActivityController.php';
+
+// Handle CORS & Options pre-flight
+handleCors($config);
+
+// Initialize secure session
+startAppSession($config);
+
+// Initialize Database connection
+try {
+    $pdo = Database::getConnection($config['db']);
+} catch (Throwable $e) {
+    jsonError('No se pudo establecer conexión con la base de datos.', 500);
+}
+
+// Extract Request Method and Path
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+
+// Normalize path: strip script directory or /api prefix
+$basePath = '/api';
+if (str_starts_with($uri, $basePath)) {
+    $path = substr($uri, strlen($basePath));
+} else {
+    $path = $uri;
+}
+$path = '/' . trim($path, '/');
+$segments = array_values(array_filter(explode('/', $path)));
+
+// -----------------------------------------------------------------------------
+// Router Dispatcher
+// -----------------------------------------------------------------------------
+try {
+    // Health / Root check
+    if (empty($segments) || ($segments[0] === '' && count($segments) === 1)) {
+        jsonSuccess([
+            'status'  => 'ok',
+            'version' => '1.0.0',
+            'service' => 'iWE Dashboard API',
+            'time'    => date('c'),
+        ], 'iWE API funcionando correctamente.');
+    }
+
+    $resource = $segments[0] ?? '';
+    $id = $segments[1] ?? null;
+
+    // --- Overview Summary (Dashboard Overview) ---
+    if ($resource === 'overview' && $method === 'GET') {
+        requireAuth($pdo);
+        
+        $totalActivities = (int)$pdo->query('SELECT COUNT(*) FROM activities')->fetchColumn();
+        $publishedActivities = (int)$pdo->query('SELECT COUNT(*) FROM activities WHERE published = 1')->fetchColumn();
+        $totalMedia = (int)$pdo->query('SELECT COUNT(*) FROM media')->fetchColumn();
+        $totalPosts = (int)$pdo->query('SELECT COUNT(*) FROM posts')->fetchColumn();
+        $publishedPosts = (int)$pdo->query('SELECT COUNT(*) FROM posts WHERE status = "published"')->fetchColumn();
+        
+        $lastActivity = $pdo->query('SELECT title, updated_at FROM activities ORDER BY updated_at DESC LIMIT 1')->fetch();
+        $lastPost = $pdo->query('SELECT title, updated_at FROM posts ORDER BY updated_at DESC LIMIT 1')->fetch();
+
+        jsonSuccess([
+            'activities' => [
+                'total'     => $totalActivities,
+                'published' => $publishedActivities,
+                'last_edit' => $lastActivity ?: null,
+            ],
+            'posts' => [
+                'total'     => $totalPosts,
+                'published' => $publishedPosts,
+                'last_edit' => $lastPost ?: null,
+            ],
+            'media' => [
+                'total' => $totalMedia,
+            ],
+        ]);
+    }
+
+    // --- Auth Endpoints ---
+    if ($resource === 'auth') {
+        $authController = new AuthController($pdo, $config);
+        $action = $segments[1] ?? '';
+
+        if ($action === 'login' && $method === 'POST') {
+            $authController->login();
+        } elseif ($action === 'logout' && $method === 'POST') {
+            $authController->logout();
+        } elseif ($action === 'me' && $method === 'GET') {
+            $authController->me();
+        } else {
+            jsonError('Acción de autenticación no válida.', 404);
+        }
+    }
+
+    // --- Activities Endpoints ---
+    if ($resource === 'activities') {
+        $activityController = new ActivityController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $activityController->list();
+            } elseif ($method === 'POST') {
+                $activityController->create();
+            }
+        } else {
+            if ($method === 'GET') {
+                $activityController->get((string)$id);
+            } elseif ($method === 'PUT') {
+                $activityController->update((string)$id);
+            } elseif ($method === 'DELETE') {
+                $activityController->delete((string)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/activities', 405);
+    }
+
+    // --- Content Endpoints ---
+    if ($resource === 'content') {
+        $contentController = new ContentController($pdo, $config);
+
+        if ($id === null && $method === 'GET') {
+            $contentController->list();
+        } elseif ($id !== null && $method === 'PUT') {
+            $contentController->update((string)$id);
+        }
+        jsonError('Método no permitido para /api/content', 405);
+    }
+
+    // --- Media Endpoints ---
+    if ($resource === 'media') {
+        $mediaController = new MediaController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $mediaController->list();
+            } elseif ($method === 'POST') {
+                $mediaController->upload();
+            }
+        } else {
+            if ($method === 'DELETE') {
+                $mediaController->delete((int)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/media', 405);
+    }
+
+    // --- Posts Endpoints ---
+    if ($resource === 'posts') {
+        $postsController = new PostsController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $postsController->list();
+            } elseif ($method === 'POST') {
+                $postsController->create();
+            }
+        } else {
+            if ($method === 'GET') {
+                $postsController->get((string)$id);
+            } elseif ($method === 'PUT') {
+                $postsController->update((int)$id);
+            } elseif ($method === 'DELETE') {
+                $postsController->delete((int)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/posts', 405);
+    }
+
+    // --- Social / Webhook Endpoints ---
+    if ($resource === 'social') {
+        $sub = $segments[1] ?? '';
+        if ($sub === 'webhook') {
+            $webhookController = new WebhookController($pdo, $config);
+            $webhookController->handle();
+        }
+        jsonError('Ruta social no encontrada.', 404);
+    }
+
+    // Unmatched route
+    jsonError("Ruta '{$uri}' no encontrada en la API.", 404);
+
+} catch (Throwable $e) {
+    error_log('Unhandled API exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+    jsonError('Error interno del servidor: ' . $e->getMessage(), 500);
+}
