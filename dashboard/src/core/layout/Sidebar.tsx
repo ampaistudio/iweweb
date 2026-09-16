@@ -34,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Backdrop for tablet and mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-stone-950/80 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-30 lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -42,25 +42,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-stone-950 border-r border-stone-800 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-surface border-r border-border flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand logo / Header */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-stone-800/80">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-border/80">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-bold flex items-center justify-center font-mono text-sm">
+            <div className="w-8 h-8 rounded-lg bg-accent-soft border border-accent/30 text-accent-text font-bold flex items-center justify-center font-mono text-sm">
               iWE
             </div>
             <div>
-              <span className="font-bold text-stone-100 text-sm tracking-tight block">Studio</span>
-              <span className="text-[10px] text-stone-400 block -mt-0.5">Andorra & Pirineos</span>
+              <span className="font-bold text-primary text-sm tracking-tight block">Studio</span>
+              <span className="text-[10px] text-muted block -mt-0.5">Andorra & Pirineos</span>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="lg:hidden text-stone-400 hover:text-white p-1"
+            className="lg:hidden text-muted hover:text-primary p-1"
             aria-label="Cerrar menú"
           >
             ✕
@@ -80,8 +80,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={({ isActive }) =>
                 `flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all duration-150 min-h-[44px] ${
                   isActive
-                    ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 shadow-sm'
-                    : 'text-stone-300 hover:bg-stone-900 hover:text-white border border-transparent'
+                    ? 'bg-accent-soft text-accent-text border border-accent/30 shadow-sm'
+                    : 'text-secondary hover:bg-surface-elevated hover:text-primary border border-transparent'
                 }`
               }
             >
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span>{item.label}</span>
               </div>
               {item.badge !== undefined && (
-                <span className="text-xs bg-stone-800 text-stone-300 px-2 py-0.5 rounded-full font-bold">
+                <span className="text-xs bg-surface-elevated text-secondary px-2 py-0.5 rounded-full font-bold">
                   {item.badge}
                 </span>
               )}
@@ -99,12 +99,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Footer / Quick link to public site */}
-        <div className="p-4 border-t border-stone-800/80">
+        <div className="p-4 border-t border-border/80">
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-300 hover:text-white text-xs font-medium border border-stone-800 transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-surface-elevated hover:bg-surface-hover text-secondary hover:text-primary text-xs font-medium border border-border transition-colors"
           >
             <span>Ver sitio público</span>
             <span>↗</span>

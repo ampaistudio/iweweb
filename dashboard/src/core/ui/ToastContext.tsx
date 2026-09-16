@@ -57,12 +57,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             key={toast.id}
             className={`pointer-events-auto flex items-start justify-between p-4 rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 transform translate-y-0 ${
               toast.type === 'success'
-                ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-100'
+                ? 'bg-accent-soft border-accent/30 text-accent-text'
                 : toast.type === 'error'
-                ? 'bg-rose-950/90 border-rose-500/30 text-rose-100'
+                ? 'bg-danger-soft border-danger/30 text-danger-text'
                 : toast.type === 'warning'
-                ? 'bg-amber-950/90 border-amber-500/30 text-amber-100'
-                : 'bg-stone-900/90 border-stone-700 text-stone-100'
+                ? 'bg-warning-soft border-warning-text/30 text-warning-text'
+                : 'bg-surface-elevated border-border-strong text-primary'
             }`}
           >
             <div className="flex gap-3">

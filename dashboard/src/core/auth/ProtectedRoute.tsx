@@ -8,8 +8,8 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center text-stone-300 gap-4">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center text-secondary gap-4">
+        <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
         <p className="text-sm font-medium">Verificando sesión...</p>
       </div>
     );

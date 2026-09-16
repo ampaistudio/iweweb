@@ -58,14 +58,19 @@ function App() {
   const fontScaleLabel = { normal: "A", large: "A+", xlarge: "A++" }[fontScale];
   const contactAddress = getContent("contact_address", "Av. de Sant Antoni, 12, AD400 La Massana, Andorra");
   const contactPhone = getContent("contact_phone", "+376 344 870");
+  const logoUrl = getContent("logo_url", "");
 
   return (
     <div className="site-shell bg-stone-50 text-ink">
       <header className={`site-header ${scrolled ? "site-header-scrolled" : ""}`}>
         <Link className="brand-mark" to="/" aria-label="iWE Isard Wildland Experience home">
-          <span className="brand-logo-placeholder" aria-hidden="true">
-            LOGO
-          </span>
+          {logoUrl ? (
+            <img src={logoUrl} alt="iWE Isard Wildland Experience" className="brand-logo-image" />
+          ) : (
+            <span className="brand-logo-placeholder" aria-hidden="true">
+              LOGO
+            </span>
+          )}
         </Link>
 
         <nav className="desktop-nav" aria-label="Main navigation">

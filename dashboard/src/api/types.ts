@@ -30,6 +30,12 @@ export interface SiteContentMap {
 
 export interface SiteContentResponse {
   content: SiteContentMap;
+  base?: SiteContentMap;
+  translations?: {
+    ca?: Record<string, string>;
+    en?: Record<string, string>;
+    fr?: Record<string, string>;
+  };
   raw: Array<{
     content_key: string;
     content_value: string;
@@ -48,6 +54,21 @@ export interface PostSocialLink {
   synced_at: string | null;
 }
 
+export interface PostTranslations {
+  ca?: {
+    title?: string;
+    body?: string;
+  };
+  en?: {
+    title?: string;
+    body?: string;
+  };
+  fr?: {
+    title?: string;
+    body?: string;
+  };
+}
+
 export interface Post {
   id: number;
   title: string;
@@ -64,6 +85,7 @@ export interface Post {
   cover_filename?: string | null;
   cover_image_url?: string | null;
   social_links?: PostSocialLink[];
+  translations?: PostTranslations;
 }
 
 export interface OverviewData {
@@ -86,4 +108,20 @@ export interface OverviewData {
   media: {
     total: number;
   };
+}
+
+export type DashboardLocale = 'es' | 'ca' | 'en' | 'fr';
+
+export interface TranslateParams {
+  text: string;
+  target_locale: 'ca' | 'en' | 'fr';
+  source_locale?: 'es';
+  field_name?: string;
+}
+
+export interface TranslateResponse {
+  translated_text: string;
+  target_locale: string;
+  source_locale: string;
+  model: string;
 }

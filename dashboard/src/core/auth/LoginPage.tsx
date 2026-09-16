@@ -42,25 +42,25 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-950 flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-emerald-500/30 selection:text-emerald-200">
+    <div className="min-h-screen bg-bg flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-accent/30 selection:text-accent-text">
       {/* Background glow effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-amber-600/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-warning-soft/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md bg-stone-900 border border-stone-800 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
+      <div className="relative w-full max-w-md bg-surface border border-border rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-bold text-2xl mb-4 font-mono shadow-inner">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-soft border border-accent/30 text-accent-text font-bold text-2xl mb-4 font-mono shadow-inner">
             iWE
           </div>
-          <h1 className="text-2xl font-bold text-stone-100 tracking-tight">Studio Editorial</h1>
-          <p className="text-sm text-stone-400 mt-1">Panel de administración y contenidos</p>
+          <h1 className="text-2xl font-bold text-primary tracking-tight">Studio Editorial</h1>
+          <p className="text-sm text-muted mt-1">Panel de administración y contenidos</p>
         </div>
 
         {errorMsg && (
-          <div className="mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-500/30 text-rose-200 text-sm flex items-start gap-3 animate-fadeIn">
+          <div className="mb-6 p-4 rounded-xl bg-danger-soft border border-danger/30 text-danger-text text-sm flex items-start gap-3 animate-fadeIn">
             <span className="font-bold mt-0.5">✕</span>
             <div className="leading-relaxed">{errorMsg}</div>
           </div>
@@ -100,8 +100,8 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-stone-800/80 text-center">
-          <p className="text-xs text-stone-500">
+        <div className="mt-8 pt-6 border-t border-border/80 text-center">
+          <p className="text-xs text-muted">
             Acceso exclusivo para administradores (Christian y Charly).
           </p>
         </div>

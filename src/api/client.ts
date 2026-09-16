@@ -75,22 +75,31 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const publicApi = {
   activities: {
-    list: (params?: { type?: string }) => {
+    list: (params?: { type?: string; locale?: string }) => {
       const query = new URLSearchParams();
       if (params?.type) query.append('type', params.type);
+      if (params?.locale) query.append('locale', params.locale);
       const qs = query.toString();
       return request<RawApiActivity[]>(`/activities${qs ? `?${qs}` : ''}`);
     },
-    get: (id: string) => request<RawApiActivity>(`/activities/${encodeURIComponent(id)}`),
+    get: (id: string, locale?: string) =>
+      request<RawApiActivity>(`/activities/${encodeURIComponent(id)}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
   },
 
   content: {
-    get: () => request<SiteContentResponse>('/content'),
+    get: (locale?: string) =>
+      request<SiteContentResponse>(`/content${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
   },
 
   posts: {
-    list: () => request<Post[]>('/posts'),
-    get: (idOrSlug: string | number) => request<Post>(`/posts/${encodeURIComponent(String(idOrSlug))}`),
+    list: (params?: { locale?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.locale) query.append('locale', params.locale);
+      const qs = query.toString();
+      return request<Post[]>(`/posts${qs ? `?${qs}` : ''}`);
+    },
+    get: (idOrSlug: string | number, locale?: string) =>
+      request<Post>(`/posts/${encodeURIComponent(String(idOrSlug))}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
   },
 };
 

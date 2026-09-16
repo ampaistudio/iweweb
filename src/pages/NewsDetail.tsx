@@ -4,6 +4,7 @@ import { publicApi } from '../api/client';
 import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
 import { formatDate, formatTextParagraphs } from '../utils/sanitize';
+import { usePreferences } from '../context/PreferencesContext';
 
 function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
   return (
@@ -20,6 +21,7 @@ function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
 
 export default function NewsDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { language } = usePreferences();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export default function NewsDetail() {
       try {
         setLoading(true);
         setError(null);
-        const data = await publicApi.posts.get(slug);
+        const data = await publicApi.posts.get(slug, language);
         if (isMounted) {
           setPost(data);
         }
@@ -52,7 +54,7 @@ export default function NewsDetail() {
     return () => {
       isMounted = false;
     };
-  }, [slug]);
+  }, [slug, language]);
 
   if (loading) {
     return (

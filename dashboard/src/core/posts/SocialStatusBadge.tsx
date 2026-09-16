@@ -13,7 +13,7 @@ export const SocialStatusBadge: React.FC<SocialStatusBadgeProps> = ({
   isRetrying = false,
 }) => {
   if (!links || links.length === 0) {
-    return <span className="text-xs text-stone-500 italic">Solo web</span>;
+    return <span className="text-xs text-muted italic">Solo web</span>;
   }
 
   return (
@@ -31,10 +31,10 @@ export const SocialStatusBadge: React.FC<SocialStatusBadgeProps> = ({
             key={link.platform}
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium ${
               isSynced
-                ? 'bg-emerald-950/70 border-emerald-500/30 text-emerald-300'
+                ? 'bg-accent-soft border-accent/30 text-accent-text'
                 : isFailed
-                ? 'bg-rose-950/70 border-rose-500/30 text-rose-300'
-                : 'bg-amber-950/70 border-amber-500/30 text-amber-300'
+                ? 'bg-danger-soft border-danger/30 text-danger-text'
+                : 'bg-warning-soft border-warning-text/30 text-warning-text'
             }`}
           >
             <span>{platformIcon}</span>
@@ -50,7 +50,7 @@ export const SocialStatusBadge: React.FC<SocialStatusBadgeProps> = ({
                 type="button"
                 onClick={() => onRetry(link.platform)}
                 disabled={isRetrying}
-                className="ml-1 underline hover:text-white text-[11px] font-semibold cursor-pointer disabled:opacity-50"
+                className="ml-1 underline hover:text-primary text-[11px] font-semibold cursor-pointer disabled:opacity-50"
                 title={link.sync_error || 'Reintentar sincronización con la red'}
               >
                 {isRetrying ? '...' : 'Reintentar'}

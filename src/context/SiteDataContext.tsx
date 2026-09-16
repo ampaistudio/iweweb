@@ -3,6 +3,7 @@ import { activities as staticActivities, type Activity, type ActivityType } from
 import { publicApi } from '../api/client';
 import type { RawApiActivity, SiteContentMap } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
+import { usePreferences } from './PreferencesContext';
 
 export interface NavSection {
   label: string;
@@ -108,6 +109,7 @@ interface SiteDataContextValue {
 const SiteDataContext = createContext<SiteDataContextValue | undefined>(undefined);
 
 export function SiteDataProvider({ children }: { children: ReactNode }) {
+  const { language } = usePreferences();
   const [activities, setActivities] = useState<Activity[]>(staticActivities);
   const [content, setContent] = useState<SiteContentMap>(DEFAULT_SITE_CONTENT);
   const [loading, setLoading] = useState(true);
@@ -118,9 +120,9 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     async function loadData() {
-      // 1. Fetch activities with resilient fallback
+      // 1. Fetch activities with resilient fallback passing selected language
       try {
-        const rawActivities = await publicApi.activities.list();
+        const rawActivities = await publicApi.activities.list({ locale: language });
         if (isMounted && Array.isArray(rawActivities) && rawActivities.length > 0) {
           const normalized = rawActivities.map(normalizeRawActivity);
           setActivities(normalized);
@@ -134,9 +136,9 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // 2. Fetch institutional content with resilient fallback
+      // 2. Fetch institutional content with resilient fallback passing selected language
       try {
-        const contentRes = await publicApi.content.get();
+        const contentRes = await publicApi.content.get(language);
         if (isMounted && contentRes?.content) {
           setContent({
             ...DEFAULT_SITE_CONTENT,
@@ -162,7 +164,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [language]);
 
   const navSections = buildNavSections(activities);
 

@@ -87,13 +87,19 @@ export const api = {
   },
 
   content: {
-    list: () => request<SiteContentResponse>('/content', { method: 'GET' }),
-    update: (key: string, value: string) =>
+    list: (locale?: string) => request<SiteContentResponse>(`/content${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`, { method: 'GET' }),
+    update: (key: string, value: string, translations?: Record<string, string>) =>
       request<{ content_key: string; content_value: string }>(`/content/${encodeURIComponent(key)}`, {
         method: 'PUT',
-        body: JSON.stringify({ content_value: value }),
+        body: JSON.stringify({ content_value: value, translations }),
       }),
   },
+
+  translate: (params: { text: string; target_locale: 'ca' | 'en' | 'fr'; source_locale?: string; field_name?: string }) =>
+    request<{ translated_text: string; target_locale: string; source_locale: string; model: string }>('/translate', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
 
   media: {
     list: () => request<MediaItem[]>('/media', { method: 'GET' }),
@@ -112,8 +118,14 @@ export const api = {
   },
 
   posts: {
-    list: () => request<Post[]>('/posts', { method: 'GET' }),
-    get: (idOrSlug: string | number) => request<Post>(`/posts/${idOrSlug}`, { method: 'GET' }),
+    list: (params?: { locale?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.locale) query.append('locale', params.locale);
+      const qs = query.toString();
+      return request<Post[]>(`/posts${qs ? `?${qs}` : ''}`, { method: 'GET' });
+    },
+    get: (idOrSlug: string | number, locale?: string) =>
+      request<Post>(`/posts/${idOrSlug}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`, { method: 'GET' }),
     create: (postData: {
       title: string;
       body: string;
@@ -121,6 +133,7 @@ export const api = {
       status: 'draft' | 'published';
       publish_to_facebook?: boolean;
       publish_to_instagram?: boolean;
+      translations?: Record<string, { title?: string; body?: string }>;
     }) =>
       request<{ id: number; title: string; slug: string; status: string; social_sync: Record<string, unknown> }>(
         '/posts',
@@ -139,6 +152,7 @@ export const api = {
         publish_to_facebook?: boolean;
         publish_to_instagram?: boolean;
         retry_platform?: 'facebook' | 'instagram';
+        translations?: Record<string, { title?: string; body?: string }>;
       }
     ) =>
       request<{ id: number; title: string; slug: string; status: string; social_sync: Record<string, unknown> }>(
@@ -152,14 +166,16 @@ export const api = {
   },
 
   activities: {
-    list: (params?: { type?: string; published?: number }) => {
+    list: (params?: { type?: string; published?: number; locale?: string }) => {
       const query = new URLSearchParams();
       if (params?.type) query.append('type', params.type);
       if (params?.published !== undefined) query.append('published', String(params.published));
+      if (params?.locale) query.append('locale', params.locale);
       const qs = query.toString();
       return request<unknown[]>(`/activities${qs ? `?${qs}` : ''}`, { method: 'GET' });
     },
-    get: (id: string) => request<unknown>(`/activities/${encodeURIComponent(id)}`, { method: 'GET' }),
+    get: (id: string, locale?: string) =>
+      request<unknown>(`/activities/${encodeURIComponent(id)}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`, { method: 'GET' }),
     create: (data: unknown) =>
       request<{ id: string; title: string }>('/activities', {
         method: 'POST',

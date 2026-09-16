@@ -68,8 +68,8 @@ export const MediaPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Galería Multimedia</h2>
-          <p className="text-sm text-stone-400 mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-primary">Galería Multimedia</h2>
+          <p className="text-sm text-muted mt-1">
             Sube y administra las fotos de actividades, novedades y encabezados de iWE.
           </p>
         </div>
@@ -91,32 +91,32 @@ export const MediaPage: React.FC = () => {
         }
       >
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-stone-400">
-            <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted">
+            <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
             <p className="text-sm">Cargando fotos...</p>
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-16 text-stone-500 text-sm">
+          <div className="text-center py-16 text-muted text-sm">
             <p className="text-2xl mb-2">📸</p>
             <p>Todavía no hay fotos en la galería.</p>
-            <p className="text-xs text-stone-600 mt-1">Usa la caja de arriba para subir la primera imagen.</p>
+            <p className="text-xs text-faint mt-1">Usa la caja de arriba para subir la primera imagen.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="group bg-stone-950 rounded-2xl border border-stone-800 overflow-hidden flex flex-col justify-between hover:border-stone-700 transition-all shadow-md"
+                className="group bg-surface rounded-2xl border border-border overflow-hidden flex flex-col justify-between hover:border-border-strong transition-all shadow-md"
               >
                 {/* Image preview */}
-                <div className="relative aspect-[4/3] bg-stone-900 overflow-hidden">
+                <div className="relative aspect-[4/3] bg-surface-elevated overflow-hidden">
                   <img
                     src={item.url}
                     alt={item.original_name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                  <div className="absolute top-2 right-2 bg-stone-950/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono text-stone-300 border border-stone-800">
+                  <div className="absolute top-2 right-2 bg-surface/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono text-secondary border border-border">
                     {formatFileSize(item.size_bytes)}
                   </div>
                 </div>
@@ -124,10 +124,10 @@ export const MediaPage: React.FC = () => {
                 {/* Metadata & Actions */}
                 <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
                   <div>
-                    <h4 className="text-xs font-semibold text-stone-200 truncate" title={item.original_name}>
+                    <h4 className="text-xs font-semibold text-primary truncate" title={item.original_name}>
                       {item.original_name}
                     </h4>
-                    <p className="text-[10px] text-stone-500 mt-0.5">
+                    <p className="text-[10px] text-muted mt-0.5">
                       Subida el{' '}
                       {new Date(item.created_at).toLocaleDateString('es-ES', {
                         day: 'numeric',
@@ -137,7 +137,7 @@ export const MediaPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2 border-t border-stone-800/80">
+                  <div className="flex items-center gap-2 pt-2 border-t border-border/80">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -154,7 +154,7 @@ export const MediaPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setItemToDelete(item)}
-                      className="text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 text-xs py-1 h-8 px-2.5"
+                      className="text-danger-text hover:text-danger hover:bg-danger-soft/40 text-xs py-1 h-8 px-2.5"
                       title="Eliminar foto"
                     >
                       🗑️

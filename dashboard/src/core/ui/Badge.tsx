@@ -14,11 +14,11 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
 }) => {
   const variantClasses = {
-    success: 'bg-emerald-950/80 text-emerald-300 border-emerald-500/30',
-    warning: 'bg-amber-950/80 text-amber-300 border-amber-500/30',
-    error: 'bg-rose-950/80 text-rose-300 border-rose-500/30',
-    info: 'bg-sky-950/80 text-sky-300 border-sky-500/30',
-    neutral: 'bg-stone-800 text-stone-300 border-stone-700',
+    success: 'bg-accent-soft text-accent-text border-accent/30',
+    warning: 'bg-warning-soft text-warning-text border-warning-text/30',
+    error: 'bg-danger-soft text-danger-text border-danger/30',
+    info: 'bg-info-soft text-info-text border-info-text/30',
+    neutral: 'bg-surface-elevated text-secondary border-border-strong',
   };
 
   const sizeClasses = {
@@ -33,14 +33,14 @@ export const Badge: React.FC<BadgeProps> = ({
       <span
         className={`w-1.5 h-1.5 rounded-full ${
           variant === 'success'
-            ? 'bg-emerald-400'
+            ? 'bg-accent'
             : variant === 'warning'
-            ? 'bg-amber-400'
+            ? 'bg-warning-text'
             : variant === 'error'
-            ? 'bg-rose-400'
+            ? 'bg-danger'
             : variant === 'info'
-            ? 'bg-sky-400'
-            : 'bg-stone-400'
+            ? 'bg-info-text'
+            : 'bg-muted'
         }`}
       />
       <span>{children}</span>

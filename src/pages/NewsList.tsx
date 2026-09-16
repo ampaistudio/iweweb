@@ -4,6 +4,7 @@ import { publicApi } from '../api/client';
 import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
 import { formatDate, generateExcerpt } from '../utils/sanitize';
+import { usePreferences } from '../context/PreferencesContext';
 
 function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
   return (
@@ -19,6 +20,7 @@ function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
 }
 
 export default function NewsList() {
+  const { language } = usePreferences();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function NewsList() {
       try {
         setLoading(true);
         setError(null);
-        const data = await publicApi.posts.list();
+        const data = await publicApi.posts.list({ locale: language });
         if (isMounted) {
           // Backend already filters by status=published for public requests
           setPosts(Array.isArray(data) ? data : []);
@@ -51,7 +53,7 @@ export default function NewsList() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [language]);
 
   return (
     <main className="news-page page-width section-space">

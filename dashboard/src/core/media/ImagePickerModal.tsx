@@ -56,14 +56,14 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     >
       <div className="space-y-5">
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-stone-800 pb-3">
+        <div className="flex gap-2 border-b border-border pb-3">
           <button
             type="button"
             onClick={() => setActiveTab('gallery')}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all min-h-[40px] cursor-pointer ${
               activeTab === 'gallery'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-stone-800/80 text-stone-300 hover:bg-stone-800'
+                ? 'bg-accent text-white shadow-md'
+                : 'bg-surface-elevated/80 text-secondary hover:bg-surface-elevated'
             }`}
           >
             📸 Ver galería ({items.length})
@@ -73,8 +73,8 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             onClick={() => setActiveTab('upload')}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all min-h-[40px] cursor-pointer ${
               activeTab === 'upload'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-stone-800/80 text-stone-300 hover:bg-stone-800'
+                ? 'bg-accent text-white shadow-md'
+                : 'bg-surface-elevated/80 text-secondary hover:bg-surface-elevated'
             }`}
           >
             ➕ Subir foto nueva
@@ -90,12 +90,12 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         {activeTab === 'gallery' && (
           <div>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2 text-stone-400">
-                <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted">
+                <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                 <p className="text-xs">Cargando fotos...</p>
               </div>
             ) : items.length === 0 ? (
-              <div className="text-center py-12 text-stone-500 text-sm">
+              <div className="text-center py-12 text-muted text-sm">
                 <p>No hay fotos subidas todavía.</p>
                 <Button
                   type="button"
@@ -118,10 +118,10 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         onSelectImage(item);
                         onClose();
                       }}
-                      className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-stone-950 ${
+                      className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-surface ${
                         isSelected
-                          ? 'border-emerald-500 ring-2 ring-emerald-500/30'
-                          : 'border-stone-800 hover:border-stone-600'
+                          ? 'border-accent ring-2 ring-accent/30'
+                          : 'border-border hover:border-border-strong'
                       }`}
                     >
                       <img
@@ -130,11 +130,11 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
                         loading="lazy"
                       />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent p-2 text-left">
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 text-left">
                         <p className="text-[11px] font-medium text-white truncate">{item.original_name}</p>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 bg-emerald-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                        <div className="absolute top-2 right-2 bg-accent text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
                           ✓
                         </div>
                       )}
@@ -146,7 +146,7 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
           </div>
         )}
 
-        <div className="flex justify-end pt-3 border-t border-stone-800">
+        <div className="flex justify-end pt-3 border-t border-border">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cerrar
           </Button>

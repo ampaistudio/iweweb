@@ -25,6 +25,7 @@ require_once __DIR__ . '/core/content/ContentController.php';
 require_once __DIR__ . '/core/social/MetaGraphService.php';
 require_once __DIR__ . '/core/social/WebhookController.php';
 require_once __DIR__ . '/core/posts/PostsController.php';
+require_once __DIR__ . '/core/translation/TranslationController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -192,6 +193,15 @@ try {
             }
         }
         jsonError('Método no permitido para /api/posts', 405);
+    }
+
+    // --- AI Translation Endpoint ---
+    if ($resource === 'translate') {
+        $translationController = new TranslationController($pdo, $config);
+        if ($method === 'POST') {
+            $translationController->translate();
+        }
+        jsonError('Método no permitido para /api/translate', 405);
     }
 
     // --- Social / Webhook Endpoints ---

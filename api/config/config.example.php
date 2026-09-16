@@ -70,4 +70,13 @@ return [
         'verify_token'      => getenv('META_VERIFY_TOKEN') ?: 'iwe_webhook_verify_token_secure_string',
         'api_version'       => 'v21.0',
     ],
+
+    // -------------------------------------------------------------------------
+    // NVIDIA NIM AI Translation API (build.nvidia.com)
+    // -------------------------------------------------------------------------
+    'nvidia_nim' => [
+        'api_key' => getenv('NVIDIA_NIM_API_KEY') ?: '',
+        'api_url' => getenv('NVIDIA_NIM_API_URL') ?: 'https://integrate.api.nvidia.com/v1/chat/completions',
+        'model'   => getenv('NVIDIA_NIM_MODEL') ?: 'meta/llama-3.1-70b-instruct',
+    ],
 ];

@@ -17,6 +17,24 @@ export const ACTIVITY_TYPES: ActivityType[] = [
   'Heliflight',
 ];
 
+export interface ActivityTranslations {
+  ca?: {
+    title?: string;
+    description?: string;
+    highlights?: string[];
+  };
+  en?: {
+    title?: string;
+    description?: string;
+    highlights?: string[];
+  };
+  fr?: {
+    title?: string;
+    description?: string;
+    highlights?: string[];
+  };
+}
+
 export interface Activity {
   id: string;
   title: string;
@@ -36,4 +54,5 @@ export interface Activity {
   published: boolean;
   created_at?: string;
   updated_at?: string;
+  translations?: ActivityTranslations;
 }

@@ -18,8 +18,8 @@ export const Toggle: React.FC<ToggleProps> = ({
   return (
     <div className="flex items-center justify-between gap-4 py-2">
       <div>
-        <span className="text-sm font-medium text-stone-200">{label}</span>
-        {description && <p className="text-xs text-stone-400 mt-0.5">{description}</p>}
+        <span className="text-sm font-medium text-primary">{label}</span>
+        {description && <p className="text-xs text-muted mt-0.5">{description}</p>}
       </div>
       <button
         type="button"
@@ -27,8 +27,8 @@ export const Toggle: React.FC<ToggleProps> = ({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-stone-900 disabled:opacity-50 ${
-          checked ? 'bg-emerald-600' : 'bg-stone-700'
+        className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg disabled:opacity-50 ${
+          checked ? 'bg-accent' : 'bg-surface-hover'
         }`}
       >
         <span

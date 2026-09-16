@@ -21,7 +21,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ customNavItems
   };
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex">
+    <div className="min-h-screen bg-bg text-primary flex">
       {/* Sidebar navigation */}
       <Sidebar
         isOpen={sidebarOpen}

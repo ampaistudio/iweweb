@@ -70,8 +70,8 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ onUploadSuccess })
       onDrop={handleDrop}
       className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition-all ${
         isDragging
-          ? 'border-emerald-500 bg-emerald-950/20'
-          : 'border-stone-700/80 bg-stone-900/50 hover:border-stone-600'
+          ? 'border-accent bg-accent-soft/20'
+          : 'border-border-strong/80 bg-surface/50 hover:border-border-strong'
       }`}
     >
       <input
@@ -83,19 +83,19 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ onUploadSuccess })
       />
 
       <div className="flex flex-col items-center justify-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-stone-800 text-stone-300 flex items-center justify-center text-2xl">
+        <div className="w-12 h-12 rounded-2xl bg-surface-elevated text-secondary flex items-center justify-center text-2xl">
           {isUploading ? (
-            <div className="w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-3 border-accent border-t-transparent rounded-full animate-spin" />
           ) : (
             '📸'
           )}
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-stone-200">
+          <p className="text-sm font-semibold text-primary">
             {isUploading ? 'Subiendo imagen...' : 'Arrastra una foto aquí o haz clic para seleccionarla'}
           </p>
-          <p className="text-xs text-stone-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Formatos soportados: JPG, PNG, WebP (Hasta 8 MB)
           </p>
         </div>

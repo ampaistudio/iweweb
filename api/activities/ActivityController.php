@@ -2,9 +2,11 @@
 /**
  * iWE Dashboard API - Activity Controller (Domain: Tourism Activities)
  * 
- * Manages tourism activities and highlights.
+ * Manages tourism activities, highlights, and multi-language translations (ES, CA, EN, FR).
  * Strict type validation against the closed enum used by the public site.
  */
+
+declare(strict_types=1);
 
 class ActivityController {
     private PDO $pdo;
@@ -19,6 +21,8 @@ class ActivityController {
         'Rafting',
         'Heliflight'
     ];
+
+    public const SUPPORTED_LOCALES = ['es', 'ca', 'en', 'fr'];
 
     public function __construct(PDO $pdo, array $config) {
         $this->pdo = $pdo;
@@ -41,49 +45,94 @@ class ActivityController {
 
     /**
      * GET /api/activities
-     * List all activities (public shows published only; auth shows all or filtered)
+     * List all activities (public shows published only; auth shows all or filtered).
+     * Query param: ?locale=es|ca|en|fr
      */
     public function list(): void {
         $user = getAuthenticatedUser($this->pdo);
+        $locale = strtolower(trim((string)($_GET['locale'] ?? 'es')));
+        if (!in_array($locale, self::SUPPORTED_LOCALES, true)) {
+            $locale = 'es';
+        }
 
         $params = [];
         $where = [];
 
         if (!$user) {
-            $where[] = 'published = 1';
+            $where[] = 'a.published = 1';
         } elseif (isset($_GET['published'])) {
-            $where[] = 'published = :published';
+            $where[] = 'a.published = :published';
             $params['published'] = (int)$_GET['published'];
         }
 
         if (!empty($_GET['type'])) {
-            $where[] = 'type = :type';
+            $where[] = 'a.type = :type';
             $params['type'] = $_GET['type'];
         }
 
-        $sql = 'SELECT * FROM activities';
+        if ($locale !== 'es') {
+            $params['locale'] = $locale;
+            $sql = '
+                SELECT 
+                    a.id, 
+                    COALESCE(NULLIF(t.title, ""), a.title) AS title,
+                    a.region, 
+                    a.country, 
+                    a.type, 
+                    a.level, 
+                    a.duration, 
+                    a.image_url, 
+                    a.alt_text, 
+                    a.price, 
+                    COALESCE(NULLIF(t.description, ""), a.description) AS description,
+                    a.display_order, 
+                    a.published, 
+                    a.created_at, 
+                    a.updated_at
+                FROM activities a
+                LEFT JOIN activity_translations t ON t.activity_id = a.id AND t.locale = :locale
+            ';
+        } else {
+            $sql = 'SELECT a.* FROM activities a';
+        }
+
         if (!empty($where)) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
-        $sql .= ' ORDER BY display_order ASC, created_at ASC';
+        $sql .= ' ORDER BY a.display_order ASC, a.created_at ASC';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         $activities = $stmt->fetchAll();
 
-        // Fetch all highlights in one batch query
+        // Fetch highlights for these activities
         $activityIds = array_column($activities, 'id');
         $highlightsByActivity = [];
 
         if (!empty($activityIds)) {
             $placeholders = implode(',', array_fill(0, count($activityIds), '?'));
-            $stmtH = $this->pdo->prepare("
-                SELECT activity_id, highlight_text, display_order 
-                FROM activity_highlights 
-                WHERE activity_id IN ({$placeholders})
-                ORDER BY display_order ASC, id ASC
-            ");
-            $stmtH->execute($activityIds);
+            if ($locale !== 'es') {
+                $stmtH = $this->pdo->prepare("
+                    SELECT 
+                        h.activity_id,
+                        COALESCE(NULLIF(ht.highlight_text, ''), h.highlight_text) AS highlight_text,
+                        h.display_order 
+                    FROM activity_highlights h
+                    LEFT JOIN activity_highlight_translations ht ON ht.highlight_id = h.id AND ht.locale = ?
+                    WHERE h.activity_id IN ({$placeholders})
+                    ORDER BY h.display_order ASC, h.id ASC
+                ");
+                $stmtH->execute(array_merge([$locale], $activityIds));
+            } else {
+                $stmtH = $this->pdo->prepare("
+                    SELECT activity_id, highlight_text, display_order 
+                    FROM activity_highlights 
+                    WHERE activity_id IN ({$placeholders})
+                    ORDER BY display_order ASC, id ASC
+                ");
+                $stmtH->execute($activityIds);
+            }
+
             while ($h = $stmtH->fetch()) {
                 $highlightsByActivity[$h['activity_id']][] = $h['highlight_text'];
             }
@@ -98,9 +147,14 @@ class ActivityController {
 
     /**
      * GET /api/activities/:id
+     * Returns activity details. Includes full translations dictionary for dashboard editing.
      */
     public function get(string $id): void {
         $user = getAuthenticatedUser($this->pdo);
+        $locale = strtolower(trim((string)($_GET['locale'] ?? 'es')));
+        if (!in_array($locale, self::SUPPORTED_LOCALES, true)) {
+            $locale = 'es';
+        }
 
         $sql = 'SELECT * FROM activities WHERE id = :id';
         if (!$user) {
@@ -116,16 +170,94 @@ class ActivityController {
             jsonError('Actividad no encontrada.', 404);
         }
 
-        $stmtH = $this->pdo->prepare('SELECT highlight_text FROM activity_highlights WHERE activity_id = :id ORDER BY display_order ASC, id ASC');
+        // Fetch base highlights
+        $stmtH = $this->pdo->prepare('SELECT id, highlight_text, display_order FROM activity_highlights WHERE activity_id = :id ORDER BY display_order ASC, id ASC');
         $stmtH->execute(['id' => $id]);
-        $highlights = $stmtH->fetchAll(PDO::FETCH_COLUMN);
+        $baseHighlightsRows = $stmtH->fetchAll();
+        $baseHighlights = array_column($baseHighlightsRows, 'highlight_text');
 
-        jsonSuccess($this->formatActivityResponse($activity, $highlights));
+        // Fetch translations for all locales (CA, EN, FR)
+        $translations = [
+            'ca' => ['title' => '', 'description' => '', 'highlights' => []],
+            'en' => ['title' => '', 'description' => '', 'highlights' => []],
+            'fr' => ['title' => '', 'description' => '', 'highlights' => []],
+        ];
+
+        $stmtT = $this->pdo->prepare('SELECT locale, title, description FROM activity_translations WHERE activity_id = :id');
+        $stmtT->execute(['id' => $id]);
+        while ($t = $stmtT->fetch()) {
+            $loc = $t['locale'];
+            if (isset($translations[$loc])) {
+                $translations[$loc]['title'] = $t['title'];
+                $translations[$loc]['description'] = $t['description'];
+            }
+        }
+
+        // Fetch highlight translations
+        if (!empty($baseHighlightsRows)) {
+            $highlightIds = array_column($baseHighlightsRows, 'id');
+            $placeholders = implode(',', array_fill(0, count($highlightIds), '?'));
+            $stmtHT = $this->pdo->prepare("
+                SELECT highlight_id, locale, highlight_text 
+                FROM activity_highlight_translations 
+                WHERE highlight_id IN ({$placeholders})
+            ");
+            $stmtHT->execute($highlightIds);
+
+            // Map highlight_id to index
+            $idToIndex = [];
+            foreach ($baseHighlightsRows as $idx => $r) {
+                $idToIndex[$r['id']] = $idx;
+            }
+
+            // Initialize empty arrays with proper length
+            foreach (['ca', 'en', 'fr'] as $loc) {
+                $translations[$loc]['highlights'] = array_fill(0, count($baseHighlightsRows), '');
+            }
+
+            while ($ht = $stmtHT->fetch()) {
+                $loc = $ht['locale'];
+                $hId = $ht['highlight_id'];
+                if (isset($translations[$loc], $idToIndex[$hId])) {
+                    $translations[$loc]['highlights'][$idToIndex[$hId]] = $ht['highlight_text'];
+                }
+            }
+        }
+
+        // If specific non-ES locale was requested for public view:
+        $displayTitle = $activity['title'];
+        $displayDescription = $activity['description'];
+        $displayHighlights = $baseHighlights;
+
+        if ($locale !== 'es' && isset($translations[$locale])) {
+            if (!empty($translations[$locale]['title'])) {
+                $displayTitle = $translations[$locale]['title'];
+            }
+            if (!empty($translations[$locale]['description'])) {
+                $displayDescription = $translations[$locale]['description'];
+            }
+            if (!empty($translations[$locale]['highlights'])) {
+                $displayHighlights = array_map(function ($idx, $baseH) use ($translations, $locale) {
+                    $translated = $translations[$locale]['highlights'][$idx] ?? '';
+                    return !empty($translated) ? $translated : $baseH;
+                }, array_keys($baseHighlights), $baseHighlights);
+            }
+        }
+
+        $formatted = $this->formatActivityResponse([
+            ...$activity,
+            'title'       => $displayTitle,
+            'description' => $displayDescription,
+        ], $displayHighlights);
+
+        $formatted['translations'] = $translations;
+
+        jsonSuccess($formatted);
     }
 
     /**
      * POST /api/activities
-     * Create a new activity (requires authentication)
+     * Create a new activity and its translations (requires authentication)
      */
     public function create(): void {
         requireAuth($this->pdo);
@@ -173,7 +305,8 @@ class ActivityController {
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
 
-            // Insert highlights
+            // Insert base highlights
+            $insertedHighlightIds = [];
             $highlights = $body['highlights'] ?? [];
             if (is_array($highlights)) {
                 $stmtH = $this->pdo->prepare('
@@ -188,14 +321,18 @@ class ActivityController {
                             'highlight_text' => $text,
                             'display_order'  => $order + 1,
                         ]);
+                        $insertedHighlightIds[] = (int)$this->pdo->lastInsertId();
                     }
                 }
             }
 
+            // Save multi-language translations (CA, EN, FR)
+            $this->saveTranslations($id, $insertedHighlightIds, $body['translations'] ?? []);
+
             $this->pdo->commit();
 
             jsonSuccess([
-                'id' => $id,
+                'id'    => $id,
                 'title' => trim($body['title'])
             ], 'Actividad creada exitosamente.', 201);
 
@@ -207,7 +344,7 @@ class ActivityController {
 
     /**
      * PUT /api/activities/:id
-     * Update an activity and its highlights (requires authentication)
+     * Update an activity, highlights, and translations (requires authentication)
      */
     public function update(string $id): void {
         requireAuth($this->pdo);
@@ -260,7 +397,8 @@ class ActivityController {
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
 
-            // Replace highlights if provided
+            // Replace base highlights
+            $newHighlightIds = [];
             if (isset($body['highlights']) && is_array($body['highlights'])) {
                 $stmtDel = $this->pdo->prepare('DELETE FROM activity_highlights WHERE activity_id = :id');
                 $stmtDel->execute(['id' => $id]);
@@ -277,8 +415,18 @@ class ActivityController {
                             'highlight_text' => $text,
                             'display_order'  => $order + 1,
                         ]);
+                        $newHighlightIds[] = (int)$this->pdo->lastInsertId();
                     }
                 }
+            } else {
+                $stmtExistingH = $this->pdo->prepare('SELECT id FROM activity_highlights WHERE activity_id = :id ORDER BY display_order ASC, id ASC');
+                $stmtExistingH->execute(['id' => $id]);
+                $newHighlightIds = $stmtExistingH->fetchAll(PDO::FETCH_COLUMN);
+            }
+
+            // Save multi-language translations (CA, EN, FR)
+            if (isset($body['translations']) && is_array($body['translations'])) {
+                $this->saveTranslations($id, $newHighlightIds, $body['translations']);
             }
 
             $this->pdo->commit();
@@ -293,7 +441,7 @@ class ActivityController {
 
     /**
      * DELETE /api/activities/:id
-     * Delete an activity and its cascade highlights (requires authentication)
+     * Delete an activity and its cascade highlights and translations (requires authentication)
      */
     public function delete(string $id): void {
         requireAuth($this->pdo);
@@ -308,6 +456,65 @@ class ActivityController {
         $stmtDel->execute(['id' => $id]);
 
         jsonSuccess(null, 'Actividad eliminada correctamente.');
+    }
+
+    /**
+     * Save translations into activity_translations and activity_highlight_translations
+     */
+    private function saveTranslations(string $activityId, array $highlightIds, array $translations): void {
+        foreach (['ca', 'en', 'fr'] as $loc) {
+            if (!isset($translations[$loc]) || !is_array($translations[$loc])) {
+                continue;
+            }
+
+            $tTitle = trim((string)($translations[$loc]['title'] ?? ''));
+            $tDesc = trim((string)($translations[$loc]['description'] ?? ''));
+
+            if ($tTitle !== '' || $tDesc !== '') {
+                $stmt = $this->pdo->prepare('
+                    INSERT INTO activity_translations (activity_id, locale, title, description, created_at, updated_at)
+                    VALUES (:activity_id, :locale, :title, :description, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        title = VALUES(title), 
+                        description = VALUES(description), 
+                        updated_at = NOW()
+                ');
+                $stmt->execute([
+                    'activity_id' => $activityId,
+                    'locale'      => $loc,
+                    'title'       => $tTitle,
+                    'description' => $tDesc,
+                ]);
+            } else {
+                $stmt = $this->pdo->prepare('DELETE FROM activity_translations WHERE activity_id = :activity_id AND locale = :locale');
+                $stmt->execute(['activity_id' => $activityId, 'locale' => $loc]);
+            }
+
+            // Save highlight translations
+            $tHighlights = $translations[$loc]['highlights'] ?? [];
+            if (is_array($tHighlights)) {
+                foreach ($highlightIds as $index => $hId) {
+                    $tText = trim((string)($tHighlights[$index] ?? ''));
+                    if ($tText !== '') {
+                        $stmtHT = $this->pdo->prepare('
+                            INSERT INTO activity_highlight_translations (highlight_id, locale, highlight_text, created_at, updated_at)
+                            VALUES (:highlight_id, :locale, :highlight_text, NOW(), NOW())
+                            ON DUPLICATE KEY UPDATE 
+                                highlight_text = VALUES(highlight_text), 
+                                updated_at = NOW()
+                        ');
+                        $stmtHT->execute([
+                            'highlight_id'   => $hId,
+                            'locale'         => $loc,
+                            'highlight_text' => $tText,
+                        ]);
+                    } else {
+                        $stmtHT = $this->pdo->prepare('DELETE FROM activity_highlight_translations WHERE highlight_id = :highlight_id AND locale = :locale');
+                        $stmtHT->execute(['highlight_id' => $hId, 'locale' => $loc]);
+                    }
+                }
+            }
+        }
     }
 
     /**

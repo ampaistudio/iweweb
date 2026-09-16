@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './core/theme/ThemeContext';
 import { AuthProvider } from './core/auth/AuthContext';
 import { ToastProvider } from './core/ui/ToastContext';
 import { ProtectedRoute } from './core/auth/ProtectedRoute';
@@ -25,8 +26,9 @@ import {
 export const App: React.FC = () => {
   return (
     <BrowserRouter basename="/dashboard">
-      <ToastProvider>
-        <AuthProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
           <Routes>
             {/* Public Login Route */}
             <Route path="/login" element={<LoginPage />} />
@@ -73,6 +75,7 @@ export const App: React.FC = () => {
           </Routes>
         </AuthProvider>
       </ToastProvider>
-    </BrowserRouter>
-  );
+    </ThemeProvider>
+  </BrowserRouter>
+);
 };

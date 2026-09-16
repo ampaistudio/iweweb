@@ -126,8 +126,8 @@ export const ActivityListPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Actividades de Turismo</h2>
-          <p className="text-sm text-stone-400 mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-primary">Actividades de Turismo</h2>
+          <p className="text-sm text-muted mt-1">
             Administra los tours, experiencias de montaña, niveles de dificultad, precios y orden de visualización.
           </p>
         </div>
@@ -148,8 +148,8 @@ export const ActivityListPage: React.FC = () => {
               onClick={() => setSelectedType('all')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[36px] ${
                 selectedType === 'all'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'bg-stone-950 text-stone-400 hover:text-stone-200 border border-stone-800'
+                  ? 'bg-accent text-accent-text shadow-md'
+                  : 'bg-bg text-muted hover:text-primary border border-border'
               }`}
             >
               Todas ({activities.length})
@@ -163,8 +163,8 @@ export const ActivityListPage: React.FC = () => {
                   onClick={() => setSelectedType(type)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[36px] ${
                     selectedType === type
-                      ? 'bg-emerald-600 text-white shadow-md'
-                      : 'bg-stone-950 text-stone-400 hover:text-stone-200 border border-stone-800'
+                      ? 'bg-accent text-accent-text shadow-md'
+                      : 'bg-bg text-muted hover:text-primary border border-border'
                   }`}
                 >
                   {type} ({count})
@@ -196,12 +196,12 @@ export const ActivityListPage: React.FC = () => {
         }
       >
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-stone-400">
-            <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted">
+            <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
             <p className="text-sm">Cargando actividades...</p>
           </div>
         ) : filteredActivities.length === 0 ? (
-          <div className="text-center py-16 text-stone-500 text-sm">
+          <div className="text-center py-16 text-muted text-sm">
             <p className="text-2xl mb-2">🏔️</p>
             <p>No se encontraron actividades con los filtros actuales.</p>
           </div>
@@ -216,8 +216,8 @@ export const ActivityListPage: React.FC = () => {
                   key={act.id}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
                     act.published
-                      ? 'bg-stone-950/80 border-stone-800 hover:border-stone-700/80'
-                      : 'bg-stone-950/40 border-stone-900 opacity-75'
+                      ? 'bg-surface/80 border-border hover:border-border-strong/80'
+                      : 'bg-surface/40 border-border opacity-75'
                   }`}
                 >
                   <div className="flex items-start gap-4">
@@ -225,29 +225,29 @@ export const ActivityListPage: React.FC = () => {
                     <img
                       src={act.image_url || act.image}
                       alt={act.alt_text || act.alt}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border border-stone-800 flex-shrink-0 bg-stone-900 shadow-md"
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border border-border flex-shrink-0 bg-surface shadow-md"
                       loading="lazy"
                     />
 
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800/60 px-2.5 py-0.5 rounded-md font-bold">
+                        <span className="text-xs bg-accent-soft text-accent-text border border-accent/30 px-2.5 py-0.5 rounded-md font-bold">
                           {act.type}
                         </span>
-                        <h4 className="text-base font-bold text-stone-100">{act.title}</h4>
+                        <h4 className="text-base font-bold text-primary">{act.title}</h4>
                         <Badge variant={act.published ? 'success' : 'warning'} size="sm">
                           {act.published ? 'Publicado' : 'Oculto'}
                         </Badge>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-stone-400">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
                         <span>📍 {act.region}, {act.country}</span>
                         <span>⏱️ {act.duration}</span>
                         <span>⚡ {act.level}</span>
-                        {act.price && <span className="font-semibold text-emerald-400">💶 {act.price}</span>}
+                        {act.price && <span className="font-semibold text-accent-text">💶 {act.price}</span>}
                       </div>
 
-                      <p className="text-xs text-stone-400 line-clamp-2 max-w-3xl leading-relaxed">
+                      <p className="text-xs text-muted line-clamp-2 max-w-3xl leading-relaxed">
                         {act.description}
                       </p>
 
@@ -256,13 +256,13 @@ export const ActivityListPage: React.FC = () => {
                           {act.highlights.slice(0, 3).map((h, i) => (
                             <span
                               key={i}
-                              className="text-[11px] bg-stone-900 text-stone-300 border border-stone-800 px-2 py-0.5 rounded-md"
+                              className="text-[11px] bg-surface-elevated text-secondary border border-border px-2 py-0.5 rounded-md"
                             >
                               ✓ {h}
                             </span>
                           ))}
                           {act.highlights.length > 3 && (
-                            <span className="text-[11px] text-stone-500 py-0.5">
+                            <span className="text-[11px] text-muted py-0.5">
                               +{act.highlights.length - 3} más
                             </span>
                           )}
@@ -272,14 +272,14 @@ export const ActivityListPage: React.FC = () => {
                   </div>
 
                   {/* Actions & Reordering */}
-                  <div className="flex flex-wrap items-center gap-2.5 self-end lg:self-center pt-3 lg:pt-0 border-t lg:border-t-0 border-stone-800/80 w-full lg:w-auto justify-end">
+                  <div className="flex flex-wrap items-center gap-2.5 self-end lg:self-center pt-3 lg:pt-0 border-t lg:border-t-0 border-border/80 w-full lg:w-auto justify-end">
                     {/* Reorder Buttons */}
-                    <div className="flex items-center gap-1 bg-stone-900 border border-stone-800 rounded-xl p-1">
+                    <div className="flex items-center gap-1 bg-surface-elevated border border-border rounded-xl p-1">
                       <button
                         type="button"
                         onClick={() => handleMoveOrder(index, 'up')}
                         disabled={isFirst || isReordering}
-                        className="p-1.5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg disabled:opacity-30 cursor-pointer min-h-[32px] min-w-[32px]"
+                        className="p-1.5 text-muted hover:text-primary hover:bg-surface-hover rounded-lg disabled:opacity-30 cursor-pointer min-h-[32px] min-w-[32px]"
                         title="Subir en la lista"
                         aria-label="Subir en el orden"
                       >
@@ -289,7 +289,7 @@ export const ActivityListPage: React.FC = () => {
                         type="button"
                         onClick={() => handleMoveOrder(index, 'down')}
                         disabled={isLast || isReordering}
-                        className="p-1.5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg disabled:opacity-30 cursor-pointer min-h-[32px] min-w-[32px]"
+                        className="p-1.5 text-muted hover:text-primary hover:bg-surface-hover rounded-lg disabled:opacity-30 cursor-pointer min-h-[32px] min-w-[32px]"
                         title="Bajar en la lista"
                         aria-label="Bajar en el orden"
                       >
@@ -319,7 +319,7 @@ export const ActivityListPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setActivityToDelete(act)}
-                      className="text-rose-400 hover:text-rose-300 hover:bg-rose-950/40"
+                      className="text-danger-text hover:text-danger hover:bg-danger-soft"
                       title="Eliminar actividad"
                     >
                       🗑️

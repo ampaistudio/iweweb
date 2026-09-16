@@ -20,7 +20,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-stone-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] select-none';
+    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] select-none';
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-xs gap-1.5 min-h-[36px]',
@@ -30,15 +30,15 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantClasses = {
     primary:
-      'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-950/40 focus:ring-emerald-500 border border-emerald-500/30',
+      'bg-accent hover:bg-accent-hover text-white font-semibold shadow-lg shadow-black/40 focus:ring-accent border border-accent/30',
     secondary:
-      'bg-stone-800 hover:bg-stone-700 text-stone-100 border border-stone-700/80 focus:ring-stone-500',
+      'bg-surface-elevated hover:bg-surface-hover text-primary border border-border-strong/80 focus:ring-border-strong',
     danger:
-      'bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-lg shadow-rose-950/40 focus:ring-rose-500 border border-rose-500/30',
+      'bg-danger hover:bg-danger-hover text-white font-semibold shadow-lg shadow-black/40 focus:ring-danger border border-danger/30',
     outline:
-      'bg-transparent hover:bg-stone-800 text-stone-200 border border-stone-700 hover:border-stone-600 focus:ring-stone-500',
+      'bg-transparent hover:bg-surface-elevated text-secondary border border-border-strong hover:border-border-strong focus:ring-border-strong',
     ghost:
-      'bg-transparent hover:bg-stone-800 text-stone-300 hover:text-stone-100 focus:ring-stone-500',
+      'bg-transparent hover:bg-surface-elevated text-muted hover:text-primary focus:ring-border-strong',
   };
 
   return (
