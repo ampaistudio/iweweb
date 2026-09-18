@@ -136,6 +136,85 @@ function slugify(string $text): string {
     return empty($text) ? 'n-a-' . time() : $text;
 }
 
+/**
+ * Sanitize rich-text HTML coming from the dashboard editor (Tiptap StarterKit
+ * with headings/blockquote/codeBlock/horizontalRule disabled).
+ *
+ * Strips any tag/attribute outside the allow-list, and removes script/style
+ * content entirely instead of just unwrapping it, so no injected markup or
+ * event handler attribute can survive into the public site (NAES §9.2 — XSS
+ * must never be accepted).
+ */
+function sanitizeRichText(string $html): string {
+    $html = trim($html);
+    if ($html === '') {
+        return '';
+    }
+
+    $allowedTags = ['p', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'br'];
+
+    $doc = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $doc->loadHTML(
+        '<?xml encoding="utf-8" ?><div id="sanitize-root">' . $html . '</div>',
+        LIBXML_NOERROR | LIBXML_NOWARNING
+    );
+    libxml_clear_errors();
+
+    $root = $doc->getElementById('sanitize-root');
+    if (!$root) {
+        return '';
+    }
+
+    $stripDisallowedNode = function (DOMNode $node) use (&$stripDisallowedNode, $allowedTags, $doc): void {
+        $children = iterator_to_array($node->childNodes);
+
+        foreach ($children as $child) {
+            if ($child->nodeType === XML_TEXT_NODE) {
+                continue;
+            }
+
+            if ($child->nodeType !== XML_ELEMENT_NODE) {
+                $node->removeChild($child);
+                continue;
+            }
+
+            /** @var DOMElement $child */
+            $tag = strtolower($child->tagName);
+
+            if ($tag === 'script' || $tag === 'style') {
+                $node->removeChild($child);
+                continue;
+            }
+
+            if (!in_array($tag, $allowedTags, true)) {
+                // Unwrap: keep children (plain text/inline content), drop the tag itself.
+                while ($child->firstChild) {
+                    $node->insertBefore($child->firstChild, $child);
+                }
+                $node->removeChild($child);
+                continue;
+            }
+
+            // Strip every attribute — no href/src/style/on* survives on an allowed tag either.
+            while ($child->attributes->length > 0) {
+                $child->removeAttribute($child->attributes->item(0)->name);
+            }
+
+            $stripDisallowedNode($child);
+        }
+    };
+
+    $stripDisallowedNode($root);
+
+    $innerHtml = '';
+    foreach ($root->childNodes as $child) {
+        $innerHtml .= $doc->saveHTML($child);
+    }
+
+    return trim($innerHtml);
+}
+
 function handleCors(array $config): void {
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
     $allowedOrigins = $config['app']['cors_origins'] ?? ['*'];

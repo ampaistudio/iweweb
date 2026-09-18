@@ -159,7 +159,7 @@ class PackageController {
      */
     public function create(): void {
         requireAuth($this->pdo);
-        $data = getJsonInput();
+        $data = getRequestBody();
 
         $errors = $this->validatePackageData($data, true);
         if (!empty($errors)) {
@@ -214,7 +214,7 @@ class PackageController {
      */
     public function update(string $id): void {
         requireAuth($this->pdo);
-        $data = getJsonInput();
+        $data = getRequestBody();
 
         $stmtCheck = $this->pdo->prepare('SELECT id FROM packages WHERE id = :id');
         $stmtCheck->execute(['id' => $id]);
@@ -289,7 +289,7 @@ class PackageController {
      */
     public function reorder(): void {
         requireAuth($this->pdo);
-        $data = getJsonInput();
+        $data = getRequestBody();
 
         $items = $data['items'] ?? $data;
         if (!is_array($items)) {

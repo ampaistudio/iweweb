@@ -7,7 +7,7 @@ import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
 import { Button } from '../core/ui/Button';
 import { Input } from '../core/ui/Input';
-import { Textarea } from '../core/ui/Textarea';
+import { RichTextEditor } from '../core/ui/RichTextEditor';
 import { Select } from '../core/ui/Select';
 import { Toggle } from '../core/ui/Toggle';
 import { ImagePickerModal } from '../core/media/ImagePickerModal';
@@ -761,20 +761,22 @@ export const ActivityEditorPage: React.FC = () => {
         <div className="space-y-6">
           {/* Descripción */}
           {isEs ? (
-            <Textarea
+            <RichTextEditor
               label="Descripción completa (Español - Principal)"
-              rows={5}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
               placeholder="Escribe el texto detallado de la ruta, el entorno y los atractivos de esta actividad..."
-              required
             />
           ) : (
             currentNonEs && (
               <div className="space-y-3">
                 <div className="p-3 bg-bg rounded-xl border border-border text-xs text-muted">
                   <span className="font-semibold text-primary block mb-1">Descripción base en Español:</span>
-                  <p className="leading-relaxed whitespace-pre-line">{description || '(Sin descripción ingresada aún)'}</p>
+                  {description ? (
+                    <div className="rich-text-content leading-relaxed" dangerouslySetInnerHTML={{ __html: description }} />
+                  ) : (
+                    <p className="leading-relaxed">(Sin descripción ingresada aún)</p>
+                  )}
                 </div>
 
                 <div>
@@ -789,10 +791,9 @@ export const ActivityEditorPage: React.FC = () => {
                       onTranslated={(val) => updateTranslationField(currentNonEs, 'description', val)}
                     />
                   </div>
-                  <Textarea
-                    rows={5}
+                  <RichTextEditor
                     value={translations[currentNonEs].description}
-                    onChange={(e) => updateTranslationField(currentNonEs, 'description', e.target.value)}
+                    onChange={(val) => updateTranslationField(currentNonEs, 'description', val)}
                     placeholder={`Descripción traducida (${activeLocale.toUpperCase()})...`}
                   />
                 </div>

@@ -330,7 +330,7 @@ class ActivityController {
                 'image_url'     => trim($body['image'] ?? $body['image_url'] ?? ''),
                 'alt_text'      => trim($body['alt'] ?? $body['alt_text'] ?? ''),
                 'price'         => !empty($body['price']) ? trim($body['price']) : null,
-                'description'   => trim($body['description']),
+                'description'   => sanitizeRichText($body['description']),
                 'display_order' => (int)($body['display_order'] ?? $body['order'] ?? 0),
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
@@ -422,7 +422,7 @@ class ActivityController {
                 'image_url'     => trim($body['image'] ?? $body['image_url'] ?? ''),
                 'alt_text'      => trim($body['alt'] ?? $body['alt_text'] ?? ''),
                 'price'         => !empty($body['price']) ? trim($body['price']) : null,
-                'description'   => trim($body['description']),
+                'description'   => sanitizeRichText($body['description']),
                 'display_order' => (int)($body['display_order'] ?? $body['order'] ?? 0),
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
@@ -498,7 +498,7 @@ class ActivityController {
             }
 
             $tTitle = trim((string)($translations[$loc]['title'] ?? ''));
-            $tDesc = trim((string)($translations[$loc]['description'] ?? ''));
+            $tDesc = sanitizeRichText((string)($translations[$loc]['description'] ?? ''));
 
             if ($tTitle !== '' || $tDesc !== '') {
                 $stmt = $this->pdo->prepare('

@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+.rich-text-content p { margin: 0 0 0.5em; }
+.rich-text-content p:last-child { margin-bottom: 0; }
+.rich-text-content ul, .rich-text-content ol { padding-left: 1.25em; margin: 0 0 0.5em; }
+.rich-text-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-text-faint);
+  pointer-events: none;
+  height: 0;
+}
+
 :root {
   --color-bg: #0f172a;
   --color-surface: #1e293b;

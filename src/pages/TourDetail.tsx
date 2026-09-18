@@ -176,9 +176,6 @@ function TourDetail() {
     };
   });
 
-  // TEMPORAL: comparación visual A/B, Christian decide cuál variante usar antes de generalizar
-  const heroVariant: "full" | "tall" = activity.id === "ebike-forn-canillo" ? "full" : "tall";
-
   const related = activities
     .filter((item) => item.type === activity.type && item.id !== activity.id)
     .slice(0, 3);
@@ -194,7 +191,7 @@ function TourDetail() {
         slides={heroSlides}
         title={activity.title}
         eyebrow={`${activity.type} · ${activity.region}`}
-        variant={heroVariant}
+        variant="full"
       />
 
       {/* Tour Content Details */}
@@ -271,9 +268,10 @@ function TourDetail() {
             </div>
 
             {/* Description */}
-            <div className="tour-description-wrap">
-              <p className="large-copy">{activity.description}</p>
-            </div>
+            <div
+              className="tour-description-wrap"
+              dangerouslySetInnerHTML={{ __html: activity.description }}
+            />
 
             {/* Itinerary */}
             {activity.itinerary && activity.itinerary.length > 0 && (

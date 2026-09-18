@@ -160,7 +160,7 @@ class MenuController {
      */
     public function create(): void {
         requireAuth($this->pdo);
-        $data = getJsonInput();
+        $data = getRequestBody();
 
         $errors = $this->validateMenuItemData($data, true);
         if (!empty($errors)) {
@@ -208,7 +208,7 @@ class MenuController {
      */
     public function update(int $id): void {
         requireAuth($this->pdo);
-        $data = getJsonInput();
+        $data = getRequestBody();
 
         $stmtCheck = $this->pdo->prepare('SELECT id FROM menu_items WHERE id = :id');
         $stmtCheck->execute(['id' => $id]);
@@ -288,7 +288,7 @@ class MenuController {
      */
     public function reorder(): void {
         requireAuth($this->pdo);
-        $data = getJsonInput();
+        $data = getRequestBody();
 
         $items = $data['items'] ?? $data;
         if (!is_array($items)) {
