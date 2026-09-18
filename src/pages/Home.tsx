@@ -5,6 +5,7 @@ import HeroSlideshow from "../components/HeroSlideshow";
 import { useSiteData } from "../context/SiteDataContext";
 import { publicApi } from "../api/client";
 import type { UnifiedReview } from "../api/types";
+import { buildWhatsAppUrl } from "../utils/whatsapp";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -399,7 +400,14 @@ function Home() {
               <button type="submit" aria-label="Subscribe"><ArrowIcon /></button>
             </form>
           )}
-          <a className="text-link dark-link" href="mailto:info@i-wildland.com">O escríbenos directamente <ArrowIcon /></a>
+          <a
+            className="text-link dark-link"
+            href={buildWhatsAppUrl(getContent("contact_phone", "+376 653 769"), "Hola! Quisiera más información sobre las experiencias de iWE.")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            O escríbenos directamente <ArrowIcon />
+          </a>
         </div>
       </section>
     </main>

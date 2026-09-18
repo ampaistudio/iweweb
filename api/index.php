@@ -173,6 +173,14 @@ try {
             jsonError('Método no permitido para /api/activities/:id/images', 405);
         }
 
+        // Sub-resource: /api/activities/:id/duplicate
+        if ($subresource === 'duplicate' && $id !== null) {
+            if ($method === 'POST') {
+                $activityController->duplicate((string)$id);
+            }
+            jsonError('Método no permitido para /api/activities/:id/duplicate', 405);
+        }
+
         if ($id === null) {
             if ($method === 'GET') {
                 $activityController->list();

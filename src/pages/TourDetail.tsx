@@ -5,6 +5,7 @@ import { usePreferences } from "../context/PreferencesContext";
 import { publicApi } from "../api/client";
 import type { RawApiActivity, ActivityImage } from "../api/types";
 import { resolveMediaUrl } from "../utils/media";
+import { buildWhatsAppUrl } from "../utils/whatsapp";
 import TourHero from "../components/TourHero";
 import type { HeroSlide } from "../components/HeroSlideshow";
 
@@ -74,7 +75,7 @@ function CheckIcon() {
 
 function TourDetail() {
   const { tourId } = useParams<{ tourId: string }>();
-  const { getActivity, activities, loading: globalLoading } = useSiteData();
+  const { getActivity, activities, loading: globalLoading, getContent } = useSiteData();
   const { language } = usePreferences();
 
   const [fullActivity, setFullActivity] = useState<RawApiActivity | null>(null);
@@ -182,9 +183,11 @@ function TourDetail() {
     .filter((item) => item.type === activity.type && item.id !== activity.id)
     .slice(0, 3);
 
-  const mailtoUrl = `mailto:info@i-wildland.com?subject=${encodeURIComponent(
-    `Reserva: ${activity.title} (${activity.type})`
-  )}`;
+  const contactPhone = getContent("contact_phone", "+376 653 769");
+  const whatsappUrl = buildWhatsAppUrl(
+    contactPhone,
+    `Hola! Quisiera reservar la experiencia "${activity.title}" (${activity.type}).`
+  );
 
   return (
     <main className="tour-detail-page">
@@ -315,7 +318,12 @@ function TourDetail() {
 
             {/* Booking CTA */}
             <div className="tour-booking-cta">
-              <a className="button button-dark tour-booking-button" href={mailtoUrl}>
+              <a
+                className="button button-dark tour-booking-button"
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Reservar esta experiencia <ArrowIcon />
               </a>
             </div>

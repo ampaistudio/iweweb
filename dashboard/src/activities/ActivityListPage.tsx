@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { ACTIVITY_TYPES, type Activity } from './types';
 import { useToast } from '../core/ui/ToastContext';
@@ -17,8 +17,10 @@ export const ActivityListPage: React.FC = () => {
   const [activityToDelete, setActivityToDelete] = useState<Activity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   const toast = useToast();
+  const navigate = useNavigate();
 
   const loadActivities = async () => {
     try {
@@ -118,6 +120,20 @@ export const ActivityListPage: React.FC = () => {
       toast.error(msg);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleDuplicate = async (act: Activity) => {
+    setDuplicatingId(act.id);
+    try {
+      const result = await api.activities.duplicate(act.id);
+      toast.success(`Actividad duplicada como '${result.title}'. Editala para ajustar precio, duración, etc.`, 'Actividad duplicada');
+      navigate(`/activities/${result.id}?promptMenu=1`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al duplicar actividad';
+      toast.error(msg);
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -313,6 +329,17 @@ export const ActivityListPage: React.FC = () => {
                         ✏️ Editar
                       </Button>
                     </Link>
+
+                    {/* Duplicate button */}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleDuplicate(act)}
+                      isLoading={duplicatingId === act.id}
+                      title="Duplicar actividad (copia todo el contenido y la galería)"
+                    >
+                      📋 Duplicar
+                    </Button>
 
                     {/* Delete button */}
                     <Button

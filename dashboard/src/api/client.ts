@@ -238,6 +238,10 @@ export const api = {
       request<void>(`/activities/${encodeURIComponent(id)}`, {
         method: 'DELETE',
       }),
+    duplicate: (id: string) =>
+      request<{ id: string; title: string }>(`/activities/${encodeURIComponent(id)}/duplicate`, {
+        method: 'POST',
+      }),
     addImage: (activityId: string, data: { image_url: string; media_type?: 'image' | 'video'; poster_url?: string; alt_text: string; is_cover?: boolean }) =>
       request<ActivityImage>(`/activities/${encodeURIComponent(activityId)}/images`, {
         method: 'POST',

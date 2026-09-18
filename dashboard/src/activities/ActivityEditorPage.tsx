@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { ACTIVITY_TYPES, type Activity, type ActivityType, type ActivityImage } from './types';
 import type { MediaItem, DashboardLocale } from '../api/types';
@@ -12,6 +12,7 @@ import { Select } from '../core/ui/Select';
 import { Toggle } from '../core/ui/Toggle';
 import { ImagePickerModal } from '../core/media/ImagePickerModal';
 import { CoverImagePickerModal } from './CoverImagePickerModal';
+import { AddToMenuModal } from './AddToMenuModal';
 import { LanguageTabs } from '../core/ui/LanguageSelector';
 import { AiTranslateButton } from '../core/ui/AiTranslateButton';
 
@@ -28,6 +29,20 @@ interface LocaleActivityData {
 export const ActivityEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id && id !== 'new');
+  const [searchParams] = useSearchParams();
+  const [addToMenuOpen, setAddToMenuOpen] = useState(false);
+  const [newlyCreatedId, setNewlyCreatedId] = useState<string | null>(null);
+
+  // React Router reuses this component instance when navigating between two
+  // "/activities/:id" routes (only the param changes), so the useState above
+  // never re-reads the query string on its own — this effect re-checks it
+  // every time `id` changes, which covers duplicating an activity while
+  // already viewing another activity's editor.
+  useEffect(() => {
+    if (searchParams.get('promptMenu') === '1') {
+      setAddToMenuOpen(true);
+    }
+  }, [id, searchParams]);
 
   const [activeLocale, setActiveLocale] = useState<DashboardLocale>('es');
 
@@ -135,7 +150,8 @@ export const ActivityEditorPage: React.FC = () => {
       };
       loadActivity();
     }
-  }, [id, isEdit, navigate, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isEdit]);
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
@@ -401,11 +417,13 @@ export const ActivityEditorPage: React.FC = () => {
       if (isEdit && id) {
         await api.activities.update(id, payload);
         toast.success(`Actividad '${title}' actualizada con éxito.`, 'Guardado');
+        navigate('/activities');
       } else {
-        await api.activities.create(payload);
+        const created = await api.activities.create(payload);
         toast.success(`Actividad '${title}' creada con éxito.`, 'Actividad creada');
+        setNewlyCreatedId(created.id);
+        setAddToMenuOpen(true);
       }
-      navigate('/activities');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al guardar la actividad';
       toast.error(msg);
@@ -1036,6 +1054,19 @@ export const ActivityEditorPage: React.FC = () => {
         isOpen={galleryPickerOpen}
         onClose={() => setGalleryPickerOpen(false)}
         onSelectImage={handleAddGalleryImage}
+      />
+
+      {/* Add to Menu Modal: shown right after creating an activity, or when arriving
+          here via "Duplicar" (?promptMenu=1), so a new activity is never left
+          published without a way to reach it from the site's navigation. */}
+      <AddToMenuModal
+        isOpen={addToMenuOpen}
+        onClose={() => {
+          setAddToMenuOpen(false);
+          navigate('/activities');
+        }}
+        activityId={newlyCreatedId || id || ''}
+        activityTitle={title}
       />
 
       {/* Video URL Modal */}
