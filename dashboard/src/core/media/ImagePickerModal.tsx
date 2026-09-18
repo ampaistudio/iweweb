@@ -62,7 +62,7 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             onClick={() => setActiveTab('gallery')}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all min-h-[40px] cursor-pointer ${
               activeTab === 'gallery'
-                ? 'bg-accent text-white shadow-md'
+                ? 'bg-accent text-accent-contrast shadow-md'
                 : 'bg-surface-elevated/80 text-secondary hover:bg-surface-elevated'
             }`}
           >
@@ -73,7 +73,7 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             onClick={() => setActiveTab('upload')}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all min-h-[40px] cursor-pointer ${
               activeTab === 'upload'
-                ? 'bg-accent text-white shadow-md'
+                ? 'bg-accent text-accent-contrast shadow-md'
                 : 'bg-surface-elevated/80 text-secondary hover:bg-surface-elevated'
             }`}
           >
@@ -131,10 +131,10 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         loading="lazy"
                       />
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 text-left">
-                        <p className="text-[11px] font-medium text-white truncate">{item.original_name}</p>
+                        <p className="text-[11px] font-medium text-text-on-overlay truncate">{item.original_name}</p>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 bg-accent text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                        <div className="absolute top-2 right-2 bg-accent text-accent-contrast w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
                           ✓
                         </div>
                       )}

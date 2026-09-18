@@ -9,6 +9,7 @@ import { Textarea } from '../ui/Textarea';
 import { ImagePickerModal } from '../media/ImagePickerModal';
 import { LanguageTabs } from '../ui/LanguageSelector';
 import { AiTranslateButton } from '../ui/AiTranslateButton';
+import { HeroSlidesTab } from './HeroSlidesTab';
 
 type NonEsLocale = 'ca' | 'en' | 'fr';
 
@@ -134,25 +135,37 @@ export const ContentEditorPage: React.FC = () => {
   const currentNonEs = !isEs ? (activeLocale as NonEsLocale) : null;
 
   return (
-    <form onSubmit={handleSaveAll} className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-primary">Textos de la Web</h2>
-          <p className="text-sm text-muted mt-1">
-            Edita los textos institucionales, la biografía del equipo y los datos de contacto del sitio público.
-          </p>
-        </div>
-        <Button
-          type="submit"
-          variant="primary"
-          size="md"
-          isLoading={isSaving}
-          className="self-start sm:self-auto"
-        >
-          💾 Guardar todos los cambios
-        </Button>
-      </div>
+    <div className="space-y-12">
+      {/* 1. Hero Slides Section */}
+      <section aria-labelledby="hero-slides-section">
+        <HeroSlidesTab />
+      </section>
+
+      <hr className="border-border" />
+
+      {/* 2. Institutional Texts Section */}
+      <section aria-labelledby="site-texts-section">
+        <form onSubmit={handleSaveAll} className="space-y-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 id="site-texts-section" className="text-2xl font-bold tracking-tight text-primary">
+                Textos Institucionales de la Web
+              </h2>
+              <p className="text-sm text-muted mt-1">
+                Edita los textos de presentación, la biografía del equipo y los datos de contacto del sitio público.
+              </p>
+            </div>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              isLoading={isSaving}
+              className="self-start sm:self-auto"
+            >
+              💾 Guardar textos institucionales
+            </Button>
+          </div>
 
       {/* Language Selector Bar */}
       <div className="space-y-1">
@@ -449,6 +462,8 @@ export const ContentEditorPage: React.FC = () => {
         onSelectImage={handleSelectLogo}
         selectedImageUrl={form.logo_url}
       />
-    </form>
+        </form>
+      </section>
+    </div>
   );
 };

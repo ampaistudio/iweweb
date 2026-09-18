@@ -35,6 +35,18 @@ export interface ActivityTranslations {
   };
 }
 
+export interface ActivityImage {
+  id: number;
+  activity_id: string;
+  image_url: string;
+  media_type?: 'image' | 'video';
+  poster_url?: string;
+  alt_text: string;
+  display_order: number;
+  is_cover: boolean;
+  created_at?: string;
+}
+
 export interface Activity {
   id: string;
   title: string;
@@ -55,4 +67,5 @@ export interface Activity {
   created_at?: string;
   updated_at?: string;
   translations?: ActivityTranslations;
+  images?: ActivityImage[];
 }

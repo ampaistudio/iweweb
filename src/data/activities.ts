@@ -1,5 +1,23 @@
 export type ActivityType = "BTT" | "4x4" | "Vía Ferrata" | "Senderismo" | "Esquí-Snow" | "Rafting" | "Heliflight";
 
+export interface ActivityImage {
+  id: number;
+  activity_id: string;
+  image_url: string;
+  media_type?: "image" | "video";
+  poster_url?: string;
+  alt_text: string;
+  display_order: number;
+  is_cover: boolean;
+}
+
+export interface ActivityTechnicalSpecs {
+  minAge?: string;
+  distanceKm?: string;
+  elevationGain?: string;
+  elevationLoss?: string;
+}
+
 export type Activity = {
   id: string;
   title: string;
@@ -13,12 +31,15 @@ export type Activity = {
   price?: string;
   description: string;
   highlights: string[];
+  images?: ActivityImage[];
+  itinerary?: string[];
+  technicalSpecs?: ActivityTechnicalSpecs;
 };
 
 export const activities: Activity[] = [
   {
     id: "esqui-dia",
-    title: "Experiencia día de Esquí",
+    title: "Esquí Tour",
     region: "Grandvalira / Vallnord",
     country: "Andorra",
     type: "Esquí-Snow",
@@ -61,7 +82,7 @@ export const activities: Activity[] = [
     country: "Andorra",
     type: "Esquí-Snow",
     level: "Principiante +",
-    duration: "4-5 horas",
+    duration: "5 horas",
     image:
       "https://privateyachtexpeditions.com/wp-content/uploads/2023/10/cropped-Isard-WildLand-Andorra-MTB-Andorra-Winter-Experiences-605x605.jpg",
     alt: "Caminata nocturna con raquetas de nieve en Andorra",
@@ -70,7 +91,26 @@ export const activities: Activity[] = [
     highlights: [
       "Raquetas y frontales incluidos",
       "Apto para toda la familia",
-      "Versión diurna disponible (4hs) o nocturna (5hs)",
+      "Versión diurna disponible (4hs)",
+    ],
+  },
+  {
+    id: "raquetas-nieve-diurna",
+    title: "Caminata con Raquetas de Nieve Diurna",
+    region: "Andorra",
+    country: "Andorra",
+    type: "Esquí-Snow",
+    level: "Principiante +",
+    duration: "4 horas",
+    image:
+      "https://privateyachtexpeditions.com/wp-content/uploads/2023/10/cropped-Isard-WildLand-Andorra-MTB-Andorra-Winter-Experiences-605x605.jpg",
+    alt: "Caminata diurna con raquetas de nieve en Andorra",
+    description:
+      "Una experiencia distinta: caminar sobre la nieve de día, con raquetas, disfrutando de las vistas de los Pirineos andorranos. Disponible también en versión nocturna de 5 horas.",
+    highlights: [
+      "Raquetas y bastones incluidos",
+      "Apto para toda la familia",
+      "Versión nocturna disponible (5hs)",
     ],
   },
   {
@@ -92,6 +132,19 @@ export const activities: Activity[] = [
       "Grupos de 3 a 8 personas",
       "E-bike disponible para alquilar",
     ],
+    itinerary: [
+      "Salida desde Envalira, a 2408 metros",
+      "Ascenso al Pic Maia",
+      "Descenso técnico por \"Port dret\" hasta el valle de Soldeu",
+      "Almuerzo breve en Soldeu",
+      "Descenso de 1000 metros y 10 km por \"Roca del Forn\" en Canillo",
+      "Tramo final: 5 km de sendero por bosque hasta el valle",
+      "El itinerario puede variar según condiciones climáticas",
+    ],
+    technicalSpecs: {
+      distanceKm: "10 km (tramo Roca del Forn) + 5 km sendero final",
+      elevationLoss: "-1000m (tramo Roca del Forn)",
+    },
   },
   {
     id: "ebike-llosada",

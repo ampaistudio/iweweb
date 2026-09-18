@@ -30,11 +30,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantClasses = {
     primary:
-      'bg-accent hover:bg-accent-hover text-white font-semibold shadow-lg shadow-black/40 focus:ring-accent border border-accent/30',
+      'bg-accent hover:bg-accent-hover text-accent-contrast font-semibold shadow-lg shadow-black/40 focus:ring-accent border border-accent/30',
     secondary:
       'bg-surface-elevated hover:bg-surface-hover text-primary border border-border-strong/80 focus:ring-border-strong',
     danger:
-      'bg-danger hover:bg-danger-hover text-white font-semibold shadow-lg shadow-black/40 focus:ring-danger border border-danger/30',
+      'bg-danger hover:bg-danger-hover text-danger-contrast font-semibold shadow-lg shadow-black/40 focus:ring-danger border border-danger/30',
     outline:
       'bg-transparent hover:bg-surface-elevated text-secondary border border-border-strong hover:border-border-strong focus:ring-border-strong',
     ghost:

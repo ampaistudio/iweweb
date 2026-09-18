@@ -8,3 +8,4 @@ api/config/config.local.php
 api/uploads/*
 !api/uploads/.gitkeep
 graphify-out/
+.claude-flow/

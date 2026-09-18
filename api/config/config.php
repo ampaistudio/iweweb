@@ -54,6 +54,25 @@ $defaultConfig = [
         'api_url' => getenv('NVIDIA_NIM_API_URL') ?: 'https://integrate.api.nvidia.com/v1/chat/completions',
         'model'   => getenv('NVIDIA_NIM_MODEL') ?: 'meta/llama-3.1-70b-instruct',
     ],
+    /**
+     * Google Places API Integration
+     * Business CID: 0x364c511f18f0fa2c ("Isard Wildland" in Google Maps)
+     * NOTE: Requires GOOGLE_PLACES_API_KEY and Place ID (resolved from CID) in config.local.php or env.
+     */
+    'google_places' => [
+        'api_key'  => getenv('GOOGLE_PLACES_API_KEY') ?: '',
+        'place_id' => getenv('GOOGLE_PLACE_ID') ?: '',
+        'cid'      => '0x364c511f18f0fa2c',
+    ],
+    /**
+     * TripAdvisor Content API Integration
+     * Business Location ID: d18719120 ("IWE" in TripAdvisor Andorra)
+     * NOTE: Requires TRIPADVISOR_API_KEY (partner approval required) in config.local.php or env.
+     */
+    'tripadvisor' => [
+        'api_key'     => getenv('TRIPADVISOR_API_KEY') ?: '',
+        'location_id' => getenv('TRIPADVISOR_LOCATION_ID') ?: 'd18719120',
+    ],
 ];
 
 // Check for local overrides file (outside version control)

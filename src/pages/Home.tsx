@@ -1,26 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { packages, reviews, type Activity, type ActivityType } from "../data/activities";
-import HeroSlideshow, { type HeroSlide } from "../components/HeroSlideshow";
+import { packages, reviews as defaultReviews, type Activity, type ActivityType } from "../data/activities";
+import HeroSlideshow from "../components/HeroSlideshow";
 import { useSiteData } from "../context/SiteDataContext";
-
-const heroSlides: HeroSlide[] = [
-  {
-    type: "image",
-    src: "https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg",
-    alt: "Guía de montaña de iWE en los Pirineos de Andorra",
-  },
-  {
-    type: "image",
-    src: "https://privateyachtexpeditions.com/wp-content/uploads/2024/01/IMG-20210729-WA0058-605x605.jpg",
-    alt: "E-Bike Enduro en Forn de Canillo",
-  },
-  {
-    type: "image",
-    src: "https://i-wildland.com/wp-content/uploads/2020/05/IMG_20180724_171459-800x533.jpg",
-    alt: "Excursión 4x4 en la ruta de los contrabandistas hacia Tor",
-  },
-];
+import { publicApi } from "../api/client";
+import type { UnifiedReview } from "../api/types";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -61,19 +45,99 @@ function ActivityGrid({ type, activities }: { type: ActivityType; activities: Ac
   );
 }
 
+const initialReviews: UnifiedReview[] = defaultReviews.map((r, i) => ({
+  id: `direct-${i}`,
+  quote: r.quote,
+  name: r.name,
+  location: r.location,
+  tour: r.tour,
+  rating: 5,
+  source: "direct" as const,
+}));
+
 function Home() {
+  const [allReviews, setAllReviews] = useState<UnifiedReview[]>(initialReviews);
+  const [selectedSource, setSelectedSource] = useState<"all" | "google" | "tripadvisor" | "direct">("all");
   const [reviewIndex, setReviewIndex] = useState(0);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-  const { activities, getContent } = useSiteData();
+  const { activities, heroSlides, getContent } = useSiteData();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadPlatformReviews() {
+      try {
+        const [googleRes, tripadvisorRes] = await Promise.allSettled([
+          publicApi.reviews.google(),
+          publicApi.reviews.tripadvisor(),
+        ]);
+
+        const fetched: UnifiedReview[] = [];
+
+        if (googleRes.status === "fulfilled" && googleRes.value?.reviews) {
+          googleRes.value.reviews.forEach((gr, idx) => {
+            fetched.push({
+              id: `google-${idx}`,
+              quote: gr.text,
+              name: gr.author_name,
+              location: "Google Maps",
+              tour: "Experiencia verificada",
+              rating: gr.rating,
+              date: gr.relative_time_description,
+              source: "google",
+              avatarUrl: gr.profile_photo_url,
+              isMock: googleRes.value.is_mock,
+            });
+          });
+        }
+
+        if (tripadvisorRes.status === "fulfilled" && tripadvisorRes.value?.reviews) {
+          tripadvisorRes.value.reviews.forEach((tr, idx) => {
+            fetched.push({
+              id: `ta-${tr.id || idx}`,
+              quote: tr.text,
+              name: tr.user?.username || "Viajero TripAdvisor",
+              location: tr.user?.user_location?.name || "TripAdvisor",
+              tour: tr.title,
+              rating: tr.rating,
+              date: tr.published_date,
+              source: "tripadvisor",
+              isMock: tripadvisorRes.value.is_mock,
+            });
+          });
+        }
+
+        if (isMounted && fetched.length > 0) {
+          setAllReviews([...initialReviews, ...fetched]);
+        }
+      } catch {
+        // Resilient fallback: keep initial curated reviews
+      }
+    }
+
+    loadPlatformReviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filteredReviews = useMemo(() => {
+    if (selectedSource === "all") return allReviews;
+    return allReviews.filter((r) => r.source === selectedSource);
+  }, [allReviews, selectedSource]);
 
   const handleNewsletter = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (email.trim()) setSubscribed(true);
   };
 
+  const currentReview = filteredReviews[reviewIndex % (filteredReviews.length || 1)] || initialReviews[0];
+
   const moveReview = (direction: number) => {
-    setReviewIndex((current) => (current + direction + reviews.length) % reviews.length);
+    if (filteredReviews.length <= 1) return;
+    setReviewIndex((current) => (current + direction + filteredReviews.length) % filteredReviews.length);
   };
 
   const heroTagline = getContent("hero_tagline", "Fabricamos experiencias.");
@@ -226,18 +290,94 @@ function Home() {
         </div>
       </section>
 
+      <section id="weather" className="weather-section section-space">
+        <div className="page-width">
+          <div className="weather-header">
+            <p className="eyebrow">Condiciones en tiempo real</p>
+            <h2>El tiempo en Andorra<br /><em>y los Pirineos.</em></h2>
+            <p>
+              Previsión meteorológica y mapa interactivo de viento en directo para planificar tus salidas de BTT, senderismo o esquí con la máxima seguridad.
+            </p>
+          </div>
+          <div className="weather-map-wrap">
+            <iframe
+              className="weather-map-frame"
+              title="Mapa meteorológico y viento en Andorra - Windy"
+              src="https://embed.windy.com/embed2.html?lat=42.5459743&lon=1.5140217&detailLat=42.5459743&detailLon=1.5140217&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+              loading="lazy"
+            />
+            <div className="weather-meta-bar">
+              <span>Andorra (42.55° N, 1.51° E) • Modelo ECMWF</span>
+              <span className="weather-meta-badge">Viento &amp; Previsión en vivo</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="stories" className="reviews-section section-space">
         <div className="page-width reviews-layout">
           <div className="reviews-label">
             <p className="eyebrow">Opiniones de clientes</p>
-            <span className="review-count">0{reviewIndex + 1}<small>/0{reviews.length}</small></span>
+            <span className="review-count">
+              {String(reviewIndex + 1).padStart(2, "0")}
+              <small>/{String(filteredReviews.length || 1).padStart(2, "0")}</small>
+            </span>
+            <div className="review-source-tabs" role="tablist" aria-label="Filtrar por origen de reseña">
+              <button
+                type="button"
+                className={`review-source-tab ${selectedSource === "all" ? "active" : ""}`}
+                onClick={() => { setSelectedSource("all"); setReviewIndex(0); }}
+              >
+                Todas ({allReviews.length})
+              </button>
+              <button
+                type="button"
+                className={`review-source-tab ${selectedSource === "google" ? "active" : ""}`}
+                onClick={() => { setSelectedSource("google"); setReviewIndex(0); }}
+              >
+                Google ★ 4.9
+              </button>
+              <button
+                type="button"
+                className={`review-source-tab ${selectedSource === "tripadvisor" ? "active" : ""}`}
+                onClick={() => { setSelectedSource("tripadvisor"); setReviewIndex(0); }}
+              >
+                TripAdvisor ★ 5.0
+              </button>
+              <button
+                type="button"
+                className={`review-source-tab ${selectedSource === "direct" ? "active" : ""}`}
+                onClick={() => { setSelectedSource("direct"); setReviewIndex(0); }}
+              >
+                iWE
+              </button>
+            </div>
           </div>
           <div className="review-content">
-            <blockquote>{reviews[reviewIndex].quote}</blockquote>
-            <div className="review-byline"><strong>{reviews[reviewIndex].name}</strong><span>{reviews[reviewIndex].location} / {reviews[reviewIndex].tour}</span></div>
+            <div className="review-stars" aria-label="Calificación 5 estrellas">
+              {"★".repeat(currentReview.rating || 5)}
+            </div>
+            <blockquote>{currentReview.quote}</blockquote>
+            <div className="review-byline">
+              <strong>{currentReview.name}</strong>
+              <span>
+                {currentReview.location ? `${currentReview.location} • ` : ""}
+                {currentReview.tour || "Experiencia iWE"}
+                {currentReview.date ? ` (${currentReview.date})` : ""}
+              </span>
+              <span className="review-source-badge">
+                {currentReview.source === "google" && "📍 Google Reviews"}
+                {currentReview.source === "tripadvisor" && "🦉 TripAdvisor"}
+                {currentReview.source === "direct" && "🏔️ iWE Experiencias"}
+              </span>
+            </div>
             <div className="review-controls">
-              <button type="button" aria-label="Previous review" onClick={() => moveReview(-1)}><ArrowIcon direction="left" /></button>
-              <button type="button" aria-label="Next review" onClick={() => moveReview(1)}><ArrowIcon /></button>
+              <button type="button" aria-label="Previous review" onClick={() => moveReview(-1)}>
+                <ArrowIcon direction="left" />
+              </button>
+              <button type="button" aria-label="Next review" onClick={() => moveReview(1)}>
+                <ArrowIcon />
+              </button>
             </div>
           </div>
         </div>

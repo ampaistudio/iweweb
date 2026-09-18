@@ -1,9 +1,15 @@
 import type {
   ApiResponse,
+  ApiHeroSlide,
   RawApiActivity,
   SiteContentResponse,
   Post,
+  GoogleReviewsResponse,
+  TripAdvisorReviewsResponse,
+  MenuItem,
+  Package,
 } from './types';
+
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 const DEFAULT_TIMEOUT_MS = 5000;
@@ -91,6 +97,10 @@ export const publicApi = {
       request<SiteContentResponse>(`/content${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
   },
 
+  heroSlides: {
+    list: () => request<ApiHeroSlide[]>('/hero-slides'),
+  },
+
   posts: {
     list: (params?: { locale?: string }) => {
       const query = new URLSearchParams();
@@ -100,6 +110,31 @@ export const publicApi = {
     },
     get: (idOrSlug: string | number, locale?: string) =>
       request<Post>(`/posts/${encodeURIComponent(String(idOrSlug))}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
+  },
+
+  reviews: {
+    google: () => request<GoogleReviewsResponse>('/reviews/google'),
+    tripadvisor: () => request<TripAdvisorReviewsResponse>('/reviews/tripadvisor'),
+  },
+
+  menu: {
+    list: (params?: { locale?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.locale) query.append('locale', params.locale);
+      const qs = query.toString();
+      return request<MenuItem[]>(`/menu${qs ? `?${qs}` : ''}`);
+    },
+  },
+
+  packages: {
+    list: (params?: { locale?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.locale) query.append('locale', params.locale);
+      const qs = query.toString();
+      return request<Package[]>(`/packages${qs ? `?${qs}` : ''}`);
+    },
+    get: (id: string, locale?: string) =>
+      request<Package>(`/packages/${encodeURIComponent(id)}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
   },
 };
 

@@ -2,10 +2,17 @@ import type {
   ApiResponse,
   AuthUser,
   MediaItem,
+  HeroSlideItem,
   SiteContentResponse,
   Post,
   OverviewData,
+  MenuItem,
+  MenuItemPayload,
+  PackageItem,
+  PackagePayload,
+  ActivityImage,
 } from './types';
+
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 
@@ -92,6 +99,47 @@ export const api = {
       request<{ content_key: string; content_value: string }>(`/content/${encodeURIComponent(key)}`, {
         method: 'PUT',
         body: JSON.stringify({ content_value: value, translations }),
+      }),
+  },
+
+  heroSlides: {
+    listAll: () => request<HeroSlideItem[]>('/hero-slides/all', { method: 'GET' }),
+    create: (data: FormData | {
+      slide_type?: 'image' | 'video';
+      media_source?: 'upload' | 'external_url';
+      src: string;
+      poster?: string | null;
+      alt: string;
+      display_order?: number;
+      published?: boolean;
+    }) => {
+      const isFormData = data instanceof FormData;
+      return request<HeroSlideItem>('/hero-slides', {
+        method: 'POST',
+        body: isFormData ? data : JSON.stringify(data),
+      });
+    },
+    update: (id: number, data: {
+      slide_type?: 'image' | 'video';
+      media_source?: 'upload' | 'external_url';
+      src?: string;
+      poster?: string | null;
+      alt?: string;
+      display_order?: number;
+      published?: boolean;
+    }) =>
+      request<HeroSlideItem>(`/hero-slides/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      request<void>(`/hero-slides/${id}`, {
+        method: 'DELETE',
+      }),
+    reorder: (ids: number[]) =>
+      request<void>('/hero-slides/reorder', {
+        method: 'PUT',
+        body: JSON.stringify({ ids }),
       }),
   },
 
@@ -190,5 +238,81 @@ export const api = {
       request<void>(`/activities/${encodeURIComponent(id)}`, {
         method: 'DELETE',
       }),
+    addImage: (activityId: string, data: { image_url: string; media_type?: 'image' | 'video'; poster_url?: string; alt_text: string; is_cover?: boolean }) =>
+      request<ActivityImage>(`/activities/${encodeURIComponent(activityId)}/images`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    removeImage: (activityId: string, imageId: number) =>
+      request<void>(`/activities/${encodeURIComponent(activityId)}/images/${imageId}`, {
+        method: 'DELETE',
+      }),
+    setCoverImage: (activityId: string, imageId: number) =>
+      request<void>(`/activities/${encodeURIComponent(activityId)}/images/${imageId}/cover`, {
+        method: 'PUT',
+      }),
+    reorderImages: (activityId: string, items: { id: number; display_order: number }[]) =>
+      request<void>(`/activities/${encodeURIComponent(activityId)}/images`, {
+        method: 'PUT',
+        body: JSON.stringify({ items }),
+      }),
+  },
+
+  menu: {
+    list: (includeUnpublished: boolean = true) =>
+      request<MenuItem[]>(`/menu${includeUnpublished ? '?includeUnpublished=1' : ''}`, { method: 'GET' }),
+    get: (id: number) =>
+      request<MenuItem>(`/menu/${id}`, { method: 'GET' }),
+    create: (data: MenuItemPayload) =>
+      request<{ id: number }>('/menu', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: MenuItemPayload) =>
+      request<{ id: number }>(`/menu/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      request<void>(`/menu/${id}`, {
+        method: 'DELETE',
+      }),
+    reorder: (items: Array<{ id: number; parent_id?: number | null; display_order?: number }>) =>
+      request<void>('/menu/reorder', {
+        method: 'PUT',
+        body: JSON.stringify({ items }),
+      }),
+  },
+
+  packages: {
+    list: (params?: { includeUnpublished?: boolean; locale?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.includeUnpublished !== undefined) query.append('includeUnpublished', params.includeUnpublished ? '1' : '0');
+      if (params?.locale) query.append('locale', params.locale);
+      const qs = query.toString();
+      return request<PackageItem[]>(`/packages${qs ? `?${qs}` : ''}`, { method: 'GET' });
+    },
+    get: (id: string, locale?: string) =>
+      request<PackageItem>(`/packages/${encodeURIComponent(id)}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`, { method: 'GET' }),
+    create: (data: PackagePayload) =>
+      request<{ id: string }>('/packages', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: PackagePayload) =>
+      request<{ id: string }>(`/packages/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/packages/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      }),
+    reorder: (items: Array<{ id: string; display_order?: number }>) =>
+      request<void>('/packages/reorder', {
+        method: 'PUT',
+        body: JSON.stringify({ items }),
+      }),
   },
 };
+

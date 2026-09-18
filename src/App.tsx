@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
-import { useSiteData } from "./context/SiteDataContext";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { useSiteData, isNavGroup } from "./context/SiteDataContext";
 import { languages, usePreferences } from "./context/PreferencesContext";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
@@ -46,6 +46,7 @@ function MoonIcon() {
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
   const { theme, toggleTheme, fontScale, cycleFontScale, language, setLanguage } = usePreferences();
   const { navSections, getContent } = useSiteData();
 
@@ -55,14 +56,17 @@ function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const isDarkHero = (location.pathname === "/" || location.pathname.startsWith("/tour/")) && !scrolled;
+  const headerVariantClass = isDarkHero ? "site-header-hero" : "site-header-default";
+
   const fontScaleLabel = { normal: "A", large: "A+", xlarge: "A++" }[fontScale];
   const contactAddress = getContent("contact_address", "Av. de Sant Antoni, 12, AD400 La Massana, Andorra");
   const contactPhone = getContent("contact_phone", "+376 344 870");
   const logoUrl = getContent("logo_url", "");
 
   return (
-    <div className="site-shell bg-stone-50 text-ink">
-      <header className={`site-header ${scrolled ? "site-header-scrolled" : ""}`}>
+    <div className="site-shell">
+      <header className={`site-header ${headerVariantClass} ${scrolled ? "site-header-scrolled" : ""}`}>
         <Link className="brand-mark" to="/" aria-label="iWE Isard Wildland Experience home">
           {logoUrl ? (
             <img src={logoUrl} alt="iWE Isard Wildland Experience" className="brand-logo-image" />
@@ -76,19 +80,50 @@ function App() {
         <nav className="desktop-nav" aria-label="Main navigation">
           {navSections.map((section) => (
             <div className="nav-dropdown" key={section.label}>
-              <a href={section.anchor}>{section.label}</a>
+              {section.anchor.startsWith('/') && !section.anchor.includes('#') ? (
+                <Link to={section.anchor}>{section.label}</Link>
+              ) : (
+                <a href={section.anchor}>{section.label}</a>
+              )}
               {section.items.length > 0 && (
                 <div className="nav-dropdown-menu">
-                  {section.items.map((item) => (
-                    <Link to={`/tour/${item.id}`} key={item.id}>{item.title}</Link>
-                  ))}
+                  {section.items.map((item, idx) => {
+                    if (isNavGroup(item)) {
+                      return (
+                        <div key={item.label || idx} className="nav-dropdown-group">
+                          <span className="nav-dropdown-subheading">{item.label}</span>
+                          <div className="nav-dropdown-nested">
+                            {item.items.map((leaf) =>
+                              leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
+                                <Link to={leaf.href} key={leaf.id || leaf.href}>
+                                  {leaf.title}
+                                </Link>
+                              ) : (
+                                <a href={leaf.href} key={leaf.id || leaf.href}>
+                                  {leaf.title}
+                                </a>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return item.href.startsWith('/') && !item.href.includes('#') ? (
+                      <Link to={item.href} key={item.id || item.href}>
+                        {item.title}
+                      </Link>
+                    ) : (
+                      <a href={item.href} key={item.id || item.href}>
+                        {item.title}
+                      </a>
+                    );
+                  })}
                 </div>
               )}
             </div>
           ))}
-          <a href="/#tours">Tours en Andorra</a>
-          <Link to="/novedades">Novedades</Link>
         </nav>
+
 
         <div className="header-actions">
           <div className="preferences-controls">
@@ -141,21 +176,72 @@ function App() {
           <nav className="mobile-nav" aria-label="Mobile navigation">
             {navSections.map((section) => (
               <div className="mobile-nav-group" key={section.label}>
-                <a href={section.anchor} onClick={() => setMenuOpen(false)}>{section.label}</a>
+                {section.anchor.startsWith('/') && !section.anchor.includes('#') ? (
+                  <Link to={section.anchor} onClick={() => setMenuOpen(false)}>
+                    {section.label}
+                  </Link>
+                ) : (
+                  <a href={section.anchor} onClick={() => setMenuOpen(false)}>
+                    {section.label}
+                  </a>
+                )}
                 {section.items.length > 0 && (
                   <div className="mobile-nav-subitems">
-                    {section.items.map((item) => (
-                      <Link to={`/tour/${item.id}`} key={item.id} onClick={() => setMenuOpen(false)}>{item.title}</Link>
-                    ))}
+                    {section.items.map((item, idx) => {
+                      if (isNavGroup(item)) {
+                        return (
+                          <div key={item.label || idx} className="mobile-nav-nested-group">
+                            <span className="mobile-nav-subheading">{item.label}</span>
+                            <div className="mobile-nav-nested">
+                              {item.items.map((leaf) =>
+                                leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
+                                  <Link
+                                    to={leaf.href}
+                                    key={leaf.id || leaf.href}
+                                    onClick={() => setMenuOpen(false)}
+                                  >
+                                    {leaf.title}
+                                  </Link>
+                                ) : (
+                                  <a
+                                    href={leaf.href}
+                                    key={leaf.id || leaf.href}
+                                    onClick={() => setMenuOpen(false)}
+                                  >
+                                    {leaf.title}
+                                  </a>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return item.href.startsWith('/') && !item.href.includes('#') ? (
+                        <Link
+                          to={item.href}
+                          key={item.id || item.href}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {item.title}
+                        </Link>
+                      ) : (
+                        <a
+                          href={item.href}
+                          key={item.id || item.href}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {item.title}
+                        </a>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             ))}
-            <a href="/#tours" onClick={() => setMenuOpen(false)}>Tours en Andorra</a>
-            <Link to="/novedades" onClick={() => setMenuOpen(false)}>Novedades</Link>
             <a href="/#contact" onClick={() => setMenuOpen(false)}>Contacto <ArrowIcon /></a>
           </nav>
         )}
+
       </header>
 
       <Outlet />
@@ -172,6 +258,7 @@ function App() {
             <a href="/#tours">Tours en Andorra</a>
             <Link to="/novedades">Novedades</Link>
             <a href="/#stories">Opiniones</a>
+            <Link to="/privacidad">Privacidad</Link>
             <a href="/#contact">Contacto</a>
           </div>
         </div>
@@ -182,6 +269,9 @@ function App() {
             <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
             <a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a>
           </div>
+        </div>
+        <div className="page-width footer-credit">
+          <a href="https://www.nodoai.co" target="_blank" rel="noreferrer">Powered by NODO Ai Agency</a>
         </div>
       </footer>
     </div>

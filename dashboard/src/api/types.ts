@@ -24,6 +24,19 @@ export interface MediaItem {
   url: string;
 }
 
+export interface HeroSlideItem {
+  id: number;
+  slide_type: 'image' | 'video';
+  media_source: 'upload' | 'external_url';
+  src: string;
+  poster: string | null;
+  alt: string;
+  display_order: number;
+  published: boolean | number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SiteContentMap {
   [key: string]: string;
 }
@@ -125,3 +138,87 @@ export interface TranslateResponse {
   source_locale: string;
   model: string;
 }
+
+export type MenuLinkType = 'route' | 'anchor' | 'activity' | 'package' | 'external';
+
+export interface MenuItemTranslations {
+  ca?: { label: string };
+  en?: { label: string };
+  fr?: { label: string };
+}
+
+export interface MenuItem {
+  id: number;
+  parent_id: number | null;
+  label: string;
+  link_type: MenuLinkType;
+  target_value: string;
+  display_order: number;
+  published: boolean | number;
+  publish_at: string | null;
+  unpublish_at: string | null;
+  is_currently_visible: boolean;
+  children?: MenuItem[];
+  translations?: MenuItemTranslations;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MenuItemPayload {
+  id?: number;
+  parent_id?: number | null;
+  label: string;
+  link_type: MenuLinkType;
+  target_value: string;
+  display_order?: number;
+  published?: boolean | number;
+  publish_at?: string | null;
+  unpublish_at?: string | null;
+  translations?: MenuItemTranslations;
+}
+
+export interface PackageTranslations {
+  ca?: { title: string; description: string; price_unit?: string };
+  en?: { title: string; description: string; price_unit?: string };
+  fr?: { title: string; description: string; price_unit?: string };
+}
+
+export interface PackageItem {
+  id: string;
+  title: string;
+  duration: string;
+  description: string;
+  image_url: string | null;
+  alt_text: string | null;
+  price_amount: number | null;
+  price_currency: string;
+  price_unit: string | null;
+  display_order: number;
+  published: boolean | number;
+  publish_at: string | null;
+  unpublish_at: string | null;
+  is_currently_visible: boolean;
+  translations?: PackageTranslations;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PackagePayload {
+  id?: string;
+  title: string;
+  duration: string;
+  description: string;
+  image_url?: string | null;
+  alt_text?: string | null;
+  price_amount?: number | null;
+  price_currency?: string;
+  price_unit?: string | null;
+  display_order?: number;
+  published?: boolean | number;
+  publish_at?: string | null;
+  unpublish_at?: string | null;
+  translations?: PackageTranslations;
+}
+
+export type { ActivityImage, Activity, ActivityType } from '../activities/types';
+

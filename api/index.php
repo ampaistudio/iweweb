@@ -22,10 +22,14 @@ require_once __DIR__ . '/core/helpers.php';
 require_once __DIR__ . '/core/auth/AuthController.php';
 require_once __DIR__ . '/core/media/MediaController.php';
 require_once __DIR__ . '/core/content/ContentController.php';
+require_once __DIR__ . '/core/hero/HeroSlideController.php';
 require_once __DIR__ . '/core/social/MetaGraphService.php';
 require_once __DIR__ . '/core/social/WebhookController.php';
 require_once __DIR__ . '/core/posts/PostsController.php';
 require_once __DIR__ . '/core/translation/TranslationController.php';
+require_once __DIR__ . '/core/reviews/ReviewsController.php';
+require_once __DIR__ . '/core/menu/MenuController.php';
+require_once __DIR__ . '/core/packages/PackageController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -123,6 +127,28 @@ try {
     // --- Activities Endpoints ---
     if ($resource === 'activities') {
         $activityController = new ActivityController($pdo, $config);
+        $subresource = $segments[2] ?? null;
+        $subId = $segments[3] ?? null;
+        $subAction = $segments[4] ?? null;
+
+        // Sub-resource: /api/activities/:id/images[/:imageId[/cover]]
+        if ($subresource === 'images') {
+            $activityId = (string)$id;
+            if ($subId === null) {
+                if ($method === 'POST') {
+                    $activityController->addImage($activityId);
+                } elseif ($method === 'PUT') {
+                    $activityController->reorderImages($activityId);
+                }
+            } elseif ($subAction === 'cover' && $method === 'PUT') {
+                $activityController->setCoverImage((int)$subId);
+            } elseif ($method === 'DELETE') {
+                $activityController->removeImage((int)$subId);
+            } elseif ($method === 'PUT') {
+                $activityController->setCoverImage((int)$subId);
+            }
+            jsonError('Método no permitido para /api/activities/:id/images', 405);
+        }
 
         if ($id === null) {
             if ($method === 'GET') {
@@ -152,6 +178,30 @@ try {
             $contentController->update((string)$id);
         }
         jsonError('Método no permitido para /api/content', 405);
+    }
+
+    // --- Hero Slides Endpoints ---
+    if ($resource === 'hero-slides') {
+        $heroController = new HeroSlideController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $heroController->listPublic();
+            } elseif ($method === 'POST') {
+                $heroController->create();
+            }
+        } elseif ($id === 'all' && $method === 'GET') {
+            $heroController->listAll();
+        } elseif ($id === 'reorder' && $method === 'PUT') {
+            $heroController->reorder();
+        } else {
+            if ($method === 'PUT') {
+                $heroController->update((int)$id);
+            } elseif ($method === 'DELETE') {
+                $heroController->delete((int)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/hero-slides', 405);
     }
 
     // --- Media Endpoints ---
@@ -202,6 +252,67 @@ try {
             $translationController->translate();
         }
         jsonError('Método no permitido para /api/translate', 405);
+    }
+
+    // --- Reviews Endpoints (Google & TripAdvisor) ---
+    if ($resource === 'reviews') {
+        $reviewsController = new ReviewsController($pdo, $config);
+        $provider = $segments[1] ?? '';
+
+        if ($provider === 'google' && $method === 'GET') {
+            $reviewsController->getGoogleReviews();
+        } elseif ($provider === 'tripadvisor' && $method === 'GET') {
+            $reviewsController->getTripAdvisorReviews();
+        }
+        jsonError('Proveedor de reviews no encontrado o método no permitido.', 404);
+    }
+
+    // --- Menu Hierarchy Endpoints ---
+    if ($resource === 'menu') {
+        $menuController = new MenuController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $menuController->list();
+            } elseif ($method === 'POST') {
+                $menuController->create();
+            }
+        } elseif ($id === 'reorder' && $method === 'PUT') {
+            $menuController->reorder();
+        } else {
+            if ($method === 'GET') {
+                $menuController->get((int)$id);
+            } elseif ($method === 'PUT') {
+                $menuController->update((int)$id);
+            } elseif ($method === 'DELETE') {
+                $menuController->delete((int)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/menu', 405);
+    }
+
+    // --- Multi-day Packages Endpoints ---
+    if ($resource === 'packages') {
+        $packageController = new PackageController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $packageController->list();
+            } elseif ($method === 'POST') {
+                $packageController->create();
+            }
+        } elseif ($id === 'reorder' && $method === 'PUT') {
+            $packageController->reorder();
+        } else {
+            if ($method === 'GET') {
+                $packageController->get((string)$id);
+            } elseif ($method === 'PUT') {
+                $packageController->update((string)$id);
+            } elseif ($method === 'DELETE') {
+                $packageController->delete((string)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/packages', 405);
     }
 
     // --- Social / Webhook Endpoints ---

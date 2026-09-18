@@ -17,6 +17,8 @@ import { PostEditorPage } from './core/posts/PostEditorPage';
 // Domain Pages & Widgets (iWE Tourism Specific)
 import { ActivityListPage } from './activities/ActivityListPage';
 import { ActivityEditorPage } from './activities/ActivityEditorPage';
+import { PackageListPage } from './packages/PackageListPage';
+import { MenuManagerPage } from './menu/MenuManagerPage';
 import {
   ActivityOverviewMetric,
   ActivityQuickAction,
@@ -58,8 +60,15 @@ export const App: React.FC = () => {
               <Route path="activities/new" element={<ActivityEditorPage />} />
               <Route path="activities/:id" element={<ActivityEditorPage />} />
 
+              {/* Domain: Multi-day Packages */}
+              <Route path="packages" element={<PackageListPage />} />
+
+              {/* Domain: Navigation Menu */}
+              <Route path="menu" element={<MenuManagerPage />} />
+
               {/* Core: Site Content (Institutional Texts) */}
               <Route path="content" element={<ContentEditorPage />} />
+
 
               {/* Core: Posts / News & Meta Social Sync */}
               <Route path="posts" element={<PostsListPage />} />

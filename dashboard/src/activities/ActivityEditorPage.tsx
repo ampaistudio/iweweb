@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
-import { ACTIVITY_TYPES, type Activity, type ActivityType } from './types';
+import { ACTIVITY_TYPES, type Activity, type ActivityType, type ActivityImage } from './types';
 import type { MediaItem, DashboardLocale } from '../api/types';
 import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
@@ -44,6 +44,16 @@ export const ActivityEditorPage: React.FC = () => {
   const [published, setPublished] = useState(true);
   const [displayOrder, setDisplayOrder] = useState(1);
 
+  // Gallery state
+  const [images, setImages] = useState<ActivityImage[]>([]);
+  const [galleryPickerOpen, setGalleryPickerOpen] = useState(false);
+  const [isGalleryLoading, setIsGalleryLoading] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [videoInputUrl, setVideoInputUrl] = useState('');
+  const [videoInputPoster, setVideoInputPoster] = useState('');
+  const [videoInputAlt, setVideoInputAlt] = useState('');
+  const [isVideoSubmitting, setIsVideoSubmitting] = useState(false);
+
   // Translations (CA, EN, FR)
   const [translations, setTranslations] = useState<Record<NonEsLocale, LocaleActivityData>>({
     ca: { title: '', description: '', highlights: [] },
@@ -78,6 +88,10 @@ export const ActivityEditorPage: React.FC = () => {
           setHighlights(act.highlights && act.highlights.length > 0 ? act.highlights : ['']);
           setPublished(act.published);
           setDisplayOrder(act.display_order || 1);
+
+          if (act.images && act.images.length > 0) {
+            setImages(act.images);
+          }
 
           if (act.translations) {
             setTranslations({
@@ -129,6 +143,128 @@ export const ActivityEditorPage: React.FC = () => {
       setAltText(`Foto de ${title || 'actividad iWE'}`);
     }
     toast.success(`Foto '${item.original_name}' seleccionada.`);
+  };
+
+  const handleAddGalleryImage = async (item: MediaItem) => {
+    if (!isEdit || !id) {
+      toast.info('Guarda la actividad primero para agregar más fotos a su galería.');
+      return;
+    }
+    try {
+      setIsGalleryLoading(true);
+      const newImg = (await api.activities.addImage(id, {
+        image_url: item.url,
+        alt_text: `Foto de ${title || 'actividad iWE'}`,
+      })) as ActivityImage;
+      setImages((prev) => [...prev, newImg]);
+      toast.success(`Foto '${item.original_name}' agregada a la galería.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al agregar imagen a la galería';
+      toast.error(msg);
+    } finally {
+      setIsGalleryLoading(false);
+      setGalleryPickerOpen(false);
+    }
+  };
+
+  const handleSetCover = async (imageId: number) => {
+    if (!id) return;
+    try {
+      setIsGalleryLoading(true);
+      await api.activities.setCoverImage(id, imageId);
+      setImages((prev) =>
+        prev.map((img) => ({
+          ...img,
+          is_cover: img.id === imageId,
+        }))
+      );
+      const cov = images.find((img) => img.id === imageId);
+      if (cov) {
+        setImageUrl(cov.image_url);
+        setAltText(cov.alt_text);
+      }
+      toast.success('Portada actualizada correctamente.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al cambiar portada';
+      toast.error(msg);
+    } finally {
+      setIsGalleryLoading(false);
+    }
+  };
+
+  const handleRemoveGalleryImage = async (imageId: number) => {
+    if (!id) return;
+    if (images.length <= 1) {
+      toast.error('La actividad debe tener al menos una imagen en la galería.');
+      return;
+    }
+    try {
+      setIsGalleryLoading(true);
+      await api.activities.removeImage(id, imageId);
+      const act = (await api.activities.get(id)) as Activity;
+      if (act.images) {
+        setImages(act.images);
+      }
+      setImageUrl(act.image_url || act.image);
+      setAltText(act.alt_text || act.alt);
+      toast.success('Imagen eliminada de la galería.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al eliminar imagen';
+      toast.error(msg);
+    } finally {
+      setIsGalleryLoading(false);
+    }
+  };
+
+  const handleMoveGalleryImage = async (index: number, direction: 'up' | 'down') => {
+    if (!id) return;
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= images.length) return;
+
+    const newImages = [...images];
+    const [moved] = newImages.splice(index, 1);
+    newImages.splice(targetIndex, 0, moved);
+
+    const reordered = newImages.map((img, idx) => ({ ...img, display_order: idx }));
+    setImages(reordered);
+
+    try {
+      await api.activities.reorderImages(
+        id,
+        reordered.map((img) => ({ id: img.id, display_order: img.display_order }))
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al reordenar galería';
+      toast.error(msg);
+    }
+  };
+
+  const handleAddVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !videoInputUrl.trim()) {
+      toast.error('Ingresa una URL de video válida (YouTube, Vimeo o enlace a archivo de video).');
+      return;
+    }
+    setIsVideoSubmitting(true);
+    try {
+      const newImg = await api.activities.addImage(id, {
+        image_url: videoInputUrl.trim(),
+        media_type: 'video',
+        poster_url: videoInputPoster.trim() || undefined,
+        alt_text: videoInputAlt.trim() || `Video de ${title || 'actividad'}`,
+      });
+      setImages((prev) => [...prev, newImg]);
+      setVideoModalOpen(false);
+      setVideoInputUrl('');
+      setVideoInputPoster('');
+      setVideoInputAlt('');
+      toast.success('Video agregado a la galería.', 'Galería actualizada');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al agregar video';
+      toast.error(msg);
+    } finally {
+      setIsVideoSubmitting(false);
+    }
   };
 
   const handleAddHighlight = () => {
@@ -489,6 +625,134 @@ export const ActivityEditorPage: React.FC = () => {
         </Card>
       )}
 
+      {/* 3.1. Galería de Fotos y Videos (Solo en ES y modo edición) */}
+      {isEs && isEdit && (
+        <Card
+          title="Galería Multimedia"
+          subtitle="Fotos y videos para enriquecer el hero y la página de detalle del tour"
+          action={
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setGalleryPickerOpen(true)}
+                isLoading={isGalleryLoading}
+              >
+                📷 Agregar foto
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setVideoModalOpen(true)}
+              >
+                🎥 Agregar video (URL)
+              </Button>
+            </div>
+          }
+        >
+          {images.length === 0 ? (
+            <div className="text-center py-8 text-muted text-sm border-2 border-dashed border-border rounded-xl">
+              No hay fotos ni videos en la galería. Haz clic en "Agregar foto" o "Agregar video" para comenzar.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {images.map((img, index) => (
+                <div
+                  key={img.id}
+                  className={`relative group rounded-xl overflow-hidden border transition-all ${
+                    img.is_cover ? 'border-accent ring-2 ring-accent/30 shadow-md' : 'border-border hover:border-border-hover'
+                  } bg-bg flex flex-col`}
+                >
+                  <div className="aspect-square relative overflow-hidden bg-surface flex items-center justify-center">
+                    {img.media_type === 'video' ? (
+                      <div className="w-full h-full bg-surface-hover/80 text-primary flex flex-col items-center justify-center p-3 text-center border-b border-border">
+                        <span className="w-10 h-10 rounded-full bg-accent/15 text-accent-text flex items-center justify-center text-lg mb-1 font-bold">
+                          ▶
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-accent-text">Video</span>
+                        <span className="text-[10px] text-muted truncate max-w-full px-1 mt-0.5" title={img.image_url}>
+                          {img.image_url}
+                        </span>
+                      </div>
+                    ) : (
+                      <img
+                        src={img.image_url}
+                        alt={img.alt_text}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                    {img.is_cover && (
+                      <span className="absolute top-2 left-2 bg-accent text-accent-text text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+                        ★ Portada
+                      </span>
+                    )}
+                    {img.media_type === 'video' && !img.is_cover && (
+                      <span className="absolute top-2 left-2 bg-surface text-primary border border-border text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+                        ▶ Video
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-2.5 flex-1 flex flex-col justify-between gap-2 text-xs">
+                    <p className="text-muted truncate font-mono text-[11px]" title={img.alt_text || img.image_url}>
+                      {img.alt_text || (img.media_type === 'video' ? 'Video' : 'Sin texto alt')}
+                    </p>
+
+                    <div className="flex items-center justify-between gap-1 pt-1 border-t border-border">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() => handleMoveGalleryImage(index, 'up')}
+                          className="p-1 text-muted hover:text-primary disabled:opacity-30 rounded hover:bg-surface-hover transition-colors"
+                          title="Mover antes"
+                        >
+                          ◀
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === images.length - 1}
+                          onClick={() => handleMoveGalleryImage(index, 'down')}
+                          className="p-1 text-muted hover:text-primary disabled:opacity-30 rounded hover:bg-surface-hover transition-colors"
+                          title="Mover después"
+                        >
+                          ▶
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        {!img.is_cover && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetCover(img.id)}
+                            className="px-2 py-1 text-[11px] font-medium text-accent-text hover:bg-accent/10 rounded transition-colors"
+                            title="Hacer portada principal"
+                          >
+                            Portada
+                          </button>
+                        )}
+                        {images.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGalleryImage(img.id)}
+                            className="p-1 text-muted hover:text-danger rounded hover:bg-surface-hover transition-colors"
+                            title="Eliminar de galería"
+                          >
+                            🗑
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* 4. Descripción y Puntos Destacados */}
       <Card
         title="Descripción y Puntos Destacados"
@@ -545,34 +809,32 @@ export const ActivityEditorPage: React.FC = () => {
               {isEs && (
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={handleAddHighlight}
-                  className="text-xs text-accent-text hover:text-accent"
                 >
-                  ➕ Agregar punto
+                  + Agregar punto
                 </Button>
               )}
             </div>
 
             {isEs ? (
               <div className="space-y-2">
-                {highlights.map((highlight, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="text-xs text-muted font-mono w-5 text-right">{index + 1}.</span>
+                {highlights.map((h, index) => (
+                  <div key={index} className="flex gap-2 items-center">
                     <input
                       type="text"
-                      value={highlight}
+                      value={h}
                       onChange={(e) => handleHighlightChange(index, e.target.value)}
-                      placeholder="Ej: Guía certificado por AADIDES/ISIA"
+                      placeholder={`Punto destacado #${index + 1} (ej. Guía certificado AADIDES/ISIA)`}
                       className="flex-1 bg-input border border-border focus:border-accent focus:ring-accent/20 rounded-xl px-3.5 py-2 text-sm text-primary placeholder-faint focus:outline-none focus:ring-2"
                     />
                     {highlights.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveHighlight(index)}
-                        className="p-2 text-muted hover:text-danger rounded-lg hover:bg-surface-hover transition-colors"
-                        title="Eliminar este punto"
+                        className="p-2 text-muted hover:text-danger rounded-xl hover:bg-surface-hover transition-colors"
+                        title="Eliminar punto"
                       >
                         ✕
                       </button>
@@ -582,17 +844,21 @@ export const ActivityEditorPage: React.FC = () => {
               </div>
             ) : (
               currentNonEs && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {highlights.map((baseH, index) => (
                     <div key={index} className="p-3 bg-bg rounded-xl border border-border space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono text-muted font-semibold">Punto #{index + 1}:</span>
-                        <AiTranslateButton
-                          sourceText={baseH}
-                          targetLocale={activeLocale}
-                          fieldName={`Punto destacado #${index + 1}`}
-                          onTranslated={(val) => updateTranslationHighlight(currentNonEs, index, val)}
-                        />
+                        <span className="text-xs font-semibold text-secondary">
+                          Punto #{index + 1} ({activeLocale.toUpperCase()})
+                        </span>
+                        {baseH && (
+                          <AiTranslateButton
+                            sourceText={baseH}
+                            targetLocale={activeLocale}
+                            fieldName={`Punto destacado #${index + 1}`}
+                            onTranslated={(val) => updateTranslationHighlight(currentNonEs, index, val)}
+                          />
+                        )}
                       </div>
                       <p className="text-xs text-muted italic">Base (ES): {baseH || '(vacío)'}</p>
                       <input
@@ -642,13 +908,83 @@ export const ActivityEditorPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Image Picker Modal */}
+      {/* Main Image Picker Modal */}
       <ImagePickerModal
         isOpen={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelectImage={handleSelectImage}
         selectedImageUrl={imageUrl}
       />
+
+      {/* Gallery Image Picker Modal */}
+      <ImagePickerModal
+        isOpen={galleryPickerOpen}
+        onClose={() => setGalleryPickerOpen(false)}
+        onSelectImage={handleAddGalleryImage}
+      />
+
+      {/* Video URL Modal */}
+      {videoModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-surface border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-border">
+              <h3 className="text-base font-bold text-primary flex items-center gap-2">
+                🎥 Agregar Video a la Galería
+              </h3>
+              <button
+                type="button"
+                onClick={() => setVideoModalOpen(false)}
+                className="text-muted hover:text-primary p-1 rounded"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddVideo} className="space-y-4">
+              <Input
+                label="URL del Video (YouTube, Vimeo o enlace MP4)"
+                value={videoInputUrl}
+                onChange={(e) => setVideoInputUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=... o https://vimeo.com/..."
+                helperText="Se reproducirá automáticamente en loop y silenciado en el hero del tour."
+                required
+              />
+
+              <Input
+                label="URL de Poster/Miniatura (Opcional)"
+                value={videoInputPoster}
+                onChange={(e) => setVideoInputPoster(e.target.value)}
+                placeholder="https://..."
+                helperText="Opcional. Imagen estática antes de que cargue el video."
+              />
+
+              <Input
+                label="Texto descriptivo / Alt (Opcional)"
+                value={videoInputAlt}
+                onChange={(e) => setVideoInputAlt(e.target.value)}
+                placeholder={`Video de ${title || 'la experiencia'}`}
+              />
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setVideoModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  isLoading={isVideoSubmitting}
+                >
+                  Agregar video
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </form>
   );
 };
