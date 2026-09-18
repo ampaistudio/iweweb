@@ -78,6 +78,29 @@ try {
     $resource = $segments[0] ?? '';
     $id = $segments[1] ?? null;
 
+    // --- Static uploads (PHP built-in server only; Apache/.htaccess serves these directly in production) ---
+    if ($resource === 'uploads') {
+        if ($method !== 'GET') {
+            jsonError('Método no permitido para /api/uploads', 405);
+        }
+        $filename = $segments[1] ?? '';
+        if ($filename === '' || !preg_match('/^[a-f0-9]+\.(jpg|jpeg|png|webp)$/i', $filename)) {
+            jsonError('Archivo no encontrado.', 404);
+        }
+        $uploadDir = rtrim($config['media']['upload_dir'] ?? (__DIR__ . '/uploads'), '/');
+        $filePath = $uploadDir . '/' . $filename;
+        if (!is_file($filePath)) {
+            jsonError('Archivo no encontrado.', 404);
+        }
+        $mimeTypes = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        header('Content-Type: ' . ($mimeTypes[$ext] ?? 'application/octet-stream'));
+        header('Content-Length: ' . filesize($filePath));
+        header('Cache-Control: public, max-age=31536000, immutable');
+        readfile($filePath);
+        exit;
+    }
+
     // --- Overview Summary (Dashboard Overview) ---
     if ($resource === 'overview' && $method === 'GET') {
         requireAuth($pdo);

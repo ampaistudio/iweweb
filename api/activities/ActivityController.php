@@ -411,6 +411,8 @@ class ActivityController {
                 WHERE id = :id
             ');
 
+            $newImageUrl = trim($body['image'] ?? $body['image_url'] ?? '');
+
             $stmt->execute([
                 'id'            => $id,
                 'title'         => trim($body['title']),
@@ -419,13 +421,30 @@ class ActivityController {
                 'type'          => trim($body['type']),
                 'level'         => trim($body['level']),
                 'duration'      => trim($body['duration']),
-                'image_url'     => trim($body['image'] ?? $body['image_url'] ?? ''),
+                'image_url'     => $newImageUrl,
                 'alt_text'      => trim($body['alt'] ?? $body['alt_text'] ?? ''),
                 'price'         => !empty($body['price']) ? trim($body['price']) : null,
                 'description'   => sanitizeRichText($body['description']),
                 'display_order' => (int)($body['display_order'] ?? $body['order'] ?? 0),
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
+
+            // Keep activity_images.is_cover in sync with the main photo chosen in the form.
+            // If the new image_url matches an existing gallery entry, mark it as cover and
+            // unmark the rest; if it doesn't match any gallery entry (external URL or one
+            // typed by hand), leave the gallery untouched — we never invent a gallery row
+            // for a photo the user did not explicitly add to the gallery.
+            if ($newImageUrl !== '') {
+                $stmtFindImg = $this->pdo->prepare('SELECT id FROM activity_images WHERE activity_id = :act_id AND image_url = :image_url LIMIT 1');
+                $stmtFindImg->execute(['act_id' => $id, 'image_url' => $newImageUrl]);
+                $matchingImage = $stmtFindImg->fetch();
+                if ($matchingImage) {
+                    $stmtUnsetCover = $this->pdo->prepare('UPDATE activity_images SET is_cover = 0 WHERE activity_id = :act_id');
+                    $stmtUnsetCover->execute(['act_id' => $id]);
+                    $stmtSetCover = $this->pdo->prepare('UPDATE activity_images SET is_cover = 1 WHERE id = :id');
+                    $stmtSetCover->execute(['id' => $matchingImage['id']]);
+                }
+            }
 
             // Replace base highlights
             $newHighlightIds = [];

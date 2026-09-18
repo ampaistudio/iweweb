@@ -11,6 +11,7 @@ import { RichTextEditor } from '../core/ui/RichTextEditor';
 import { Select } from '../core/ui/Select';
 import { Toggle } from '../core/ui/Toggle';
 import { ImagePickerModal } from '../core/media/ImagePickerModal';
+import { CoverImagePickerModal } from './CoverImagePickerModal';
 import { LanguageTabs } from '../core/ui/LanguageSelector';
 import { AiTranslateButton } from '../core/ui/AiTranslateButton';
 
@@ -143,6 +144,17 @@ export const ActivityEditorPage: React.FC = () => {
       setAltText(`Foto de ${title || 'actividad iWE'}`);
     }
     toast.success(`Foto '${item.original_name}' seleccionada.`);
+  };
+
+  const handleSelectCoverFromGallery = (img: ActivityImage) => {
+    setImageUrl(img.image_url);
+    setAltText(img.alt_text);
+    toast.success('Foto principal actualizada. Guardá la actividad para confirmar el cambio.');
+  };
+
+  const galleryCardRef = React.useRef<HTMLDivElement>(null);
+  const scrollToGallery = () => {
+    galleryCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleAddGalleryImage = async (item: MediaItem) => {
@@ -589,15 +601,17 @@ export const ActivityEditorPage: React.FC = () => {
                     >
                       Cambiar foto
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setImageUrl('')}
-                      className="text-danger-text hover:text-danger"
-                    >
-                      Quitar foto
-                    </Button>
+                    {isEdit && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setImageUrl('')}
+                        className="text-danger-text hover:text-danger"
+                      >
+                        Quitar foto
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -611,6 +625,11 @@ export const ActivityEditorPage: React.FC = () => {
               >
                 Elegir foto de la galería
               </Button>
+            )}
+            {isEdit && (
+              <p className="text-[11px] text-muted">
+                La foto principal se elige entre las fotos que ya están en la Galería Multimedia de esta actividad.
+              </p>
             )}
 
             <Input
@@ -627,6 +646,7 @@ export const ActivityEditorPage: React.FC = () => {
 
       {/* 3.1. Galería de Fotos y Videos (Solo en ES y modo edición) */}
       {isEs && isEdit && (
+        <div ref={galleryCardRef}>
         <Card
           title="Galería Multimedia"
           subtitle="Fotos y videos para enriquecer el hero y la página de detalle del tour"
@@ -751,6 +771,7 @@ export const ActivityEditorPage: React.FC = () => {
             </div>
           )}
         </Card>
+        </div>
       )}
 
       {/* 4. Descripción y Puntos Destacados */}
@@ -909,13 +930,26 @@ export const ActivityEditorPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Main Image Picker Modal */}
-      <ImagePickerModal
-        isOpen={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onSelectImage={handleSelectImage}
-        selectedImageUrl={imageUrl}
-      />
+      {/* Main Image Picker Modal: for a new activity (no gallery yet) we still allow
+          picking from the media library / uploading directly. Once the activity exists,
+          the main photo must come from its own gallery — see CoverImagePickerModal. */}
+      {isEdit ? (
+        <CoverImagePickerModal
+          isOpen={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelectImage={handleSelectCoverFromGallery}
+          images={images}
+          selectedImageUrl={imageUrl}
+          onGoToGallery={scrollToGallery}
+        />
+      ) : (
+        <ImagePickerModal
+          isOpen={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelectImage={handleSelectImage}
+          selectedImageUrl={imageUrl}
+        />
+      )}
 
       {/* Gallery Image Picker Modal */}
       <ImagePickerModal
