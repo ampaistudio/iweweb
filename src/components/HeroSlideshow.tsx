@@ -42,6 +42,14 @@ function HeroSlideshow({ slides }: { slides: HeroSlide[] }) {
     return () => clearInterval(timer);
   }, [slides.length]);
 
+  const goToPrevious = () => {
+    setActiveIndex((current) => (current - 1 + slides.length) % slides.length);
+  };
+
+  const goToNext = () => {
+    setActiveIndex((current) => (current + 1) % slides.length);
+  };
+
   return (
     <div className="hero-slideshow">
       {slides.map((slide, index) => (
@@ -77,19 +85,41 @@ function HeroSlideshow({ slides }: { slides: HeroSlide[] }) {
       ))}
 
       {slides.length > 1 && (
-        <div className="hero-slideshow-dots" role="tablist" aria-label="Seleccionar diapositiva">
-          {slides.map((slide, index) => (
-            <button
-              key={slide.src}
-              type="button"
-              role="tab"
-              aria-selected={index === activeIndex}
-              aria-label={`Ir a la diapositiva ${index + 1}`}
-              className={`hero-slideshow-dot ${index === activeIndex ? "hero-slideshow-dot-active" : ""}`}
-              onClick={() => setActiveIndex(index)}
-            />
-          ))}
-        </div>
+        <>
+          <button
+            type="button"
+            className="hero-slideshow-arrow hero-slideshow-arrow-prev"
+            aria-label="Diapositiva anterior"
+            onClick={goToPrevious}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="hero-slideshow-arrow hero-slideshow-arrow-next"
+            aria-label="Diapositiva siguiente"
+            onClick={goToNext}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+          <div className="hero-slideshow-dots" role="tablist" aria-label="Seleccionar diapositiva">
+            {slides.map((slide, index) => (
+              <button
+                key={slide.src}
+                type="button"
+                role="tab"
+                aria-selected={index === activeIndex}
+                aria-label={`Ir a la diapositiva ${index + 1}`}
+                className={`hero-slideshow-dot ${index === activeIndex ? "hero-slideshow-dot-active" : ""}`}
+                onClick={() => setActiveIndex(index)}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
