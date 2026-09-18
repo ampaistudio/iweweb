@@ -521,8 +521,12 @@ class ActivityController {
             jsonError('Actividad no encontrada.', 404);
         }
 
-        $stmtDel = $this->pdo->prepare('DELETE FROM activities WHERE id = :id');
-        $stmtDel->execute(['id' => $id]);
+        try {
+            $stmtDel = $this->pdo->prepare('DELETE FROM activities WHERE id = :id');
+            $stmtDel->execute(['id' => $id]);
+        } catch (Throwable $e) {
+            jsonError('Error al eliminar la actividad: ' . $e->getMessage(), 500);
+        }
 
         jsonSuccess(null, 'Actividad eliminada correctamente.');
     }
