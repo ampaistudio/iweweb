@@ -30,6 +30,8 @@ export type Activity = {
   alt: string;
   price?: string;
   description: string;
+  intro_title?: string | null;
+  intro_text?: string | null;
   highlights: string[];
   images?: ActivityImage[];
   itinerary?: string[];

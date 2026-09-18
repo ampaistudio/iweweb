@@ -325,6 +325,12 @@ h3 { color: var(--text-primary); font-size: 25px; letter-spacing: -.04em; line-h
 }
 .tour-detail-back { font-family: "Space Grotesk", sans-serif; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 40px; opacity: .85; transition: opacity .2s ease; }
 .tour-detail-back:hover { opacity: .6; }
+.tour-intro-section { max-width: 860px; margin: 0 auto 44px; }
+.tour-intro-title { font-family: "Space Grotesk", sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -.02em; margin: 0 0 16px; color: var(--text-primary); }
+.tour-intro-text { color: var(--text-muted); font-size: 19px; line-height: 1.6; }
+.tour-intro-text p { margin: 0 0 0.6em; }
+.tour-intro-text p:last-child { margin-bottom: 0; }
+.tour-intro-text strong { color: var(--text-primary); font-weight: 700; }
 .tour-detail-layout { display: block; max-width: 860px; margin-inline: auto; }
 .tour-gallery-wrap { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 100px; }
 .tour-slider-container { position: relative; border-radius: 6px; overflow: hidden; background: var(--sand); border: 1px solid var(--line); }

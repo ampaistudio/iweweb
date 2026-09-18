@@ -21,16 +21,22 @@ export interface ActivityTranslations {
   ca?: {
     title?: string;
     description?: string;
+    intro_title?: string;
+    intro_text?: string;
     highlights?: string[];
   };
   en?: {
     title?: string;
     description?: string;
+    intro_title?: string;
+    intro_text?: string;
     highlights?: string[];
   };
   fr?: {
     title?: string;
     description?: string;
+    intro_title?: string;
+    intro_text?: string;
     highlights?: string[];
   };
 }
@@ -61,6 +67,8 @@ export interface Activity {
   alt_text?: string;
   price?: string | null;
   description: string;
+  intro_title?: string | null;
+  intro_text?: string | null;
   highlights: string[];
   display_order: number;
   published: boolean;

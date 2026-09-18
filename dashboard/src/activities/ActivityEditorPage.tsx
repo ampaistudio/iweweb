@@ -20,6 +20,8 @@ type NonEsLocale = 'ca' | 'en' | 'fr';
 interface LocaleActivityData {
   title: string;
   description: string;
+  intro_title: string;
+  intro_text: string;
   highlights: string[];
 }
 
@@ -41,6 +43,8 @@ export const ActivityEditorPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [altText, setAltText] = useState('');
   const [description, setDescription] = useState('');
+  const [introTitle, setIntroTitle] = useState('');
+  const [introText, setIntroText] = useState('');
   const [highlights, setHighlights] = useState<string[]>(['']);
   const [published, setPublished] = useState(true);
   const [displayOrder, setDisplayOrder] = useState(1);
@@ -57,9 +61,9 @@ export const ActivityEditorPage: React.FC = () => {
 
   // Translations (CA, EN, FR)
   const [translations, setTranslations] = useState<Record<NonEsLocale, LocaleActivityData>>({
-    ca: { title: '', description: '', highlights: [] },
-    en: { title: '', description: '', highlights: [] },
-    fr: { title: '', description: '', highlights: [] },
+    ca: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
+    en: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
+    fr: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
   });
 
   const [loading, setLoading] = useState(isEdit);
@@ -86,6 +90,8 @@ export const ActivityEditorPage: React.FC = () => {
           setImageUrl(act.image_url || act.image);
           setAltText(act.alt_text || act.alt);
           setDescription(act.description);
+          setIntroTitle(act.intro_title || '');
+          setIntroText(act.intro_text || '');
           setHighlights(act.highlights && act.highlights.length > 0 ? act.highlights : ['']);
           setPublished(act.published);
           setDisplayOrder(act.display_order || 1);
@@ -99,16 +105,22 @@ export const ActivityEditorPage: React.FC = () => {
               ca: {
                 title: act.translations.ca?.title || '',
                 description: act.translations.ca?.description || '',
+                intro_title: act.translations.ca?.intro_title || '',
+                intro_text: act.translations.ca?.intro_text || '',
                 highlights: act.translations.ca?.highlights || [],
               },
               en: {
                 title: act.translations.en?.title || '',
                 description: act.translations.en?.description || '',
+                intro_title: act.translations.en?.intro_title || '',
+                intro_text: act.translations.en?.intro_text || '',
                 highlights: act.translations.en?.highlights || [],
               },
               fr: {
                 title: act.translations.fr?.title || '',
                 description: act.translations.fr?.description || '',
+                intro_title: act.translations.fr?.intro_title || '',
+                intro_text: act.translations.fr?.intro_text || '',
                 highlights: act.translations.fr?.highlights || [],
               },
             });
@@ -306,7 +318,7 @@ export const ActivityEditorPage: React.FC = () => {
     });
   };
 
-  const updateTranslationField = (locale: NonEsLocale, field: 'title' | 'description', val: string) => {
+  const updateTranslationField = (locale: NonEsLocale, field: 'title' | 'description' | 'intro_title' | 'intro_text', val: string) => {
     setTranslations((prev) => ({
       ...prev,
       [locale]: {
@@ -378,6 +390,8 @@ export const ActivityEditorPage: React.FC = () => {
         alt: altText.trim() || `Experiencia de ${title}`,
         alt_text: altText.trim() || `Experiencia de ${title}`,
         description: description.trim(),
+        intro_title: introTitle.trim() || null,
+        intro_text: introText.trim() || null,
         highlights: cleanHighlights,
         published,
         display_order: Number(displayOrder) || 1,
@@ -780,6 +794,72 @@ export const ActivityEditorPage: React.FC = () => {
         subtitle={isEs ? 'Explicación detallada y lista de qué incluye' : `Traducción de textos para ${activeLocale.toUpperCase()}`}
       >
         <div className="space-y-6">
+          {/* Introducción (título + texto corto, se muestra entre el hero y la ficha técnica) */}
+          {isEs ? (
+            <div className="space-y-3 pb-5 border-b border-border">
+              <Input
+                label="Título de introducción (opcional)"
+                value={introTitle}
+                onChange={(e) => setIntroTitle(e.target.value)}
+                placeholder="Ej: Volá sobre los Pirineos"
+                helperText="Se muestra como título grande entre la foto de cabecera y la ficha técnica. Dejalo vacío para no mostrar esta sección."
+              />
+              <RichTextEditor
+                label="Texto de introducción (opcional)"
+                value={introText}
+                onChange={setIntroText}
+                placeholder="Breve presentación de la actividad, antes de la descripción detallada..."
+              />
+            </div>
+          ) : (
+            currentNonEs && (
+              <div className="space-y-3 pb-5 border-b border-border">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Título de introducción en {activeLocale.toUpperCase()}
+                    </label>
+                    {introTitle && (
+                      <AiTranslateButton
+                        sourceText={introTitle}
+                        targetLocale={activeLocale}
+                        fieldName="Título de introducción"
+                        onTranslated={(val) => updateTranslationField(currentNonEs, 'intro_title', val)}
+                      />
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={translations[currentNonEs].intro_title}
+                    onChange={(e) => updateTranslationField(currentNonEs, 'intro_title', e.target.value)}
+                    placeholder={`Título de introducción traducido (${activeLocale.toUpperCase()})...`}
+                    className="w-full bg-input border border-border focus:border-accent focus:ring-accent/20 rounded-xl px-3.5 py-2 text-sm text-primary placeholder-faint focus:outline-none focus:ring-2"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Texto de introducción en {activeLocale.toUpperCase()}
+                    </label>
+                    {introText && (
+                      <AiTranslateButton
+                        sourceText={introText}
+                        targetLocale={activeLocale}
+                        fieldName="Texto de introducción"
+                        onTranslated={(val) => updateTranslationField(currentNonEs, 'intro_text', val)}
+                      />
+                    )}
+                  </div>
+                  <RichTextEditor
+                    value={translations[currentNonEs].intro_text}
+                    onChange={(val) => updateTranslationField(currentNonEs, 'intro_text', val)}
+                    placeholder={`Texto de introducción traducido (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+              </div>
+            )
+          )}
+
           {/* Descripción */}
           {isEs ? (
             <RichTextEditor

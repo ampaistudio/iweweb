@@ -91,9 +91,11 @@ class ActivityController {
                     a.duration, 
                     a.image_url, 
                     a.alt_text, 
-                    a.price, 
+                    a.price,
                     COALESCE(NULLIF(t.description, ""), a.description) AS description,
-                    a.display_order, 
+                    COALESCE(NULLIF(t.intro_title, ""), a.intro_title) AS intro_title,
+                    COALESCE(NULLIF(t.intro_text, ""), a.intro_text) AS intro_text,
+                    a.display_order,
                     a.published, 
                     a.created_at, 
                     a.updated_at
@@ -186,18 +188,20 @@ class ActivityController {
 
         // Fetch translations for all locales (CA, EN, FR)
         $translations = [
-            'ca' => ['title' => '', 'description' => '', 'highlights' => []],
-            'en' => ['title' => '', 'description' => '', 'highlights' => []],
-            'fr' => ['title' => '', 'description' => '', 'highlights' => []],
+            'ca' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'highlights' => []],
+            'en' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'highlights' => []],
+            'fr' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'highlights' => []],
         ];
 
-        $stmtT = $this->pdo->prepare('SELECT locale, title, description FROM activity_translations WHERE activity_id = :id');
+        $stmtT = $this->pdo->prepare('SELECT locale, title, description, intro_title, intro_text FROM activity_translations WHERE activity_id = :id');
         $stmtT->execute(['id' => $id]);
         while ($t = $stmtT->fetch()) {
             $loc = $t['locale'];
             if (isset($translations[$loc])) {
                 $translations[$loc]['title'] = $t['title'];
                 $translations[$loc]['description'] = $t['description'];
+                $translations[$loc]['intro_title'] = $t['intro_title'] ?? '';
+                $translations[$loc]['intro_text'] = $t['intro_text'] ?? '';
             }
         }
 
@@ -235,6 +239,8 @@ class ActivityController {
         // If specific non-ES locale was requested for public view:
         $displayTitle = $activity['title'];
         $displayDescription = $activity['description'];
+        $displayIntroTitle = $activity['intro_title'] ?? null;
+        $displayIntroText = $activity['intro_text'] ?? null;
         $displayHighlights = $baseHighlights;
 
         if ($locale !== 'es' && isset($translations[$locale])) {
@@ -243,6 +249,12 @@ class ActivityController {
             }
             if (!empty($translations[$locale]['description'])) {
                 $displayDescription = $translations[$locale]['description'];
+            }
+            if (!empty($translations[$locale]['intro_title'])) {
+                $displayIntroTitle = $translations[$locale]['intro_title'];
+            }
+            if (!empty($translations[$locale]['intro_text'])) {
+                $displayIntroText = $translations[$locale]['intro_text'];
             }
             if (!empty($translations[$locale]['highlights'])) {
                 $displayHighlights = array_map(function ($idx, $baseH) use ($translations, $locale) {
@@ -277,6 +289,8 @@ class ActivityController {
             ...$activity,
             'title'       => $displayTitle,
             'description' => $displayDescription,
+            'intro_title' => $displayIntroTitle,
+            'intro_text'  => $displayIntroText,
         ], $displayHighlights);
 
         $formatted['translations'] = $translations;
@@ -311,11 +325,11 @@ class ActivityController {
         try {
             $stmt = $this->pdo->prepare('
                 INSERT INTO activities (
-                    id, title, region, country, type, level, duration, 
-                    image_url, alt_text, price, description, display_order, published, created_at, updated_at
+                    id, title, region, country, type, level, duration,
+                    image_url, alt_text, price, description, intro_title, intro_text, display_order, published, created_at, updated_at
                 ) VALUES (
                     :id, :title, :region, :country, :type, :level, :duration,
-                    :image_url, :alt_text, :price, :description, :display_order, :published, NOW(), NOW()
+                    :image_url, :alt_text, :price, :description, :intro_title, :intro_text, :display_order, :published, NOW(), NOW()
                 )
             ');
 
@@ -331,6 +345,8 @@ class ActivityController {
                 'alt_text'      => trim($body['alt'] ?? $body['alt_text'] ?? ''),
                 'price'         => !empty($body['price']) ? trim($body['price']) : null,
                 'description'   => sanitizeRichText($body['description']),
+                'intro_title'   => !empty($body['intro_title']) ? trim((string)$body['intro_title']) : null,
+                'intro_text'    => !empty($body['intro_text']) ? sanitizeRichText((string)$body['intro_text']) : null,
                 'display_order' => (int)($body['display_order'] ?? $body['order'] ?? 0),
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
@@ -405,6 +421,8 @@ class ActivityController {
                     alt_text      = :alt_text,
                     price         = :price,
                     description   = :description,
+                    intro_title   = :intro_title,
+                    intro_text    = :intro_text,
                     display_order = :display_order,
                     published     = :published,
                     updated_at    = NOW()
@@ -425,6 +443,8 @@ class ActivityController {
                 'alt_text'      => trim($body['alt'] ?? $body['alt_text'] ?? ''),
                 'price'         => !empty($body['price']) ? trim($body['price']) : null,
                 'description'   => sanitizeRichText($body['description']),
+                'intro_title'   => !empty($body['intro_title']) ? trim((string)$body['intro_title']) : null,
+                'intro_text'    => !empty($body['intro_text']) ? sanitizeRichText((string)$body['intro_text']) : null,
                 'display_order' => (int)($body['display_order'] ?? $body['order'] ?? 0),
                 'published'     => isset($body['published']) ? ((bool)$body['published'] ? 1 : 0) : 1,
             ]);
@@ -518,14 +538,18 @@ class ActivityController {
 
             $tTitle = trim((string)($translations[$loc]['title'] ?? ''));
             $tDesc = sanitizeRichText((string)($translations[$loc]['description'] ?? ''));
+            $tIntroTitle = trim((string)($translations[$loc]['intro_title'] ?? ''));
+            $tIntroText = sanitizeRichText((string)($translations[$loc]['intro_text'] ?? ''));
 
-            if ($tTitle !== '' || $tDesc !== '') {
+            if ($tTitle !== '' || $tDesc !== '' || $tIntroTitle !== '' || $tIntroText !== '') {
                 $stmt = $this->pdo->prepare('
-                    INSERT INTO activity_translations (activity_id, locale, title, description, created_at, updated_at)
-                    VALUES (:activity_id, :locale, :title, :description, NOW(), NOW())
-                    ON DUPLICATE KEY UPDATE 
-                        title = VALUES(title), 
-                        description = VALUES(description), 
+                    INSERT INTO activity_translations (activity_id, locale, title, description, intro_title, intro_text, created_at, updated_at)
+                    VALUES (:activity_id, :locale, :title, :description, :intro_title, :intro_text, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE
+                        title = VALUES(title),
+                        description = VALUES(description),
+                        intro_title = VALUES(intro_title),
+                        intro_text = VALUES(intro_text),
                         updated_at = NOW()
                 ');
                 $stmt->execute([
@@ -533,6 +557,8 @@ class ActivityController {
                     'locale'      => $loc,
                     'title'       => $tTitle,
                     'description' => $tDesc,
+                    'intro_title' => $tIntroTitle !== '' ? $tIntroTitle : null,
+                    'intro_text'  => $tIntroText !== '' ? $tIntroText : null,
                 ]);
             } else {
                 $stmt = $this->pdo->prepare('DELETE FROM activity_translations WHERE activity_id = :activity_id AND locale = :locale');
@@ -620,6 +646,8 @@ class ActivityController {
             'alt_text'      => $row['alt_text'],
             'price'         => $row['price'] ?: null,
             'description'   => $row['description'],
+            'intro_title'   => $row['intro_title'] ?? null,
+            'intro_text'    => $row['intro_text'] ?? null,
             'highlights'    => $highlights,
             'display_order' => (int)$row['display_order'],
             'published'     => (bool)$row['published'],

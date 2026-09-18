@@ -77,6 +77,8 @@ export interface RawApiActivity {
   alt_text?: string;
   price?: string | null;
   description: string;
+  intro_title?: string | null;
+  intro_text?: string | null;
   highlights?: string[];
   images?: ActivityImage[];
   display_order?: number;

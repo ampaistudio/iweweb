@@ -130,6 +130,8 @@ function TourDetail() {
     duration: fullActivity?.duration || baseActivity!.duration,
     price: fullActivity?.price ?? baseActivity?.price,
     description: fullActivity?.description || baseActivity!.description,
+    introTitle: fullActivity?.intro_title || baseActivity?.intro_title,
+    introText: fullActivity?.intro_text || baseActivity?.intro_text,
     highlights: (fullActivity?.highlights && fullActivity.highlights.length > 0)
       ? fullActivity.highlights
       : baseActivity?.highlights || [],
@@ -196,6 +198,17 @@ function TourDetail() {
 
       {/* Tour Content Details */}
       <div id="tour-content" className="page-width tour-detail-body">
+        {(activity.introTitle || activity.introText) && (
+          <div className="tour-intro-section">
+            {activity.introTitle && <h2 className="tour-intro-title">{activity.introTitle}</h2>}
+            {activity.introText && (
+              <div
+                className="tour-intro-text"
+                dangerouslySetInnerHTML={{ __html: activity.introText }}
+              />
+            )}
+          </div>
+        )}
         <div className="tour-detail-layout">
           <div className="tour-detail-copy">
             {/* Technical Specs Grid with Icons */}
