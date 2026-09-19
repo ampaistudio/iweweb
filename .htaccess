@@ -1,0 +1,31 @@
+# =============================================================================
+# iWE Web - Apache / LiteSpeed Rewrite Rules (Hostinger Native)
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 1. Prerender for Social Crawlers & AI Search Bots on Tour detail pages
+    # Matches: Facebook, WhatsApp, Twitter/X, Telegram, LinkedIn, Slack, Pinterest,
+    # as well as Generative AI bots: GPTBot, Google-Extended, PerplexityBot, ClaudeBot, CCBot, etc.
+    RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Pinterest|SkypeUriPreview|Google-Extended|GPTBot|PerplexityBot|ClaudeBot|anthropic-ai|CCBot) [NC]
+    RewriteRule ^tour/([a-zA-Z0-9_-]+)/?$ api/index.php?seo_prerender=$1 [QSA,L]
+
+    # 2. Pass existing files and directories through without rewriting
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # 3. SPA Fallback: Route all non-file/non-directory requests to index.html for React Router
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Prevent directory listings
+Options -Indexes

@@ -33,6 +33,7 @@ require_once __DIR__ . '/core/packages/PackageController.php';
 require_once __DIR__ . '/core/settings/ApiKeysController.php';
 require_once __DIR__ . '/core/health/SiteHealthController.php';
 require_once __DIR__ . '/core/newsletter/NewsletterController.php';
+require_once __DIR__ . '/core/seo/PrerenderController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -69,6 +70,12 @@ $segments = array_values(array_filter(explode('/', $path)));
 // Router Dispatcher
 // -----------------------------------------------------------------------------
 try {
+    // Direct SEO / Social Crawler Prerender Query Parameter (via .htaccess rewrite)
+    if (!empty($_GET['seo_prerender'])) {
+        $prerenderController = new PrerenderController($pdo, $config);
+        $prerenderController->renderTour((string)$_GET['seo_prerender']);
+    }
+
     // Health / Root check
     if (empty($segments) || ($segments[0] === '' && count($segments) === 1)) {
         jsonSuccess([
