@@ -52,7 +52,7 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
       onClose={onClose}
       title="Seleccionar foto de la galería"
       description="Elige una foto existente o sube una nueva para esta publicación o actividad."
-      maxWidth="4xl"
+      maxWidth="5xl"
     >
       <div className="space-y-5">
         {/* Tabs */}
@@ -90,25 +90,26 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         {activeTab === 'gallery' && (
           <div>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted">
-                <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs">Cargando fotos...</p>
+              <div className="flex flex-col items-center justify-center py-20 gap-2 text-muted">
+                <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm">Cargando fotos...</p>
               </div>
             ) : items.length === 0 ? (
-              <div className="text-center py-12 text-muted text-sm">
-                <p>No hay fotos subidas todavía.</p>
+              <div className="text-center py-16 text-muted text-sm">
+                <p className="text-base font-medium text-primary">No hay fotos subidas todavía.</p>
+                <p className="text-xs mt-1">Sube imágenes para agregarlas a la galería multimedia.</p>
                 <Button
                   type="button"
                   variant="primary"
-                  size="sm"
+                  size="md"
                   onClick={() => setActiveTab('upload')}
-                  className="mt-3"
+                  className="mt-4"
                 >
                   Subir la primera foto
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[420px] overflow-y-auto p-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[540px] overflow-y-auto p-1">
                 {items.map((item) => {
                   const isSelected = selectedImageUrl === item.url || selectedImageUrl?.includes(item.filename);
                   return (
@@ -118,23 +119,24 @@ export const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         onSelectImage(item);
                         onClose();
                       }}
-                      className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-surface ${
+                      className={`group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border-2 transition-all bg-surface shadow-sm hover:shadow-md ${
                         isSelected
-                          ? 'border-accent ring-2 ring-accent/30'
-                          : 'border-border hover:border-border-strong'
+                          ? 'border-accent ring-4 ring-accent/30 scale-[0.99]'
+                          : 'border-border hover:border-accent/60'
                       }`}
                     >
                       <img
                         src={item.url}
                         alt={item.original_name}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                         loading="lazy"
                       />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 text-left">
-                        <p className="text-[11px] font-medium text-text-on-overlay truncate">{item.original_name}</p>
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3 text-left">
+                        <p className="text-xs font-semibold text-text-on-overlay truncate">{item.original_name}</p>
+                        <p className="text-[10px] text-text-on-overlay/70 mt-0.5">{item.mime_type}</p>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 bg-accent text-accent-contrast w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                        <div className="absolute top-3 right-3 bg-accent text-accent-contrast w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ring-2 ring-white/30">
                           ✓
                         </div>
                       )}
