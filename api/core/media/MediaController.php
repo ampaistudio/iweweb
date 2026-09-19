@@ -80,7 +80,7 @@ class MediaController {
         $finalExt = in_array($originalExt, $validExts, true) ? $originalExt : $validExts[0];
 
         // Generate randomized cryptographic filename
-        $uniqueFilename = bin2hex(random_bytes(16)) . '.' . $finalExt;
+        $randomPrefix = bin2hex(random_bytes(16));
         $uploadDir = rtrim($mediaConfig['upload_dir'] ?? (__DIR__ . '/../../uploads'), '/');
 
         if (!is_dir($uploadDir)) {
@@ -89,10 +89,26 @@ class MediaController {
             }
         }
 
-        $targetPath = $uploadDir . '/' . $uniqueFilename;
+        // WebP Optimization Pipeline via PHP GD
+        $webpFilename = $randomPrefix . '.webp';
+        $webpTargetPath = $uploadDir . '/' . $webpFilename;
+        $fallbackFilename = $randomPrefix . '.' . $finalExt;
+        $fallbackTargetPath = $uploadDir . '/' . $fallbackFilename;
 
-        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-            jsonError('Error al guardar el archivo en el servidor.', 500);
+        $processedWebp = self::optimizeToWebp($file['tmp_name'], $webpTargetPath, $realMime);
+
+        if ($processedWebp) {
+            $finalFilename = $webpFilename;
+            $finalMime = 'image/webp';
+            $finalSize = filesize($webpTargetPath);
+        } else {
+            // Fallback: preserve original format
+            if (!move_uploaded_file($file['tmp_name'], $fallbackTargetPath)) {
+                jsonError('Error al guardar el archivo en el servidor.', 500);
+            }
+            $finalFilename = $fallbackFilename;
+            $finalMime = $realMime;
+            $finalSize = (int)$file['size'];
         }
 
         // Insert into database
@@ -102,10 +118,10 @@ class MediaController {
         ');
 
         $stmt->execute([
-            'filename'     => $uniqueFilename,
+            'filename'     => $finalFilename,
             'original_name'=> basename($file['name']),
-            'mime_type'    => $realMime,
-            'size_bytes'   => (int)$file['size'],
+            'mime_type'    => $finalMime,
+            'size_bytes'   => (int)$finalSize,
             'uploaded_by'  => $user['id'],
         ]);
 
@@ -114,13 +130,80 @@ class MediaController {
 
         jsonSuccess([
             'id'            => $mediaId,
-            'filename'      => $uniqueFilename,
+            'filename'      => $finalFilename,
             'original_name' => basename($file['name']),
-            'url'           => $publicBase . '/' . $uniqueFilename,
-            'mime_type'     => $realMime,
-            'size_bytes'    => (int)$file['size'],
+            'url'           => $publicBase . '/' . $finalFilename,
+            'mime_type'     => $finalMime,
+            'size_bytes'    => (int)$finalSize,
             'created_at'    => date('Y-m-d H:i:s'),
-        ], 'Archivo subido correctamente.', 201);
+        ], 'Archivo subido y optimizado correctamente.', 201);
+    }
+
+    /**
+     * Converts and proportionally resizes an image to WebP format using PHP GD.
+     */
+    public static function optimizeToWebp(
+        string $sourcePath,
+        string $destPath,
+        string $mime,
+        int $maxWidth = 1920,
+        int $maxHeight = 1920,
+        int $quality = 85
+    ): bool {
+        if (!extension_loaded('gd') || !function_exists('imagewebp')) {
+            return false;
+        }
+
+        $srcImg = null;
+        switch ($mime) {
+            case 'image/jpeg':
+                $srcImg = @imagecreatefromjpeg($sourcePath);
+                break;
+            case 'image/png':
+                $srcImg = @imagecreatefrompng($sourcePath);
+                break;
+            case 'image/webp':
+                $srcImg = @imagecreatefromwebp($sourcePath);
+                break;
+            default:
+                return false;
+        }
+
+        if (!$srcImg) {
+            return false;
+        }
+
+        $origW = imagesx($srcImg);
+        $origH = imagesy($srcImg);
+
+        if ($origW <= 0 || $origH <= 0) {
+            return false;
+        }
+
+        $targetW = $origW;
+        $targetH = $origH;
+
+        if ($origW > $maxWidth || $origH > $maxHeight) {
+            $ratio = min($maxWidth / $origW, $maxHeight / $origH);
+            $targetW = (int)round($origW * $ratio);
+            $targetH = (int)round($origH * $ratio);
+        }
+
+        $dstImg = imagecreatetruecolor($targetW, $targetH);
+        if (!$dstImg) {
+            return false;
+        }
+
+        imagealphablending($dstImg, false);
+        imagesavealpha($dstImg, true);
+        $transparent = imagecolorallocatealpha($dstImg, 255, 255, 255, 127);
+        imagefilledrectangle($dstImg, 0, 0, $targetW, $targetH, $transparent);
+
+        imagecopyresampled($dstImg, $srcImg, 0, 0, 0, 0, $targetW, $targetH, $origW, $origH);
+
+        $saved = imagewebp($dstImg, $destPath, $quality);
+
+        return $saved && file_exists($destPath) && filesize($destPath) > 0;
     }
 
     /**
