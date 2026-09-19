@@ -66,9 +66,13 @@ function Home() {
   const { activities, heroSlides, getContent } = useSiteData();
 
   useEffect(() => {
+    const title = getContent("seo_meta_title", "iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra");
+    const description = getContent("seo_meta_description", getContent("mission_text") || "Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.");
+    const image = getContent("seo_og_image", "");
     updateSeo({
-      title: "iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra",
-      description: getContent("mission_text") || "Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.",
+      title,
+      description,
+      image: image || undefined,
     });
   }, [getContent]);
 

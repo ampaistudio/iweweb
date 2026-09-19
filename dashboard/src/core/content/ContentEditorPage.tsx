@@ -45,6 +45,10 @@ export const ContentEditorPage: React.FC = () => {
     tours_cta_text: 'Consultar disponibilidad',
     logo_url: '',
     logo_height: '44',
+    seo_meta_title: 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra',
+    seo_meta_description: 'Descubre experiencias únicas en Andorra y los Pirineos con guías locales certificados: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.',
+    seo_keywords: 'Andorra, iWE, BTT Andorra, E-Bike Enduro, Vía Ferrata, 4x4 Andorra, Senderismo Pirineos, Esquí Tour, Charly Paredes, Turismo Activo',
+    seo_og_image: '',
     social_instagram: 'https://www.instagram.com/isardwildland/',
     social_facebook: 'https://www.facebook.com/isardwildland/',
     social_youtube: '',
@@ -62,13 +66,19 @@ export const ContentEditorPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<'logo' | 'og_image' | null>(null);
 
   const toast = useToast();
 
-  const handleSelectLogo = (item: MediaItem) => {
-    handleChange('logo_url', item.url);
-    toast.success(`Logo '${item.original_name}' seleccionado.`);
+  const handleSelectMedia = (item: MediaItem) => {
+    if (pickerTarget === 'logo') {
+      handleChange('logo_url', item.url);
+      toast.success(`Logo '${item.original_name}' asignado.`);
+    } else if (pickerTarget === 'og_image') {
+      handleChange('seo_og_image', item.url);
+      toast.success(`Imagen SEO '${item.original_name}' asignada.`);
+    }
+    setPickerTarget(null);
   };
 
   const loadContent = async () => {
@@ -232,7 +242,7 @@ export const ContentEditorPage: React.FC = () => {
                           type="button"
                           variant="secondary"
                           size="sm"
-                          onClick={() => setPickerOpen(true)}
+                          onClick={() => setPickerTarget('logo')}
                         >
                           Cambiar logo
                         </Button>
@@ -253,7 +263,7 @@ export const ContentEditorPage: React.FC = () => {
                     type="button"
                     variant="outline"
                     size="md"
-                    onClick={() => setPickerOpen(true)}
+                    onClick={() => setPickerTarget('logo')}
                   >
                     Seleccionar logo
                   </Button>
@@ -834,7 +844,192 @@ export const ContentEditorPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* 4. Redes Sociales Oficiales */}
+      {/* 7. Posicionamiento SEO & Previsualización Social */}
+      <Card
+        title="Posicionamiento SEO & Previsualización Social (Google / WhatsApp)"
+        subtitle={isEs ? 'Personaliza cómo se muestra iWE en Google y al compartir enlaces por WhatsApp' : `Traducción de Metadatos SEO para ${activeLocale.toUpperCase()}`}
+      >
+        <div className="space-y-6">
+          {isEs ? (
+            <>
+              <div className="space-y-4">
+                <Input
+                  label="Título SEO para Google y Navegador (Recomendado: 50-60 caracteres)"
+                  value={form.seo_meta_title || ''}
+                  onChange={(e) => handleChange('seo_meta_title', e.target.value)}
+                  placeholder="iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra"
+                />
+                <div className="text-right text-[11px] text-muted">
+                  {(form.seo_meta_title || '').length} caracteres
+                </div>
+
+                <Textarea
+                  label="Meta Descripción para Buscadores (Recomendado: 120-160 caracteres)"
+                  rows={3}
+                  value={form.seo_meta_description || ''}
+                  onChange={(e) => handleChange('seo_meta_description', e.target.value)}
+                  placeholder="Descubre experiencias únicas en Andorra y los Pirineos con guías locales certificados..."
+                />
+                <div className="text-right text-[11px] text-muted">
+                  {(form.seo_meta_description || '').length} caracteres
+                </div>
+
+                <Input
+                  label="Palabras Clave (Keywords separadas por coma)"
+                  value={form.seo_keywords || ''}
+                  onChange={(e) => handleChange('seo_keywords', e.target.value)}
+                  placeholder="Andorra, iWE, BTT, E-Bike Enduro, 4x4, Vía Ferrata, Senderismo, Esquí Tour"
+                />
+
+                <div>
+                  <label className="block text-sm font-medium text-secondary mb-2">
+                    Imagen de Portada para WhatsApp / Facebook / Twitter (OpenGraph)
+                  </label>
+                  {form.seo_og_image ? (
+                    <div className="rounded-xl border border-border bg-bg p-3 flex flex-col sm:flex-row items-center gap-4">
+                      <img
+                        src={form.seo_og_image}
+                        alt="SEO OpenGraph Preview"
+                        className="w-full sm:w-36 h-20 rounded-lg object-cover bg-surface-elevated border border-border flex-shrink-0"
+                      />
+                      <div className="flex-1 space-y-1.5 w-full text-left">
+                        <p className="text-xs font-semibold text-primary">Imagen seleccionada para compartir</p>
+                        <p className="text-[11px] text-muted break-all">{form.seo_og_image}</p>
+                        <div className="flex gap-2 pt-1">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setPickerTarget('og_image')}
+                          >
+                            Cambiar imagen
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleChange('seo_og_image', '')}
+                            className="text-danger-text hover:text-danger"
+                          >
+                            Quitar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="md"
+                      onClick={() => setPickerTarget('og_image')}
+                    >
+                      🖼️ Elegir imagen de portada para compartir en redes
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Vistas previas en vivo */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-border">
+                {/* 1. Google SERP Preview */}
+                <div className="p-4 rounded-xl bg-bg border border-border space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+                      🔍 Vista Previa en Google Search
+                    </span>
+                  </div>
+                  <div className="space-y-1 bg-white dark:bg-[#202124] p-3 rounded-lg border border-border/50 text-left">
+                    <div className="text-[12px] text-[#202124] dark:text-[#bdc1c6] flex items-center gap-1.5 font-sans">
+                      <span className="w-4 h-4 rounded-full bg-[#1a73e8] text-white text-[9px] flex items-center justify-center font-bold">i</span>
+                      <span className="truncate">https://i-wildland.com</span>
+                    </div>
+                    <div className="text-[16px] font-medium text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-snug line-clamp-1">
+                      {form.seo_meta_title || 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra'}
+                    </div>
+                    <div className="text-[12px] text-[#4d5156] dark:text-[#bdc1c6] leading-relaxed line-clamp-2">
+                      {form.seo_meta_description || 'Descubre experiencias únicas en Andorra y los Pirineos con guías locales certificados: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. WhatsApp / Social Card Preview */}
+                <div className="p-4 rounded-xl bg-bg border border-border space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+                      💬 Vista Previa en WhatsApp / Redes
+                    </span>
+                  </div>
+                  <div className="bg-[#e9fed8] dark:bg-[#054740] p-2.5 rounded-lg border border-[#c7e8b4] dark:border-[#075e54] text-left max-w-sm">
+                    <div className="rounded-lg overflow-hidden bg-surface border border-border">
+                      {form.seo_og_image ? (
+                        <img src={form.seo_og_image} alt="Preview" className="w-full h-32 object-cover" />
+                      ) : (
+                        <div className="w-full h-24 bg-surface-elevated flex items-center justify-center text-xs text-muted">
+                          Sin imagen asignada (se usará la de portada general)
+                        </div>
+                      )}
+                      <div className="p-2.5 space-y-1">
+                        <span className="text-[10px] text-muted uppercase tracking-wider">i-wildland.com</span>
+                        <p className="text-xs font-bold text-primary line-clamp-1">
+                          {form.seo_meta_title || 'iWE | Isard Wildland Experience'}
+                        </p>
+                        <p className="text-[11px] text-secondary line-clamp-2 leading-tight">
+                          {form.seo_meta_description || 'Descubre experiencias únicas en Andorra y los Pirineos...'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            currentNonEs && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Título SEO en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.seo_meta_title || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Título SEO"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'seo_meta_title', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].seo_meta_title || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'seo_meta_title', e.target.value)}
+                    placeholder={`Traducción de Título SEO (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Meta Descripción en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.seo_meta_description || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Meta Descripción"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'seo_meta_description', val)}
+                    />
+                  </div>
+                  <Textarea
+                    rows={3}
+                    value={translations[currentNonEs].seo_meta_description || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'seo_meta_description', e.target.value)}
+                    placeholder={`Traducción de Meta Descripción (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </Card>
+
+      {/* 8. Redes Sociales Oficiales */}
       {isEs && (
         <Card title="Redes Sociales Oficiales" subtitle="Enlaces a los perfiles y canales de iWE mostrados en el pie de página (Footer)">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -892,10 +1087,10 @@ export const ContentEditorPage: React.FC = () => {
       </div>
 
       <ImagePickerModal
-        isOpen={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onSelectImage={handleSelectLogo}
-        selectedImageUrl={form.logo_url}
+        isOpen={pickerTarget !== null}
+        onClose={() => setPickerTarget(null)}
+        onSelectImage={handleSelectMedia}
+        selectedImageUrl={pickerTarget === 'logo' ? form.logo_url : (form.seo_og_image || '')}
       />
         </form>
       </section>
