@@ -329,6 +329,13 @@ function TourDetail() {
               </div>
             )}
 
+            {/* Public Tour Share Widget */}
+            <TourShareWidget
+              title={activity.title}
+              type={activity.type}
+              region={activity.region}
+            />
+
             {/* Booking CTA */}
             <div className="tour-booking-cta">
               <a
@@ -340,13 +347,6 @@ function TourDetail() {
                 Reservar esta experiencia <ArrowIcon />
               </a>
             </div>
-
-            {/* Public Tour Share Widget */}
-            <TourShareWidget
-              title={activity.title}
-              type={activity.type}
-              region={activity.region}
-            />
           </div>
         </div>
 
