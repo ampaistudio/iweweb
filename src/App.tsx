@@ -43,6 +43,51 @@ function MoonIcon() {
   );
 }
 
+function SocialIcon({ name }: { name: string }) {
+  switch (name.toLowerCase()) {
+    case "instagram":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="social-svg">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+        </svg>
+      );
+    case "facebook":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="social-svg">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+        </svg>
+      );
+    case "youtube":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="social-svg">
+          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33zM9.75 15.02V8.54l5.7 3.24-5.7 3.24z" />
+        </svg>
+      );
+    case "tiktok":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="social-svg">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298 0 .59.043.87.127V9.35a6.33 6.33 0 0 0-.87-.06 6.34 6.34 0 1 0 6.34 6.34V9.2a8.16 8.16 0 0 0 4.77 1.52V7.27a4.85 4.85 0 0 1-1-.58z" />
+        </svg>
+      );
+    case "tripadvisor":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="social-svg">
+          <path d="M12 4c-5.5 0-10 2.24-10 5 0 1.25.93 2.4 2.5 3.32-.4 1.15-.9 2.3-1.5 3.46 2.4-.7 4.5-1.78 6.2-3.15.9.24 1.8.37 2.8.37 1 0 1.9-.13 2.8-.37 1.7 1.37 3.8 2.45 6.2 3.15-.6-1.16-1.1-2.31-1.5-3.46 1.57-.92 2.5-2.07 2.5-3.32 0-2.76-4.5-5-10-5zm-5 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" />
+        </svg>
+      );
+    case "strava":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="social-svg">
+          <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7.925 15.688h4.172" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -253,39 +298,63 @@ function App() {
 
       <footer className="site-footer">
         <div className="page-width footer-top">
-          <Link className="brand-mark footer-brand" to="/" aria-label="iWE Isard Wildland Experience home">
-            <span className="brand-symbol">i<span>WE</span></span>
-            <span className="brand-name">Wildland Experience</span>
-          </Link>
-          <p>Turismo activo y experiencias de montaña<br />en Andorra y los Pirineos.</p>
-          <div className="footer-links">
-            <a href="/#bike">Bike</a>
-            <a href="/#tours">Tours en Andorra</a>
-            <Link to="/novedades">Novedades</Link>
-            <a href="/#stories">Opiniones</a>
-            <Link to="/privacidad">Privacidad</Link>
-            <a href="/#contact">Contacto</a>
+          <div className="footer-col footer-col-brand">
+            <Link className="brand-mark footer-brand" to="/" aria-label="iWE Isard Wildland Experience home">
+              <span className="brand-symbol">i<span>WE</span></span>
+              <span className="brand-name">Wildland Experience</span>
+            </Link>
+            <p className="footer-brand-desc">Turismo activo y experiencias de montaña en Andorra y los Pirineos.</p>
+            <div className="footer-contact-details">
+              <span>{contactAddress}</span>
+              <span>Tel: {contactPhone}</span>
+            </div>
+          </div>
+
+          <div className="footer-col footer-col-links">
+            <h4 className="footer-heading">Navegación</h4>
+            <div className="footer-links">
+              <a href="/#bike">Bike</a>
+              <a href="/#tours">Tours en Andorra</a>
+              <Link to="/novedades">Novedades</Link>
+              <a href="/#stories">Opiniones</a>
+              <Link to="/privacidad">Privacidad</Link>
+              <a href="/#contact">Contacto</a>
+            </div>
+          </div>
+
+          <div className="footer-col footer-col-social">
+            <h4 className="footer-heading">Síguenos</h4>
+            <p className="footer-social-desc">Conéctate con nuestra comunidad en la montaña:</p>
+            <div className="footer-social-grid">
+              {[
+                { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },
+                { label: "Facebook", url: getContent("social_facebook", "https://www.facebook.com/isardwildland/") },
+                { label: "YouTube", url: getContent("social_youtube", "") },
+                { label: "TikTok", url: getContent("social_tiktok", "") },
+                { label: "TripAdvisor", url: getContent("social_tripadvisor", "https://www.tripadvisor.com/") },
+                { label: "Strava", url: getContent("social_strava", "") },
+              ]
+                .filter((item) => item.url && item.url.trim() !== "")
+                .map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="footer-social-badge"
+                    aria-label={`Seguir en ${item.label}`}
+                  >
+                    <SocialIcon name={item.label} />
+                    <span>{item.label}</span>
+                  </a>
+                ))}
+            </div>
           </div>
         </div>
+
         <div className="page-width footer-bottom">
           <span>© 2026 iWE — {getContent("business_name", "Isard Wildland Experience")}</span>
           <span>{contactAddress} · Tel: {contactPhone}</span>
-          <div className="footer-socials">
-            {[
-              { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },
-              { label: "Facebook", url: getContent("social_facebook", "https://www.facebook.com/isardwildland/") },
-              { label: "YouTube", url: getContent("social_youtube", "") },
-              { label: "TikTok", url: getContent("social_tiktok", "") },
-              { label: "TripAdvisor", url: getContent("social_tripadvisor", "") },
-              { label: "Strava", url: getContent("social_strava", "") },
-            ]
-              .filter((item) => item.url && item.url.trim() !== "")
-              .map((item) => (
-                <a key={item.label} href={item.url} target="_blank" rel="noreferrer">
-                  {item.label}
-                </a>
-              ))}
-          </div>
         </div>
         <div className="page-width footer-credit">
           <a href="https://www.nodoai.co" target="_blank" rel="noreferrer">Powered by NODO Ai Agency</a>

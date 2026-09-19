@@ -61,6 +61,19 @@ export const DEFAULT_SITE_CONTENT: SiteContentMap = {
   contact_phone: '+376 344 870',
   contact_email: 'info@i-wildland.com',
   contact_address: 'AD100 Canillo, Principat d\'Andorra',
+  social_instagram: 'https://www.instagram.com/isardwildland/',
+  social_facebook: 'https://www.facebook.com/isardwildland/',
+  social_youtube: '',
+  social_tiktok: '',
+  social_tripadvisor: 'https://www.tripadvisor.com/',
+  social_strava: '',
+  tours_section_published: 'true',
+  tours_eyebrow: 'Tours en Andorra',
+  tours_title_line1: 'Vacaciones',
+  tours_title_line2: 'completas con iWE.',
+  tours_copy:
+    'Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.',
+  tours_cta_text: 'Consultar disponibilidad',
 };
 
 export const FALLBACK_NAV_SECTIONS: NavSection[] = [
