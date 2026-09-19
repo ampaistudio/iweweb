@@ -196,6 +196,51 @@ function Home() {
   const toursCopy = getContent("tours_copy", "Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.");
   const toursCtaText = getContent("tours_cta_text", "Consultar disponibilidad");
 
+  const heroCtaActivities = getContent("hero_cta_activities", "Ver actividades");
+  const heroCtaReserve = getContent("hero_cta_reserve", "Reservar ahora");
+  const heroScrollHint = getContent("hero_scroll_hint", "Descubre más");
+  const missionTeamLink = getContent("mission_team_link", "Nuestro equipo");
+  const missionStat1Value = getContent("mission_stat1_value", "2018");
+  const missionStat1Label = getContent("mission_stat1_label", "año de fundación");
+  const missionStat2Value = getContent("mission_stat2_value", "15+");
+  const missionStat2Label = getContent("mission_stat2_label", "tipos de actividades");
+  const missionStat3Value = getContent("mission_stat3_value", "2");
+  const missionStat3Label = getContent("mission_stat3_label", "regiones: Andorra y Pirineos");
+  const teamContactLink = getContent("team_contact_link", "Cómo trabajamos");
+
+  const activitiesBikeEyebrow = getContent("activities_bike_eyebrow", "Enduro, E-Bike, BTT y remontes");
+  const activitiesBikeTitle = getContent("activities_bike_title", "Bike");
+  const activitiesViaFerrataEyebrow = getContent("activities_via_ferrata_eyebrow", "Iniciación y avanzado");
+  const activitiesViaFerrataTitle = getContent("activities_via_ferrata_title", "Vía Ferrata");
+  const activities4x4Eyebrow = getContent("activities_4x4_eyebrow", "Lagos Off-Road, Tor y Pic Negre");
+  const activities4x4Title = getContent("activities_4x4_title", "4×4");
+  const activitiesSenderismoEyebrow = getContent("activities_senderismo_eyebrow", "Medio día y día completo");
+  const activitiesSenderismoTitle = getContent("activities_senderismo_title", "Senderismo");
+  const activitiesEsquiEyebrow = getContent("activities_esqui_eyebrow", "Raquetas y esquí tour");
+  const activitiesEsquiTitle = getContent("activities_esqui_title", "Esquí-Snow");
+
+  const calendarHolidayLabel = getContent("calendar_holiday_label", "Holiday");
+  const calendarEventsLabel = getContent("calendar_events_label", "Eventos");
+  const calendarEventsName = getContent("calendar_events_name", "Team Building & Eventos Deportivos");
+  const calendarEventsPlace = getContent("calendar_events_place", "Andorra");
+
+  const weatherEyebrow = getContent("weather_eyebrow", "Condiciones en tiempo real");
+  const weatherTitleLine1 = getContent("weather_title_line1", "El tiempo en Andorra");
+  const weatherTitleLine2 = getContent("weather_title_line2", "y los Pirineos.");
+  const weatherCopy = getContent("weather_copy", "Previsión meteorológica y mapa interactivo de viento en directo para planificar tus salidas de BTT, senderismo o esquí con la máxima seguridad.");
+  const weatherMetaLocation = getContent("weather_meta_location", "Andorra (42.55° N, 1.51° E) • Modelo ECMWF");
+  const weatherMetaBadge = getContent("weather_meta_badge", "Viento & Previsión en vivo");
+
+  const reviewsEyebrow = getContent("reviews_eyebrow", "Opiniones de clientes");
+  const reviewsTabAll = getContent("reviews_tab_all", "Todas");
+  const reviewsTabGoogle = getContent("reviews_tab_google", "Google ★ 4.9");
+  const reviewsTabTripadvisor = getContent("reviews_tab_tripadvisor", "TripAdvisor ★ 5.0");
+  const reviewsTabDirect = getContent("reviews_tab_direct", "iWE");
+
+  const newsletterSuccessMessage = getContent("newsletter_success_message", "Ya formas parte de la lista. Nos vemos en la montaña.");
+  const newsletterEmailLabel = getContent("newsletter_email_label", "Tu correo electrónico");
+  const contactWhatsappLink = getContent("contact_whatsapp_link", "O escríbenos directamente");
+
   return (
     <main id="top">
       <section className="hero-section">
@@ -206,11 +251,11 @@ function Home() {
           <h1>{heroTitleLine1}<br /><em>{heroTitleLine2}</em></h1>
           <p className="hero-copy">{heroCopy}</p>
           <div className="hero-actions">
-            <a className="button button-light" href="#bike">Ver actividades <ArrowIcon /></a>
-            <a className="text-link light-link" href="#contact">Reservar ahora <ArrowIcon /></a>
+            <a className="button button-light" href="#bike">{heroCtaActivities} <ArrowIcon /></a>
+            <a className="text-link light-link" href="#contact">{heroCtaReserve} <ArrowIcon /></a>
           </div>
         </div>
-        <a className="hero-scroll" href="#mission"><span />Descubre más</a>
+        <a className="hero-scroll" href="#mission"><span />{heroScrollHint}</a>
       </section>
 
       <section id="mission" className="mission-section page-width section-space">
@@ -225,11 +270,11 @@ function Home() {
           <p className="eyebrow">{missionEyebrow}</p>
           <h2>{missionTitle}</h2>
           <p className="large-copy">{missionText}</p>
-          <a className="text-link dark-link" href="#team">Nuestro equipo <ArrowIcon /></a>
+          <a className="text-link dark-link" href="#team">{missionTeamLink} <ArrowIcon /></a>
           <div className="mission-numbers" aria-label="iWE de un vistazo">
-            <div><strong>2018</strong><span>año de fundación</span></div>
-            <div><strong>15+</strong><span>tipos de actividades</span></div>
-            <div><strong>2</strong><span>regiones: Andorra y Pirineos</span></div>
+            <div><strong>{missionStat1Value}</strong><span>{missionStat1Label}</span></div>
+            <div><strong>{missionStat2Value}</strong><span>{missionStat2Label}</span></div>
+            <div><strong>{missionStat3Value}</strong><span>{missionStat3Label}</span></div>
           </div>
         </div>
       </section>
@@ -248,7 +293,7 @@ function Home() {
           {teamBio.split(/\n\s*\n/).map((para, idx) => (
             <p key={idx}>{para}</p>
           ))}
-          <a className="button button-dark" href="#contact">Cómo trabajamos <ArrowIcon /></a>
+          <a className="button button-dark" href="#contact">{teamContactLink} <ArrowIcon /></a>
         </div>
       </section>
 
@@ -256,8 +301,8 @@ function Home() {
         <div className="page-width">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">Enduro, E-Bike, BTT y remontes</p>
-              <h2>Bike</h2>
+              <p className="eyebrow">{activitiesBikeEyebrow}</p>
+              <h2>{activitiesBikeTitle}</h2>
             </div>
           </div>
           <ActivityGrid type="BTT" activities={activities} />
@@ -268,8 +313,8 @@ function Home() {
         <div className="page-width">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">Iniciación y avanzado</p>
-              <h2>Vía Ferrata</h2>
+              <p className="eyebrow">{activitiesViaFerrataEyebrow}</p>
+              <h2>{activitiesViaFerrataTitle}</h2>
             </div>
           </div>
           <ActivityGrid type="Vía Ferrata" activities={activities} />
@@ -280,8 +325,8 @@ function Home() {
         <div className="page-width">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">Lagos Off-Road, Tor y Pic Negre</p>
-              <h2>4×4</h2>
+              <p className="eyebrow">{activities4x4Eyebrow}</p>
+              <h2>{activities4x4Title}</h2>
             </div>
           </div>
           <ActivityGrid type="4x4" activities={activities} />
@@ -292,8 +337,8 @@ function Home() {
         <div className="page-width">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">Medio día y día completo</p>
-              <h2>Senderismo</h2>
+              <p className="eyebrow">{activitiesSenderismoEyebrow}</p>
+              <h2>{activitiesSenderismoTitle}</h2>
             </div>
           </div>
           <ActivityGrid type="Senderismo" activities={activities} />
@@ -304,8 +349,8 @@ function Home() {
         <div className="page-width">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">Raquetas y esquí tour</p>
-              <h2>Esquí-Snow</h2>
+              <p className="eyebrow">{activitiesEsquiEyebrow}</p>
+              <h2>{activitiesEsquiTitle}</h2>
             </div>
           </div>
           <ActivityGrid type="Esquí-Snow" activities={activities} />
@@ -323,13 +368,13 @@ function Home() {
           <div className="calendar-list">
             {packages.map((pkg) => (
               <div className="calendar-row" key={`${pkg.name}-${pkg.duration}`}>
-                <span className="calendar-month">Holiday</span>
+                <span className="calendar-month">{calendarHolidayLabel}</span>
                 <span className="calendar-tour">{pkg.name}</span>
                 <span className="calendar-place">{pkg.duration}</span>
                 <ArrowIcon />
               </div>
             ))}
-            <div className="calendar-row"><span className="calendar-month">Eventos</span><span className="calendar-tour">Team Building &amp; Eventos Deportivos</span><span className="calendar-place">Andorra</span><ArrowIcon /></div>
+            <div className="calendar-row"><span className="calendar-month">{calendarEventsLabel}</span><span className="calendar-tour">{calendarEventsName}</span><span className="calendar-place">{calendarEventsPlace}</span><ArrowIcon /></div>
           </div>
         </section>
       )}
@@ -337,10 +382,10 @@ function Home() {
       <section id="weather" className="weather-section section-space">
         <div className="page-width">
           <div className="weather-header">
-            <p className="eyebrow">Condiciones en tiempo real</p>
-            <h2>El tiempo en Andorra<br /><em>y los Pirineos.</em></h2>
+            <p className="eyebrow">{weatherEyebrow}</p>
+            <h2>{weatherTitleLine1}<br /><em>{weatherTitleLine2}</em></h2>
             <p>
-              Previsión meteorológica y mapa interactivo de viento en directo para planificar tus salidas de BTT, senderismo o esquí con la máxima seguridad.
+              {weatherCopy}
             </p>
           </div>
           <div className="weather-map-wrap">
@@ -351,8 +396,8 @@ function Home() {
               loading="lazy"
             />
             <div className="weather-meta-bar">
-              <span>Andorra (42.55° N, 1.51° E) • Modelo ECMWF</span>
-              <span className="weather-meta-badge">Viento &amp; Previsión en vivo</span>
+              <span>{weatherMetaLocation}</span>
+              <span className="weather-meta-badge">{weatherMetaBadge}</span>
             </div>
           </div>
         </div>
@@ -361,7 +406,7 @@ function Home() {
       <section id="stories" className="reviews-section section-space">
         <div className="page-width reviews-layout">
           <div className="reviews-label">
-            <p className="eyebrow">Opiniones de clientes</p>
+            <p className="eyebrow">{reviewsEyebrow}</p>
             <span className="review-count">
               {String(reviewIndex + 1).padStart(2, "0")}
               <small>/{String(filteredReviews.length || 1).padStart(2, "0")}</small>
@@ -372,28 +417,28 @@ function Home() {
                 className={`review-source-tab ${selectedSource === "all" ? "active" : ""}`}
                 onClick={() => { setSelectedSource("all"); setReviewIndex(0); }}
               >
-                Todas ({allReviews.length})
+                {reviewsTabAll} ({allReviews.length})
               </button>
               <button
                 type="button"
                 className={`review-source-tab ${selectedSource === "google" ? "active" : ""}`}
                 onClick={() => { setSelectedSource("google"); setReviewIndex(0); }}
               >
-                Google ★ 4.9
+                {reviewsTabGoogle}
               </button>
               <button
                 type="button"
                 className={`review-source-tab ${selectedSource === "tripadvisor" ? "active" : ""}`}
                 onClick={() => { setSelectedSource("tripadvisor"); setReviewIndex(0); }}
               >
-                TripAdvisor ★ 5.0
+                {reviewsTabTripadvisor}
               </button>
               <button
                 type="button"
                 className={`review-source-tab ${selectedSource === "direct" ? "active" : ""}`}
                 onClick={() => { setSelectedSource("direct"); setReviewIndex(0); }}
               >
-                iWE
+                {reviewsTabDirect}
               </button>
             </div>
           </div>
@@ -435,16 +480,16 @@ function Home() {
         <div className="contact-copy">
           <p>{getContent("contact_copy", "Recibe novedades, disponibilidad de actividades y un poco de inspiración para tu próxima aventura. Sin ruido. Solo lo bueno.")}</p>
           {subscribed ? (
-            <p className="success-message">Ya formas parte de la lista. Nos vemos en la montaña.</p>
+            <p className="success-message">{newsletterSuccessMessage}</p>
           ) : (
             <>
               <form className="newsletter-form" onSubmit={handleNewsletter}>
-                <label className="sr-only" htmlFor="email">Tu correo electrónico</label>
+                <label className="sr-only" htmlFor="email">{newsletterEmailLabel}</label>
                 <input
                   id="email"
                   type="email"
                   required
-                  placeholder="Tu correo electrónico"
+                  placeholder={newsletterEmailLabel}
                   value={email}
                   disabled={submittingNewsletter}
                   onChange={(event) => setEmail(event.target.value)}
@@ -462,7 +507,7 @@ function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            O escríbenos directamente <ArrowIcon />
+            {contactWhatsappLink} <ArrowIcon />
           </a>
         </div>
       </section>

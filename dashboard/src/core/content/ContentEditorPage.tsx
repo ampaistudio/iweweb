@@ -24,14 +24,53 @@ export const ContentEditorPage: React.FC = () => {
     hero_title_line2: 'Un solo operador.',
     hero_copy: 'iWE, la agencia líder en turismo de experiencias. Esquí, snowboard, raquetas de nieve, BTT, 4x4, vía ferrata, senderismo y mucho más en Andorra y los Pirineos, todo el año.',
     hero_tagline: 'Fabricamos experiencias.',
+    hero_cta_activities: 'Ver actividades',
+    hero_cta_reserve: 'Reservar ahora',
+    hero_scroll_hint: 'Descubre más',
     mission_eyebrow: 'Nuestra empresa',
     mission_title: 'Líderes en turismo de experiencias en Andorra y los Pirineos.',
     mission_text: 'Descubre un mundo de experiencias únicas con un solo operador turístico...',
     mission_image: 'https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg',
+    mission_team_link: 'Nuestro equipo',
+    mission_stat1_value: '2018',
+    mission_stat1_label: 'año de fundación',
+    mission_stat2_value: '15+',
+    mission_stat2_label: 'tipos de actividades',
+    mission_stat3_value: '2',
+    mission_stat3_label: 'regiones: Andorra y Pirineos',
     team_eyebrow: 'Nuestro equipo',
     team_title: 'Fundada en 2018. Guiada por expertos locales.',
     team_bio: 'iWE nació en 2018 de la mano de Charly Paredes...',
     team_image: 'https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg',
+    team_contact_link: 'Cómo trabajamos',
+    activities_bike_eyebrow: 'Enduro, E-Bike, BTT y remontes',
+    activities_bike_title: 'Bike',
+    activities_via_ferrata_eyebrow: 'Iniciación y avanzado',
+    activities_via_ferrata_title: 'Vía Ferrata',
+    activities_4x4_eyebrow: 'Lagos Off-Road, Tor y Pic Negre',
+    activities_4x4_title: '4×4',
+    activities_senderismo_eyebrow: 'Medio día y día completo',
+    activities_senderismo_title: 'Senderismo',
+    activities_esqui_eyebrow: 'Raquetas y esquí tour',
+    activities_esqui_title: 'Esquí-Snow',
+    calendar_holiday_label: 'Holiday',
+    calendar_events_label: 'Eventos',
+    calendar_events_name: 'Team Building & Eventos Deportivos',
+    calendar_events_place: 'Andorra',
+    weather_eyebrow: 'Condiciones en tiempo real',
+    weather_title_line1: 'El tiempo en Andorra',
+    weather_title_line2: 'y los Pirineos.',
+    weather_copy: 'Previsión meteorológica y mapa interactivo de viento en directo para planificar tus salidas de BTT, senderismo o esquí con la máxima seguridad.',
+    weather_meta_location: 'Andorra (42.55° N, 1.51° E) • Modelo ECMWF',
+    weather_meta_badge: 'Viento & Previsión en vivo',
+    reviews_eyebrow: 'Opiniones de clientes',
+    reviews_tab_all: 'Todas',
+    reviews_tab_google: 'Google ★ 4.9',
+    reviews_tab_tripadvisor: 'TripAdvisor ★ 5.0',
+    reviews_tab_direct: 'iWE',
+    newsletter_success_message: 'Ya formas parte de la lista. Nos vemos en la montaña.',
+    newsletter_email_label: 'Tu correo electrónico',
+    contact_whatsapp_link: 'O escríbenos directamente',
     contact_eyebrow: 'Mantente inspirado',
     contact_title_line1: 'Más montaña.',
     contact_title_line2: 'Menos rutina.',
@@ -365,6 +404,26 @@ export const ContentEditorPage: React.FC = () => {
                 onChange={(e) => handleChange('hero_tagline', e.target.value)}
                 placeholder="Fabricamos experiencias."
               />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Botón CTA: Ver actividades"
+                  value={form.hero_cta_activities || ''}
+                  onChange={(e) => handleChange('hero_cta_activities', e.target.value)}
+                  placeholder="Ver actividades"
+                />
+                <Input
+                  label="Botón CTA: Reservar ahora"
+                  value={form.hero_cta_reserve || ''}
+                  onChange={(e) => handleChange('hero_cta_reserve', e.target.value)}
+                  placeholder="Reservar ahora"
+                />
+              </div>
+              <Input
+                label="Texto del scroll hint (debajo del Hero)"
+                value={form.hero_scroll_hint || ''}
+                onChange={(e) => handleChange('hero_scroll_hint', e.target.value)}
+                placeholder="Descubre más"
+              />
             </>
           ) : (
             currentNonEs && (
@@ -522,6 +581,53 @@ export const ContentEditorPage: React.FC = () => {
                   </Button>
                 )}
               </div>
+              <Input
+                label="Link: Nuestro equipo"
+                value={form.mission_team_link || ''}
+                onChange={(e) => handleChange('mission_team_link', e.target.value)}
+                placeholder="Nuestro equipo"
+              />
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-2">Cifras destacadas (iWE de un vistazo)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Input
+                      value={form.mission_stat1_value || ''}
+                      onChange={(e) => handleChange('mission_stat1_value', e.target.value)}
+                      placeholder="2018"
+                    />
+                    <Input
+                      value={form.mission_stat1_label || ''}
+                      onChange={(e) => handleChange('mission_stat1_label', e.target.value)}
+                      placeholder="año de fundación"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Input
+                      value={form.mission_stat2_value || ''}
+                      onChange={(e) => handleChange('mission_stat2_value', e.target.value)}
+                      placeholder="15+"
+                    />
+                    <Input
+                      value={form.mission_stat2_label || ''}
+                      onChange={(e) => handleChange('mission_stat2_label', e.target.value)}
+                      placeholder="tipos de actividades"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Input
+                      value={form.mission_stat3_value || ''}
+                      onChange={(e) => handleChange('mission_stat3_value', e.target.value)}
+                      placeholder="2"
+                    />
+                    <Input
+                      value={form.mission_stat3_label || ''}
+                      onChange={(e) => handleChange('mission_stat3_label', e.target.value)}
+                      placeholder="regiones: Andorra y Pirineos"
+                    />
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
             currentNonEs && (
@@ -641,6 +747,12 @@ export const ContentEditorPage: React.FC = () => {
                   </Button>
                 )}
               </div>
+              <Input
+                label="Link: Cómo trabajamos"
+                value={form.team_contact_link || ''}
+                onChange={(e) => handleChange('team_contact_link', e.target.value)}
+                placeholder="Cómo trabajamos"
+              />
             </>
           ) : (
             currentNonEs && (
@@ -1127,6 +1239,81 @@ export const ContentEditorPage: React.FC = () => {
           )}
         </div>
       </Card>
+
+      {/* 7b. Secciones de Actividades, Calendario, Clima y Reseñas */}
+      {isEs && (
+        <Card
+          title="Encabezados de Actividades, Calendario, Clima y Reseñas"
+          subtitle="Textos fijos de las secciones de la Home que no dependen del idioma de traducción"
+        >
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-2">Secciones de actividades (cintillo + título)</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input value={form.activities_bike_eyebrow || ''} onChange={(e) => handleChange('activities_bike_eyebrow', e.target.value)} placeholder="Enduro, E-Bike, BTT y remontes" />
+                <Input value={form.activities_bike_title || ''} onChange={(e) => handleChange('activities_bike_title', e.target.value)} placeholder="Bike" />
+                <Input value={form.activities_via_ferrata_eyebrow || ''} onChange={(e) => handleChange('activities_via_ferrata_eyebrow', e.target.value)} placeholder="Iniciación y avanzado" />
+                <Input value={form.activities_via_ferrata_title || ''} onChange={(e) => handleChange('activities_via_ferrata_title', e.target.value)} placeholder="Vía Ferrata" />
+                <Input value={form.activities_4x4_eyebrow || ''} onChange={(e) => handleChange('activities_4x4_eyebrow', e.target.value)} placeholder="Lagos Off-Road, Tor y Pic Negre" />
+                <Input value={form.activities_4x4_title || ''} onChange={(e) => handleChange('activities_4x4_title', e.target.value)} placeholder="4×4" />
+                <Input value={form.activities_senderismo_eyebrow || ''} onChange={(e) => handleChange('activities_senderismo_eyebrow', e.target.value)} placeholder="Medio día y día completo" />
+                <Input value={form.activities_senderismo_title || ''} onChange={(e) => handleChange('activities_senderismo_title', e.target.value)} placeholder="Senderismo" />
+                <Input value={form.activities_esqui_eyebrow || ''} onChange={(e) => handleChange('activities_esqui_eyebrow', e.target.value)} placeholder="Raquetas y esquí tour" />
+                <Input value={form.activities_esqui_title || ''} onChange={(e) => handleChange('activities_esqui_title', e.target.value)} placeholder="Esquí-Snow" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-2">Calendario / Eventos</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Etiqueta de temporada de paquetes" value={form.calendar_holiday_label || ''} onChange={(e) => handleChange('calendar_holiday_label', e.target.value)} placeholder="Holiday" />
+                <Input label="Etiqueta de eventos" value={form.calendar_events_label || ''} onChange={(e) => handleChange('calendar_events_label', e.target.value)} placeholder="Eventos" />
+                <Input label="Nombre del evento" value={form.calendar_events_name || ''} onChange={(e) => handleChange('calendar_events_name', e.target.value)} placeholder="Team Building & Eventos Deportivos" />
+                <Input label="Lugar del evento" value={form.calendar_events_place || ''} onChange={(e) => handleChange('calendar_events_place', e.target.value)} placeholder="Andorra" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-2">Sección de Clima (Windy)</label>
+              <div className="space-y-4">
+                <Input label="Cintillo (Eyebrow)" value={form.weather_eyebrow || ''} onChange={(e) => handleChange('weather_eyebrow', e.target.value)} placeholder="Condiciones en tiempo real" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input label="Título (Línea 1)" value={form.weather_title_line1 || ''} onChange={(e) => handleChange('weather_title_line1', e.target.value)} placeholder="El tiempo en Andorra" />
+                  <Input label="Título (Línea 2)" value={form.weather_title_line2 || ''} onChange={(e) => handleChange('weather_title_line2', e.target.value)} placeholder="y los Pirineos." />
+                </div>
+                <Textarea label="Texto descriptivo" rows={2} value={form.weather_copy || ''} onChange={(e) => handleChange('weather_copy', e.target.value)} placeholder="Previsión meteorológica y mapa interactivo..." />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input label="Ubicación (barra meta)" value={form.weather_meta_location || ''} onChange={(e) => handleChange('weather_meta_location', e.target.value)} placeholder="Andorra (42.55° N, 1.51° E) • Modelo ECMWF" />
+                  <Input label="Badge (barra meta)" value={form.weather_meta_badge || ''} onChange={(e) => handleChange('weather_meta_badge', e.target.value)} placeholder="Viento & Previsión en vivo" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-2">Sección de Reseñas</label>
+              <div className="space-y-4">
+                <Input label="Cintillo (Eyebrow)" value={form.reviews_eyebrow || ''} onChange={(e) => handleChange('reviews_eyebrow', e.target.value)} placeholder="Opiniones de clientes" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input label="Tab: Todas" value={form.reviews_tab_all || ''} onChange={(e) => handleChange('reviews_tab_all', e.target.value)} placeholder="Todas" />
+                  <Input label="Tab: Google" value={form.reviews_tab_google || ''} onChange={(e) => handleChange('reviews_tab_google', e.target.value)} placeholder="Google ★ 4.9" />
+                  <Input label="Tab: TripAdvisor" value={form.reviews_tab_tripadvisor || ''} onChange={(e) => handleChange('reviews_tab_tripadvisor', e.target.value)} placeholder="TripAdvisor ★ 5.0" />
+                  <Input label="Tab: iWE" value={form.reviews_tab_direct || ''} onChange={(e) => handleChange('reviews_tab_direct', e.target.value)} placeholder="iWE" />
+                </div>
+                <p className="text-[11px] text-muted">El conteo entre paréntesis del tab "Todas" es dinámico y no se edita aquí.</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-2">Newsletter y Contacto</label>
+              <div className="space-y-4">
+                <Input label="Mensaje de suscripción exitosa" value={form.newsletter_success_message || ''} onChange={(e) => handleChange('newsletter_success_message', e.target.value)} placeholder="Ya formas parte de la lista. Nos vemos en la montaña." />
+                <Input label="Label / placeholder del campo de email" value={form.newsletter_email_label || ''} onChange={(e) => handleChange('newsletter_email_label', e.target.value)} placeholder="Tu correo electrónico" />
+                <Input label="Link de WhatsApp en Contacto" value={form.contact_whatsapp_link || ''} onChange={(e) => handleChange('contact_whatsapp_link', e.target.value)} placeholder="O escríbenos directamente" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* 8. Redes Sociales Oficiales */}
       {isEs && (
