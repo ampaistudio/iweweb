@@ -396,33 +396,38 @@ class SiteHealthController {
     }
 
     private function inspectDependencies(bool $forceRefresh = false): array {
-        $webPackages = [
-            'react'             => 'Framework UI Principal',
-            'react-dom'         => 'Renderizador React DOM',
-            'vite'              => 'Bundler & Dev Server',
-            'typescript'        => 'Compilador TypeScript',
-            '@tailwindcss/vite' => 'Plugin Tailwind CSS v4 para Vite',
-            'tailwindcss'       => 'Motor Tailwind CSS',
-            'lucide-react'      => 'Librería de Iconos',
-            'clsx'              => 'Utilidad de Clases CSS',
-            'tailwind-merge'    => 'Merge Inteligente de Clases Tailwind',
-        ];
-
-        $dashboardPackages = [
-            'react'             => 'Framework UI Dashboard',
-            'react-dom'         => 'Renderizador React DOM',
-            'react-router-dom'  => 'Enrutamiento SPA del Dashboard',
-            'vite'              => 'Bundler & Dev Server',
-            'typescript'        => 'Compilador TypeScript',
-            '@tailwindcss/vite' => 'Plugin Tailwind CSS v4 para Vite',
-            'lucide-react'      => 'Librería de Iconos',
+        $knownDescriptions = [
+            'react'                        => 'Framework UI Principal',
+            'react-dom'                    => 'Renderizador React DOM',
+            'react-router-dom'             => 'Enrutamiento SPA',
+            'vite'                         => 'Bundler & Servidor de Desarrollo',
+            'typescript'                   => 'Compilador TypeScript',
+            '@tailwindcss/vite'            => 'Plugin Tailwind CSS v4 para Vite',
+            'tailwindcss'                  => 'Motor Tailwind CSS',
+            'clsx'                         => 'Utilidad de Clases CSS',
+            'tailwind-merge'               => 'Merge Inteligente de Clases Tailwind',
+            '@tiptap/react'                => 'Editor de Texto Enriquecido (Tiptap)',
+            '@tiptap/starter-kit'          => 'Extensiones Base de Tiptap',
+            '@tiptap/extension-placeholder'=> 'Placeholder para Editor Tiptap',
+            '@tiptap/pm'                   => 'ProseMirror Core para Tiptap',
+            '@vitejs/plugin-react'         => 'Plugin Oficial de React para Vite',
+            'vite-plugin-singlefile'       => 'Plugin Bundler Monolítico Vite',
+            '@types/node'                  => 'Definiciones de Tipos para Node.js',
+            '@types/react'                 => 'Definiciones de Tipos para React',
+            '@types/react-dom'             => 'Definiciones de Tipos para React DOM',
         ];
 
         $webResults = [];
-        $webPkgJson = $this->readJsonFile($this->rootDir . '/package.json');
+        $webPkgJson = $this->readJsonFile($this->rootDir . '/package.json') ?: [];
         $webLockJson = $this->readJsonFile($this->rootDir . '/package-lock.json');
 
-        foreach ($webPackages as $pkgName => $desc) {
+        $webPackages = array_unique(array_merge(
+            array_keys($webPkgJson['dependencies'] ?? []),
+            array_keys($webPkgJson['devDependencies'] ?? [])
+        ));
+
+        foreach ($webPackages as $pkgName) {
+            $desc = $knownDescriptions[$pkgName] ?? (isset($webPkgJson['devDependencies'][$pkgName]) ? 'Herramienta de desarrollo' : 'Dependencia del proyecto');
             $webResults[] = $this->inspectSinglePackage(
                 $pkgName,
                 $desc,
@@ -435,10 +440,16 @@ class SiteHealthController {
 
         $dashResults = [];
         $dashDir = $this->rootDir . '/dashboard';
-        $dashPkgJson = $this->readJsonFile($dashDir . '/package.json');
+        $dashPkgJson = $this->readJsonFile($dashDir . '/package.json') ?: [];
         $dashLockJson = $this->readJsonFile($dashDir . '/package-lock.json');
 
-        foreach ($dashboardPackages as $pkgName => $desc) {
+        $dashPackages = array_unique(array_merge(
+            array_keys($dashPkgJson['dependencies'] ?? []),
+            array_keys($dashPkgJson['devDependencies'] ?? [])
+        ));
+
+        foreach ($dashPackages as $pkgName) {
+            $desc = $knownDescriptions[$pkgName] ?? (isset($dashPkgJson['devDependencies'][$pkgName]) ? 'Herramienta de desarrollo' : 'Dependencia del proyecto');
             $dashResults[] = $this->inspectSinglePackage(
                 $pkgName,
                 $desc,
