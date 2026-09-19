@@ -249,6 +249,11 @@ export const api = {
       request<{ id: string; title: string }>(`/activities/${encodeURIComponent(id)}/duplicate`, {
         method: 'POST',
       }),
+    shareSocial: (id: string, platforms: { publish_to_facebook?: boolean; publish_to_instagram?: boolean }) =>
+      request<{ activity_id: string; social_sync: Record<string, unknown> }>(`/activities/${encodeURIComponent(id)}/social-share`, {
+        method: 'POST',
+        body: JSON.stringify(platforms),
+      }),
     addImage: (activityId: string, data: { image_url: string; media_type?: 'image' | 'video'; poster_url?: string; alt_text: string; is_cover?: boolean }) =>
       request<ActivityImage>(`/activities/${encodeURIComponent(activityId)}/images`, {
         method: 'POST',

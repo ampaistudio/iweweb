@@ -24,9 +24,13 @@ class ActivityController {
 
     public const SUPPORTED_LOCALES = ['es', 'ca', 'en', 'fr'];
 
+    private MetaGraphService $metaService;
+
     public function __construct(PDO $pdo, array $config) {
         $this->pdo = $pdo;
         $this->config = $config;
+        require_once __DIR__ . '/../core/social/MetaGraphService.php';
+        $this->metaService = new MetaGraphService($pdo, $config);
     }
 
     /**
@@ -296,6 +300,15 @@ class ActivityController {
         $formatted['translations'] = $translations;
         $formatted['images'] = $images;
 
+        // Fetch social links
+        $stmtSocial = $this->pdo->prepare('
+            SELECT platform, external_post_id, external_permalink, sync_status, sync_error, synced_at 
+            FROM activity_social_links 
+            WHERE activity_id = :id
+        ');
+        $stmtSocial->execute(['id' => $id]);
+        $formatted['social_links'] = $stmtSocial->fetchAll();
+
         jsonSuccess($formatted);
     }
 
@@ -377,9 +390,27 @@ class ActivityController {
 
             $this->pdo->commit();
 
+            // Social dispatch if requested
+            $publishFb = !empty($body['publish_to_facebook']);
+            $publishIg = !empty($body['publish_to_instagram']);
+            $socialResults = [];
+
+            if ($publishFb || $publishIg) {
+                $imageUrl = $this->resolvePublicImageUrl(trim($body['image'] ?? $body['image_url'] ?? ''));
+                $socialResults = $this->metaService->publishActivity(
+                    $id,
+                    trim($body['title']),
+                    (string)($body['intro_text'] ?? $body['description'] ?? ''),
+                    $imageUrl,
+                    $publishFb,
+                    $publishIg
+                );
+            }
+
             jsonSuccess([
-                'id'    => $id,
-                'title' => trim($body['title'])
+                'id'          => $id,
+                'title'       => trim($body['title']),
+                'social_sync' => $socialResults,
             ], 'Actividad creada exitosamente.', 201);
 
         } catch (Throwable $e) {
@@ -500,12 +531,90 @@ class ActivityController {
 
             $this->pdo->commit();
 
-            jsonSuccess(['id' => $id], 'Actividad actualizada correctamente.');
+            // Social dispatch if requested
+            $publishFb = !empty($body['publish_to_facebook']);
+            $publishIg = !empty($body['publish_to_instagram']);
+            $socialResults = [];
+
+            if ($publishFb || $publishIg) {
+                $imageUrl = $this->resolvePublicImageUrl($newImageUrl);
+                $socialResults = $this->metaService->publishActivity(
+                    $id,
+                    trim($body['title']),
+                    (string)($body['intro_text'] ?? $body['description'] ?? ''),
+                    $imageUrl,
+                    $publishFb,
+                    $publishIg
+                );
+            }
+
+            jsonSuccess([
+                'id'          => $id,
+                'social_sync' => $socialResults,
+            ], 'Actividad actualizada correctamente.');
 
         } catch (Throwable $e) {
             $this->pdo->rollBack();
             jsonError('Error al actualizar la actividad: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * POST /api/activities/:id/social-share
+     * Manually share an existing activity to Facebook/Instagram
+     */
+    public function shareSocial(string $id): void {
+        requireAuth($this->pdo);
+
+        $stmt = $this->pdo->prepare('SELECT id, title, description, intro_text, image_url, published FROM activities WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $activity = $stmt->fetch();
+        if (!$activity) {
+            jsonError('Actividad no encontrada.', 404);
+        }
+
+        $body = getRequestBody();
+        $publishFb = !empty($body['publish_to_facebook']);
+        $publishIg = !empty($body['publish_to_instagram']);
+
+        if (!$publishFb && !$publishIg) {
+            jsonError('Debe seleccionar al menos una plataforma (Facebook o Instagram).', 422);
+        }
+
+        $imageUrl = $this->resolvePublicImageUrl((string)$activity['image_url']);
+        $results = $this->metaService->publishActivity(
+            $id,
+            (string)$activity['title'],
+            (string)($activity['intro_text'] ?: $activity['description']),
+            $imageUrl,
+            $publishFb,
+            $publishIg
+        );
+
+        jsonSuccess([
+            'activity_id' => $id,
+            'social_sync' => $results,
+        ], 'Sincronización social ejecutada.');
+    }
+
+    /**
+     * Helper to resolve local/relative image path to absolute URL for external APIs
+     */
+    private function resolvePublicImageUrl(?string $imageUrl): ?string {
+        if (empty($imageUrl)) {
+            return null;
+        }
+        if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            return $imageUrl;
+        }
+
+        $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
+        // If image_url starts with /api/uploads or uploads/
+        if (str_starts_with($imageUrl, '/api/uploads/')) {
+            $filename = basename($imageUrl);
+            return 'https://i-wildland.com/api/uploads/' . $filename;
+        }
+        return 'https://i-wildland.com/' . ltrim($imageUrl, '/');
     }
 
     /**

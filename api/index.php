@@ -184,6 +184,14 @@ try {
             jsonError('Método no permitido para /api/activities/:id/duplicate', 405);
         }
 
+        // Sub-resource: /api/activities/:id/social-share
+        if ($subresource === 'social-share' && $id !== null) {
+            if ($method === 'POST') {
+                $activityController->shareSocial((string)$id);
+            }
+            jsonError('Método no permitido para /api/activities/:id/social-share', 405);
+        }
+
         if ($id === null) {
             if ($method === 'GET') {
                 $activityController->list();

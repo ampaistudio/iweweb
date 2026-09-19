@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
-import { DEFAULT_ACTIVITY_TYPES, type Activity, type ActivityType, type ActivityImage } from './types';
+import { DEFAULT_ACTIVITY_TYPES, type Activity, type ActivityType, type ActivityImage, type ActivitySocialLink } from './types';
 import type { MediaItem, DashboardLocale } from '../api/types';
 import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
@@ -77,6 +77,12 @@ export const ActivityEditorPage: React.FC = () => {
   const [videoInputAlt, setVideoInputAlt] = useState('');
   const [isVideoSubmitting, setIsVideoSubmitting] = useState(false);
 
+  // Social sharing state (Meta Graph API)
+  const [publishToFacebook, setPublishToFacebook] = useState(false);
+  const [publishToInstagram, setPublishToInstagram] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<ActivitySocialLink[]>([]);
+  const [isSharingSocial, setIsSharingSocial] = useState(false);
+
   // Translations (CA, EN, FR)
   const [translations, setTranslations] = useState<Record<NonEsLocale, LocaleActivityData>>({
     ca: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
@@ -130,6 +136,10 @@ export const ActivityEditorPage: React.FC = () => {
 
           if (act.images && act.images.length > 0) {
             setImages(act.images);
+          }
+
+          if (act.social_links) {
+            setSocialLinks(act.social_links);
           }
 
           if (act.translations) {
@@ -384,6 +394,30 @@ export const ActivityEditorPage: React.FC = () => {
     return Boolean(t?.title?.trim() || t?.description?.trim() || t?.highlights?.some((h) => h.trim()));
   };
 
+  const handleManualSocialShare = async () => {
+    if (!id || (!publishToFacebook && !publishToInstagram)) {
+      toast.error('Selecciona al menos una red social (Facebook o Instagram).');
+      return;
+    }
+    try {
+      setIsSharingSocial(true);
+      await api.activities.shareSocial(id, {
+        publish_to_facebook: publishToFacebook,
+        publish_to_instagram: publishToInstagram,
+      });
+      toast.success('Publicación enviada a Meta Graph API.');
+      const updatedAct = (await api.activities.get(id)) as Activity;
+      if (updatedAct.social_links) {
+        setSocialLinks(updatedAct.social_links);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al compartir en redes sociales';
+      toast.error(msg);
+    } finally {
+      setIsSharingSocial(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -428,6 +462,8 @@ export const ActivityEditorPage: React.FC = () => {
         highlights: cleanHighlights,
         published,
         display_order: Number(displayOrder) || 1,
+        publish_to_facebook: publishToFacebook,
+        publish_to_instagram: publishToInstagram,
         translations,
       };
 
@@ -1037,6 +1073,95 @@ export const ActivityEditorPage: React.FC = () => {
               checked={published}
               onChange={setPublished}
             />
+          </div>
+        </Card>
+      )}
+
+      {/* 6. Difusión en Redes Sociales (Meta Graph API) */}
+      {isEs && (
+        <Card
+          title="📲 Difusión en Redes Sociales (Meta / Instagram)"
+          subtitle="Publica automáticamente esta actividad en la página oficial de Facebook y en la cuenta de Instagram de iWE."
+        >
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl border border-border bg-bg/40 space-y-2">
+                <Toggle
+                  label="📘 Publicar en Facebook Page"
+                  description="Crea un post con la foto principal, descripción y enlace directo al tour."
+                  checked={publishToFacebook}
+                  onChange={setPublishToFacebook}
+                />
+              </div>
+
+              <div className="p-4 rounded-xl border border-border bg-bg/40 space-y-2">
+                <Toggle
+                  label="📷 Publicar en Instagram"
+                  description="Publica la imagen y el resumen en el feed de Instagram Business."
+                  checked={publishToInstagram}
+                  onChange={setPublishToInstagram}
+                />
+              </div>
+            </div>
+
+            {/* Social Links Status */}
+            {socialLinks.length > 0 && (
+              <div className="space-y-2 pt-2 border-t border-border">
+                <p className="text-xs font-semibold text-secondary">Historial de Sincronización Social:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {socialLinks.map((link) => (
+                    <div
+                      key={link.platform}
+                      className="p-3 rounded-lg bg-surface-elevated border border-border flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{link.platform === 'facebook' ? '📘 Facebook' : '📷 Instagram'}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            link.sync_status === 'synced'
+                              ? 'bg-success/15 text-success'
+                              : link.sync_status === 'failed'
+                              ? 'bg-danger/15 text-danger'
+                              : 'bg-warning/15 text-warning'
+                          }`}
+                        >
+                          {link.sync_status === 'synced' ? 'Publicado' : link.sync_status === 'failed' ? 'Error' : 'Pendiente'}
+                        </span>
+                      </div>
+
+                      {link.external_permalink && (
+                        <a
+                          href={link.external_permalink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-accent hover:underline font-medium"
+                        >
+                          Ver post ↗
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Manual Share Action when editing existing activity */}
+            {isEdit && (publishToFacebook || publishToInstagram) && (
+              <div className="flex items-center justify-between pt-2 border-t border-border bg-surface-elevated/40 p-3 rounded-xl">
+                <span className="text-xs text-muted">
+                  ¿Deseas compartir ahora mismo sin esperar a guardar toda la actividad?
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  isLoading={isSharingSocial}
+                  onClick={handleManualSocialShare}
+                >
+                  🚀 Compartir en redes sociales ahora
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
       )}

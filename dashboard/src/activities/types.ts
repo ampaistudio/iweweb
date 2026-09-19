@@ -48,6 +48,17 @@ export interface ActivityImage {
   created_at?: string;
 }
 
+export interface ActivitySocialLink {
+  id?: number;
+  activity_id?: string;
+  platform: 'facebook' | 'instagram';
+  external_post_id: string;
+  external_permalink: string | null;
+  sync_status: 'pending' | 'synced' | 'failed';
+  sync_error: string | null;
+  synced_at: string | null;
+}
+
 export interface Activity {
   id: string;
   title: string;
@@ -71,4 +82,5 @@ export interface Activity {
   updated_at?: string;
   translations?: ActivityTranslations;
   images?: ActivityImage[];
+  social_links?: ActivitySocialLink[];
 }

@@ -110,6 +110,17 @@ export interface PostSocialLink {
   synced_at: string | null;
 }
 
+export interface ActivitySocialLink {
+  id?: number;
+  activity_id?: string;
+  platform: 'facebook' | 'instagram';
+  external_post_id: string;
+  external_permalink: string | null;
+  sync_status: 'pending' | 'synced' | 'failed';
+  sync_error: string | null;
+  synced_at: string | null;
+}
+
 export interface PostTranslations {
   ca?: {
     title?: string;
