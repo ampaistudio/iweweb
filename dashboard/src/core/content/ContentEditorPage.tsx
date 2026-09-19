@@ -28,6 +28,7 @@ export const ContentEditorPage: React.FC = () => {
     contact_email: '',
     contact_address: '',
     logo_url: '',
+    logo_height: '44',
   });
 
   // Translations (CA, EN, FR)
@@ -235,6 +236,35 @@ export const ContentEditorPage: React.FC = () => {
                     Seleccionar logo
                   </Button>
                 )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-medium text-secondary">
+                    Altura del Logo en el Header: <span className="font-bold text-accent font-mono">{form.logo_height || '44'}px</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => handleChange('logo_height', '44')}
+                    className="text-[11px] text-muted hover:text-primary transition-colors cursor-pointer"
+                  >
+                    Restablecer (44px)
+                  </button>
+                </div>
+                <input
+                  type="range"
+                  min="24"
+                  max="72"
+                  step="2"
+                  value={form.logo_height || '44'}
+                  onChange={(e) => handleChange('logo_height', e.target.value)}
+                  className="w-full accent-accent cursor-pointer h-2 bg-surface-elevated rounded-lg"
+                />
+                <div className="flex justify-between text-[10px] text-muted mt-1 font-mono">
+                  <span>24px (compacto)</span>
+                  <span>44px (estándar)</span>
+                  <span>72px (grande)</span>
+                </div>
               </div>
 
               <Input
