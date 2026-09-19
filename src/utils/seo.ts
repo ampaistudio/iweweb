@@ -57,3 +57,20 @@ function setMetaTag(attrName: "name" | "property", attrValue: string, content: s
   element.setAttribute("content", content);
 }
 
+export function setJsonLd(schema: object | null) {
+  if (typeof document === "undefined") return;
+  const scriptId = "dynamic-jsonld";
+  let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+  if (!schema) {
+    if (script) script.remove();
+    return;
+  }
+  if (!script) {
+    script = document.createElement("script");
+    script.id = scriptId;
+    script.type = "application/ld+json";
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(schema);
+}
+

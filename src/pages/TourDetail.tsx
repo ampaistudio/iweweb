@@ -8,7 +8,7 @@ import { resolveMediaUrl } from "../utils/media";
 import { buildWhatsAppUrl } from "../utils/whatsapp";
 import TourHero from "../components/TourHero";
 import type { HeroSlide } from "../components/HeroSlideshow";
-import { updateSeo } from "../utils/seo";
+import { updateSeo, setJsonLd } from "../utils/seo";
 import { TourShareWidget } from "../components/TourShareWidget";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
@@ -152,8 +152,42 @@ function TourDetail() {
         image: activity.image,
         type: "article",
       });
+
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "TouristTrip",
+        "name": activity.title,
+        "description": activity.introText || activity.description || `${activity.type} en ${activity.region}, Andorra.`,
+        "image": resolveMediaUrl(activity.image),
+        "touristType": activity.type,
+        "itinerary": activity.itinerary && activity.itinerary.length > 0 ? activity.itinerary : undefined,
+        "offers": {
+          "@type": "Offer",
+          "price": activity.price ? activity.price.replace(/[^0-9.,]/g, "") : "0",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": typeof window !== "undefined" ? window.location.href : `https://i-wildland.com/tour/${activity.id}`,
+        },
+        "provider": {
+          "@type": "TravelAgency",
+          "name": "iWE — Isard Wildland Experience",
+          "url": "https://i-wildland.com",
+          "telephone": "+376653769",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": activity.region || "Canillo",
+            "addressCountry": "AD",
+          },
+        },
+      };
+
+      setJsonLd(schema);
     }
-  }, [activity.title, activity.description, activity.image, activity.type, activity.region]);
+
+    return () => {
+      setJsonLd(null);
+    };
+  }, [activity.id, activity.title, activity.description, activity.introText, activity.image, activity.type, activity.region, activity.price, activity.itinerary]);
 
   // Build gallery images array
   const rawImages = fullActivity?.images || baseActivity?.images;

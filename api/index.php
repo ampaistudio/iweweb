@@ -34,6 +34,7 @@ require_once __DIR__ . '/core/settings/ApiKeysController.php';
 require_once __DIR__ . '/core/health/SiteHealthController.php';
 require_once __DIR__ . '/core/newsletter/NewsletterController.php';
 require_once __DIR__ . '/core/seo/PrerenderController.php';
+require_once __DIR__ . '/core/seo/SitemapController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -70,6 +71,13 @@ $segments = array_values(array_filter(explode('/', $path)));
 // Router Dispatcher
 // -----------------------------------------------------------------------------
 try {
+    // Direct Dynamic XML Sitemap Generator (via .htaccess rewrite or /api/sitemap.xml)
+    if (!empty($_GET['sitemap']) || (!empty($segments) && ($segments[0] === 'sitemap.xml' || $segments[0] === 'sitemap'))) {
+        $sitemapController = new SitemapController($pdo, $config);
+        $sitemapController->render();
+        exit;
+    }
+
     // Direct SEO / Social Crawler Prerender Query Parameter (via .htaccess rewrite)
     if (!empty($_GET['seo_prerender'])) {
         $prerenderController = new PrerenderController($pdo, $config);

@@ -12,7 +12,10 @@
     RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Pinterest|SkypeUriPreview|Google-Extended|GPTBot|PerplexityBot|ClaudeBot|anthropic-ai|CCBot) [NC]
     RewriteRule ^tour/([a-zA-Z0-9_-]+)/?$ api/index.php?seo_prerender=$1 [QSA,L]
 
-    # 2. Pass existing files and directories through without rewriting
+    # 2. Dynamic XML Sitemap (queried live from database for search engines & AI bots)
+    RewriteRule ^sitemap\.xml$ api/index.php?sitemap=1 [L]
+
+    # 3. Pass existing files and directories through without rewriting
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
