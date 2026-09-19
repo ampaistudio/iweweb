@@ -131,7 +131,7 @@ function App() {
 
   const fontScaleLabel = { normal: "A", large: "A+", xlarge: "A++" }[fontScale];
   const contactAddress = getContent("contact_address", "Av. de Sant Antoni, 12, AD400 La Massana, Andorra");
-  const contactPhone = getContent("contact_phone", "+376 344 870");
+  const contactPhone = getContent("contact_phone", "+376 653 769");
   const logoUrl = getContent("logo_url", "");
   const logoHeight = getContent("logo_height", "44");
   const logoHeightNum = parseInt(logoHeight, 10) || 44;

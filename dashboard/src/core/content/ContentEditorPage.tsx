@@ -1154,7 +1154,7 @@ export const ContentEditorPage: React.FC = () => {
               label="💬 WhatsApp (Enlace directo o wa.me)"
               value={form.social_whatsapp || ''}
               onChange={(e) => handleChange('social_whatsapp', e.target.value)}
-              placeholder="https://wa.me/376344870"
+              placeholder="https://wa.me/376653769"
             />
             <Input
               label="▶️ YouTube (URL)"

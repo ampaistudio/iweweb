@@ -60,7 +60,7 @@ export const DEFAULT_SITE_CONTENT: SiteContentMap = {
   team_bio:
     'iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés. Cada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto.',
   team_image: 'https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg',
-  contact_phone: '+376 344 870',
+  contact_phone: '+376 653 769',
   contact_email: 'info@i-wildland.com',
   contact_address: 'AD100 Canillo, Principat d\'Andorra',
   social_instagram: 'https://www.instagram.com/isardwildland/',
