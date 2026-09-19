@@ -37,6 +37,12 @@ export const ContentEditorPage: React.FC = () => {
     contact_phone: '+376 653 769',
     contact_email: 'info@i-wildland.com',
     contact_address: 'Av. de Sant Antoni, 12, AD400 La Massana, Andorra',
+    tours_section_published: 'true',
+    tours_eyebrow: 'Tours en Andorra',
+    tours_title_line1: 'Vacaciones',
+    tours_title_line2: 'completas con iWE.',
+    tours_copy: 'Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.',
+    tours_cta_text: 'Consultar disponibilidad',
     logo_url: '',
     logo_height: '44',
     social_instagram: 'https://www.instagram.com/isardwildland/',
@@ -574,7 +580,174 @@ export const ContentEditorPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* 5. Contacto & Newsletter */}
+      {/* 5. Vacaciones completas con iWE (Tours y Paquetes) */}
+      <Card
+        title="Sección 'Vacaciones completas con iWE' (Tours y Paquetes)"
+        subtitle={isEs ? 'Control de visibilidad y textos de la sección de paquetes en la Home' : `Traducción de Tours y Paquetes para ${activeLocale.toUpperCase()}`}
+      >
+        <div className="space-y-4">
+          {isEs ? (
+            <>
+              {/* Toggle de publicación */}
+              <div className="flex items-center justify-between p-3.5 bg-surface-elevated rounded-xl border border-border">
+                <div>
+                  <p className="text-sm font-semibold text-primary">Publicar sección en la Home</p>
+                  <p className="text-xs text-muted">
+                    {form.tours_section_published !== 'false' && form.tours_section_published !== '0'
+                      ? 'La sección se muestra actualmente en la página principal.'
+                      : 'La sección está oculta en la página principal.'}
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.tours_section_published !== 'false' && form.tours_section_published !== '0'}
+                    onChange={(e) => handleChange('tours_section_published', e.target.checked ? 'true' : 'false')}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" />
+                </label>
+              </div>
+
+              <Input
+                label="Cintillo (Eyebrow)"
+                value={form.tours_eyebrow || ''}
+                onChange={(e) => handleChange('tours_eyebrow', e.target.value)}
+                placeholder="Tours en Andorra"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Título (Línea 1)"
+                  value={form.tours_title_line1 || ''}
+                  onChange={(e) => handleChange('tours_title_line1', e.target.value)}
+                  placeholder="Vacaciones"
+                />
+                <Input
+                  label="Título (Línea 2 - Destacada)"
+                  value={form.tours_title_line2 || ''}
+                  onChange={(e) => handleChange('tours_title_line2', e.target.value)}
+                  placeholder="completas con iWE."
+                />
+              </div>
+              <Textarea
+                label="Texto descriptivo"
+                rows={3}
+                value={form.tours_copy || ''}
+                onChange={(e) => handleChange('tours_copy', e.target.value)}
+                placeholder="Combina alojamiento, guías y actividades en un solo paquete..."
+              />
+              <Input
+                label="Texto del botón CTA"
+                value={form.tours_cta_text || ''}
+                onChange={(e) => handleChange('tours_cta_text', e.target.value)}
+                placeholder="Consultar disponibilidad"
+              />
+            </>
+          ) : (
+            currentNonEs && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Cintillo en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.tours_eyebrow || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Cintillo de Tours"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'tours_eyebrow', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].tours_eyebrow || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'tours_eyebrow', e.target.value)}
+                    placeholder={`Traducción de cintillo (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Título (Línea 1) en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.tours_title_line1 || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Título Línea 1 de Tours"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'tours_title_line1', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].tours_title_line1 || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'tours_title_line1', e.target.value)}
+                    placeholder={`Traducción de título línea 1 (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Título (Línea 2) en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.tours_title_line2 || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Título Línea 2 de Tours"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'tours_title_line2', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].tours_title_line2 || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'tours_title_line2', e.target.value)}
+                    placeholder={`Traducción de título línea 2 (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Texto descriptivo en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.tours_copy || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Descripción de Tours"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'tours_copy', val)}
+                    />
+                  </div>
+                  <Textarea
+                    rows={3}
+                    value={translations[currentNonEs].tours_copy || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'tours_copy', e.target.value)}
+                    placeholder={`Traducción de descripción (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Botón CTA en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.tours_cta_text || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Botón CTA de Tours"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'tours_cta_text', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].tours_cta_text || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'tours_cta_text', e.target.value)}
+                    placeholder={`Traducción de botón CTA (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </Card>
+
+      {/* 6. Contacto & Newsletter */}
       <Card
         title="Sección Contacto y Newsletter"
         subtitle={isEs ? 'Textos de la llamada a la acción y datos de contacto oficiales' : `Traducción de Contacto para ${activeLocale.toUpperCase()}`}

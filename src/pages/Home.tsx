@@ -166,6 +166,12 @@ function Home() {
     "team_bio",
     "iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés.\n\nCada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto."
   );
+  const toursPublished = getContent("tours_section_published", "true") !== "false" && getContent("tours_section_published", "true") !== "0";
+  const toursEyebrow = getContent("tours_eyebrow", "Tours en Andorra");
+  const toursTitleLine1 = getContent("tours_title_line1", "Vacaciones");
+  const toursTitleLine2 = getContent("tours_title_line2", "completas con iWE.");
+  const toursCopy = getContent("tours_copy", "Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.");
+  const toursCtaText = getContent("tours_cta_text", "Consultar disponibilidad");
 
   return (
     <main id="top">
@@ -283,25 +289,27 @@ function Home() {
         </div>
       </section>
 
-      <section id="tours" className="calendar-section section-space page-width">
-        <div className="calendar-intro">
-          <p className="eyebrow">Tours en Andorra</p>
-          <h2>Vacaciones<br /><em>completas con iWE.</em></h2>
-          <p>Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.</p>
-          <a className="button button-dark" href="#contact">Consultar disponibilidad <ArrowIcon /></a>
-        </div>
-        <div className="calendar-list">
-          {packages.map((pkg) => (
-            <div className="calendar-row" key={`${pkg.name}-${pkg.duration}`}>
-              <span className="calendar-month">Holiday</span>
-              <span className="calendar-tour">{pkg.name}</span>
-              <span className="calendar-place">{pkg.duration}</span>
-              <ArrowIcon />
-            </div>
-          ))}
-          <div className="calendar-row"><span className="calendar-month">Eventos</span><span className="calendar-tour">Team Building &amp; Eventos Deportivos</span><span className="calendar-place">Andorra</span><ArrowIcon /></div>
-        </div>
-      </section>
+      {toursPublished && (
+        <section id="tours" className="calendar-section section-space page-width">
+          <div className="calendar-intro">
+            <p className="eyebrow">{toursEyebrow}</p>
+            <h2>{toursTitleLine1}<br /><em>{toursTitleLine2}</em></h2>
+            <p>{toursCopy}</p>
+            <a className="button button-dark" href="#contact">{toursCtaText} <ArrowIcon /></a>
+          </div>
+          <div className="calendar-list">
+            {packages.map((pkg) => (
+              <div className="calendar-row" key={`${pkg.name}-${pkg.duration}`}>
+                <span className="calendar-month">Holiday</span>
+                <span className="calendar-tour">{pkg.name}</span>
+                <span className="calendar-place">{pkg.duration}</span>
+                <ArrowIcon />
+              </div>
+            ))}
+            <div className="calendar-row"><span className="calendar-month">Eventos</span><span className="calendar-tour">Team Building &amp; Eventos Deportivos</span><span className="calendar-place">Andorra</span><ArrowIcon /></div>
+          </div>
+        </section>
+      )}
 
       <section id="weather" className="weather-section section-space">
         <div className="page-width">
