@@ -112,3 +112,4 @@ export function TourShareWidget({ title, type, region }: TourShareWidgetProps) {
     </div>
   );
 }
+
