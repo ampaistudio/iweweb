@@ -164,12 +164,14 @@ function Home() {
     "mission_text",
     "Descubre un mundo de experiencias únicas con un solo operador turístico. Esquí, snowboard, raquetas de nieve, tours culturales y todo lo que te puedas imaginar para vivir la montaña, guiado por expertos locales como Charly Paredes."
   );
+  const missionImage = getContent("mission_image", "https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg");
   const teamEyebrow = getContent("team_eyebrow", "Nuestro equipo");
   const teamTitle = getContent("team_title", "Fundada en 2018. Guiada por expertos locales.");
   const teamBio = getContent(
     "team_bio",
     "iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés.\n\nCada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto."
   );
+  const teamImage = getContent("team_image", "https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg");
   const toursPublished = getContent("tours_section_published", "true") !== "false" && getContent("tours_section_published", "true") !== "0";
   const toursEyebrow = getContent("tours_eyebrow", "Tours en Andorra");
   const toursTitleLine1 = getContent("tours_title_line1", "Vacaciones");
@@ -197,7 +199,7 @@ function Home() {
       <section id="mission" className="mission-section page-width section-space">
         <div className="mission-image-wrap reveal-up">
           <img
-            src="https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg"
+            src={missionImage}
             alt="Roc del Quer, Andorra"
           />
           <span className="image-caption">{heroTagline}</span>
@@ -218,7 +220,7 @@ function Home() {
       <section id="team" className="why-section">
         <div className="why-image-panel">
           <img
-            src="https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg"
+            src={teamImage}
             alt="Equipo de iWE guiando una experiencia de montaña"
           />
           <div className="why-image-note"><span>01</span><span>Conocimiento local.<br />Experiencia real.</span></div>

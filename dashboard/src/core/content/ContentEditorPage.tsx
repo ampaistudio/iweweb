@@ -27,9 +27,11 @@ export const ContentEditorPage: React.FC = () => {
     mission_eyebrow: 'Nuestra empresa',
     mission_title: 'Líderes en turismo de experiencias en Andorra y los Pirineos.',
     mission_text: 'Descubre un mundo de experiencias únicas con un solo operador turístico...',
+    mission_image: 'https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg',
     team_eyebrow: 'Nuestro equipo',
     team_title: 'Fundada en 2018. Guiada por expertos locales.',
     team_bio: 'iWE nació en 2018 de la mano de Charly Paredes...',
+    team_image: 'https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg',
     contact_eyebrow: 'Mantente inspirado',
     contact_title_line1: 'Más montaña.',
     contact_title_line2: 'Menos rutina.',
@@ -69,7 +71,7 @@ export const ContentEditorPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [pickerTarget, setPickerTarget] = useState<'logo' | 'og_image' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'logo' | 'og_image' | 'mission_image' | 'team_image' | null>(null);
 
   const toast = useToast();
 
@@ -80,6 +82,12 @@ export const ContentEditorPage: React.FC = () => {
     } else if (pickerTarget === 'og_image') {
       handleChange('seo_og_image', item.url);
       toast.success(`Imagen SEO '${item.original_name}' asignada.`);
+    } else if (pickerTarget === 'mission_image') {
+      handleChange('mission_image', item.url);
+      toast.success(`Imagen de Sobre Nosotros '${item.original_name}' asignada.`);
+    } else if (pickerTarget === 'team_image') {
+      handleChange('team_image', item.url);
+      toast.success(`Imagen de Nuestro Equipo '${item.original_name}' asignada.`);
     }
     setPickerTarget(null);
   };
@@ -470,6 +478,50 @@ export const ContentEditorPage: React.FC = () => {
                 onChange={(e) => handleChange('mission_text', e.target.value)}
                 placeholder="Descubre un mundo de experiencias únicas..."
               />
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-2">Foto de la sección (Nuestra empresa)</label>
+                {form.mission_image ? (
+                  <div className="relative rounded-2xl overflow-hidden border border-border bg-bg p-4 flex flex-col sm:flex-row items-center gap-4">
+                    <img
+                      src={form.mission_image}
+                      alt="Nuestra empresa"
+                      className="w-full sm:w-40 h-24 rounded-xl object-cover bg-surface-elevated border border-border flex-shrink-0"
+                    />
+                    <div className="flex-1 space-y-2 w-full text-left">
+                      <p className="text-xs font-semibold text-primary">Imagen asignada</p>
+                      <p className="text-[11px] text-muted break-all">{form.mission_image}</p>
+                      <div className="flex gap-2 pt-1">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setPickerTarget('mission_image')}
+                        >
+                          Cambiar imagen
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleChange('mission_image', '')}
+                          className="text-danger-text hover:text-danger"
+                        >
+                          Quitar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    onClick={() => setPickerTarget('mission_image')}
+                  >
+                    Seleccionar imagen
+                  </Button>
+                )}
+              </div>
             </>
           ) : (
             currentNonEs && (
@@ -545,6 +597,50 @@ export const ContentEditorPage: React.FC = () => {
                 onChange={(e) => handleChange('team_bio', e.target.value)}
                 placeholder="iWE nació en 2018 de la mano de Charly Paredes..."
               />
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-2">Foto del equipo (Charly Paredes / Guías)</label>
+                {form.team_image ? (
+                  <div className="relative rounded-2xl overflow-hidden border border-border bg-bg p-4 flex flex-col sm:flex-row items-center gap-4">
+                    <img
+                      src={form.team_image}
+                      alt="Nuestro equipo"
+                      className="w-full sm:w-40 h-24 rounded-xl object-cover bg-surface-elevated border border-border flex-shrink-0"
+                    />
+                    <div className="flex-1 space-y-2 w-full text-left">
+                      <p className="text-xs font-semibold text-primary">Imagen asignada</p>
+                      <p className="text-[11px] text-muted break-all">{form.team_image}</p>
+                      <div className="flex gap-2 pt-1">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setPickerTarget('team_image')}
+                        >
+                          Cambiar imagen
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleChange('team_image', '')}
+                          className="text-danger-text hover:text-danger"
+                        >
+                          Quitar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    onClick={() => setPickerTarget('team_image')}
+                  >
+                    Seleccionar imagen
+                  </Button>
+                )}
+              </div>
             </>
           ) : (
             currentNonEs && (
