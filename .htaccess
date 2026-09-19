@@ -6,21 +6,26 @@
     RewriteEngine On
     RewriteBase /
 
-    # 1. Prerender for Social Crawlers & AI Search Bots on Tour detail pages
+    # 1. Prerender for Social Crawlers & AI Search Bots — Tour detail pages (/tour/:id)
     # Matches: Facebook, WhatsApp, Twitter/X, Telegram, LinkedIn, Slack, Pinterest,
     # as well as Generative AI bots: GPTBot, Google-Extended, PerplexityBot, ClaudeBot, CCBot, etc.
     RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Pinterest|SkypeUriPreview|Google-Extended|GPTBot|PerplexityBot|ClaudeBot|anthropic-ai|CCBot) [NC]
     RewriteRule ^tour/([a-zA-Z0-9_-]+)/?$ api/index.php?seo_prerender=$1 [QSA,L]
 
-    # 2. Dynamic XML Sitemap (queried live from database for search engines & AI bots)
+    # 2. Prerender for Social Crawlers & AI Search Bots — Article detail pages (/novedades/:slug)
+    # Same User-Agent list as rule 1; only matches slugged articles, NOT the bare /novedades listing.
+    RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Pinterest|SkypeUriPreview|Google-Extended|GPTBot|PerplexityBot|ClaudeBot|anthropic-ai|CCBot) [NC]
+    RewriteRule ^novedades/([a-zA-Z0-9_-]+)/?$ api/index.php?seo_prerender_post=$1 [QSA,L]
+
+    # 3. Dynamic XML Sitemap (queried live from database for search engines & AI bots)
     RewriteRule ^sitemap\.xml$ api/index.php?sitemap=1 [L]
 
-    # 3. Pass existing files and directories through without rewriting
+    # 4. Pass existing files and directories through without rewriting
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # 3. SPA Fallback: Route all non-file/non-directory requests to index.html for React Router
+    # 5. SPA Fallback: Route all non-file/non-directory requests to index.html for React Router
     RewriteRule ^ index.html [L]
 </IfModule>
 

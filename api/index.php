@@ -78,10 +78,16 @@ try {
         exit;
     }
 
-    // Direct SEO / Social Crawler Prerender Query Parameter (via .htaccess rewrite)
+    // Direct SEO / Social Crawler Prerender — Tour detail pages (via .htaccess rewrite)
     if (!empty($_GET['seo_prerender'])) {
         $prerenderController = new PrerenderController($pdo, $config);
         $prerenderController->renderTour((string)$_GET['seo_prerender']);
+    }
+
+    // Direct SEO / Social Crawler Prerender — Article detail pages /novedades/:slug (via .htaccess rewrite)
+    if (!empty($_GET['seo_prerender_post'])) {
+        $prerenderController = new PrerenderController($pdo, $config);
+        $prerenderController->renderPost((string)$_GET['seo_prerender_post']);
     }
 
     // Health / Root check
