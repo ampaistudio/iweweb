@@ -19,14 +19,24 @@ export const ContentEditorPage: React.FC = () => {
   // Base Spanish (ES) form
   const [form, setForm] = useState<Record<string, string>>({
     business_name: '',
-    hero_tagline: '',
-    mission_title: '',
-    mission_text: '',
-    team_title: '',
-    team_bio: '',
-    contact_phone: '',
-    contact_email: '',
-    contact_address: '',
+    hero_eyebrow: 'Elige tu experiencia con nosotros',
+    hero_title_line1: 'Todas las experiencias.',
+    hero_title_line2: 'Un solo operador.',
+    hero_copy: 'iWE, la agencia líder en turismo de experiencias. Esquí, snowboard, raquetas de nieve, BTT, 4x4, vía ferrata, senderismo y mucho más en Andorra y los Pirineos, todo el año.',
+    hero_tagline: 'Fabricamos experiencias.',
+    mission_eyebrow: 'Nuestra empresa',
+    mission_title: 'Líderes en turismo de experiencias en Andorra y los Pirineos.',
+    mission_text: 'Descubre un mundo de experiencias únicas con un solo operador turístico...',
+    team_eyebrow: 'Nuestro equipo',
+    team_title: 'Fundada en 2018. Guiada por expertos locales.',
+    team_bio: 'iWE nació en 2018 de la mano de Charly Paredes...',
+    contact_eyebrow: 'Mantente inspirado',
+    contact_title_line1: 'Más montaña.',
+    contact_title_line2: 'Menos rutina.',
+    contact_copy: 'Recibe novedades, disponibilidad de actividades y un poco de inspiración para tu próxima aventura. Sin ruido. Solo lo bueno.',
+    contact_phone: '+376 653 769',
+    contact_email: 'info@i-wildland.com',
+    contact_address: 'Av. de Sant Antoni, 12, AD400 La Massana, Andorra',
     logo_url: '',
     logo_height: '44',
     social_instagram: 'https://www.instagram.com/isardwildland/',
@@ -191,10 +201,10 @@ export const ContentEditorPage: React.FC = () => {
         />
       </div>
 
-      {/* 1. Empresa y Marca */}
+      {/* 1. Identidad de Marca y Logo */}
       <Card
-        title="Empresa y Marca"
-        subtitle={isEs ? 'Nombre de la empresa, logo y lema del encabezado' : `Traducción del lema y misión para ${activeLocale.toUpperCase()}`}
+        title="Identidad de Marca y Logo"
+        subtitle={isEs ? 'Logo, tamaño en encabezado y nombre comercial de iWE' : 'Ajustes de marca compartidos'}
       >
         <div className="space-y-4">
           {isEs ? (
@@ -279,58 +289,175 @@ export const ContentEditorPage: React.FC = () => {
                 onChange={(e) => handleChange('business_name', e.target.value)}
                 placeholder="Isard Wildland Experience"
               />
+            </>
+          ) : (
+            <p className="text-sm text-muted">Los ajustes de logotipo e identidad comercial son compartidos globalmente.</p>
+          )}
+        </div>
+      </Card>
 
+      {/* 2. Hero Principal (Inicio) */}
+      <Card
+        title="Hero Principal (Encabezado de Inicio)"
+        subtitle={isEs ? 'Títulos y textos de bienvenida mostrados sobre el carrusel de inicio' : `Traducción del Hero para ${activeLocale.toUpperCase()}`}
+      >
+        <div className="space-y-4">
+          {isEs ? (
+            <>
               <Input
-                label="Frase principal (Hero Tagline)"
+                label="Cintillo superior (Eyebrow)"
+                value={form.hero_eyebrow || ''}
+                onChange={(e) => handleChange('hero_eyebrow', e.target.value)}
+                placeholder="Elige tu experiencia con nosotros"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Título principal (Línea 1)"
+                  value={form.hero_title_line1 || ''}
+                  onChange={(e) => handleChange('hero_title_line1', e.target.value)}
+                  placeholder="Todas las experiencias."
+                />
+                <Input
+                  label="Título principal (Línea 2 - Destacado)"
+                  value={form.hero_title_line2 || ''}
+                  onChange={(e) => handleChange('hero_title_line2', e.target.value)}
+                  placeholder="Un solo operador."
+                />
+              </div>
+              <Textarea
+                label="Texto descriptivo del Hero (Copy)"
+                rows={3}
+                value={form.hero_copy || ''}
+                onChange={(e) => handleChange('hero_copy', e.target.value)}
+                placeholder="iWE, la agencia líder en turismo de experiencias..."
+              />
+              <Input
+                label="Frase de pie de foto (Hero Tagline)"
                 value={form.hero_tagline || ''}
                 onChange={(e) => handleChange('hero_tagline', e.target.value)}
                 placeholder="Fabricamos experiencias."
-              />
-
-              <Input
-                label="Título de 'Sobre Nosotros'"
-                value={form.mission_title || ''}
-                onChange={(e) => handleChange('mission_title', e.target.value)}
-                placeholder="Líderes en turismo de experiencias en Andorra y los Pirineos."
-              />
-
-              <Textarea
-                label="Texto descriptivo de la empresa"
-                rows={4}
-                value={form.mission_text || ''}
-                onChange={(e) => handleChange('mission_text', e.target.value)}
-                placeholder="Descubre un mundo de experiencias únicas con un solo operador turístico..."
               />
             </>
           ) : (
             currentNonEs && (
               <div className="space-y-6">
-                {/* Hero Tagline */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
-                      Frase principal (Hero Tagline) en {activeLocale.toUpperCase()}
+                      Cintillo (Eyebrow) en {activeLocale.toUpperCase()}
                     </label>
                     <AiTranslateButton
-                      sourceText={form.hero_tagline || ''}
+                      sourceText={form.hero_eyebrow || ''}
                       targetLocale={activeLocale}
-                      fieldName="Frase principal"
-                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'hero_tagline', val)}
+                      fieldName="Cintillo del Hero"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'hero_eyebrow', val)}
                     />
                   </div>
-                  <p className="text-xs text-muted italic">Base (ES): {form.hero_tagline || '(vacío)'}</p>
                   <Input
-                    value={translations[currentNonEs].hero_tagline || ''}
-                    onChange={(e) => handleTranslationChange(currentNonEs, 'hero_tagline', e.target.value)}
-                    placeholder={`Traducción de frase principal (${activeLocale.toUpperCase()})...`}
+                    value={translations[currentNonEs].hero_eyebrow || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'hero_eyebrow', e.target.value)}
+                    placeholder={`Traducción de cintillo (${activeLocale.toUpperCase()})...`}
                   />
                 </div>
 
-                {/* Mission Title */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
-                      Título de 'Sobre Nosotros' en {activeLocale.toUpperCase()}
+                      Título (Línea 1) en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.hero_title_line1 || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Título Línea 1"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'hero_title_line1', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].hero_title_line1 || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'hero_title_line1', e.target.value)}
+                    placeholder={`Traducción de título línea 1 (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Título (Línea 2) en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.hero_title_line2 || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Título Línea 2"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'hero_title_line2', val)}
+                    />
+                  </div>
+                  <Input
+                    value={translations[currentNonEs].hero_title_line2 || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'hero_title_line2', e.target.value)}
+                    placeholder={`Traducción de título línea 2 (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Texto descriptivo (Copy) en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.hero_copy || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Texto descriptivo del Hero"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'hero_copy', val)}
+                    />
+                  </div>
+                  <Textarea
+                    rows={3}
+                    value={translations[currentNonEs].hero_copy || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'hero_copy', e.target.value)}
+                    placeholder={`Traducción de texto descriptivo (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </Card>
+
+      {/* 3. Sobre Nosotros / Misión */}
+      <Card
+        title="Sección 'Sobre Nosotros' (Misión y Empresa)"
+        subtitle={isEs ? 'Textos de la sección institucional en la Home' : `Traducción de Sobre Nosotros para ${activeLocale.toUpperCase()}`}
+      >
+        <div className="space-y-4">
+          {isEs ? (
+            <>
+              <Input
+                label="Cintillo (Eyebrow)"
+                value={form.mission_eyebrow || ''}
+                onChange={(e) => handleChange('mission_eyebrow', e.target.value)}
+                placeholder="Nuestra empresa"
+              />
+              <Input
+                label="Título de la sección"
+                value={form.mission_title || ''}
+                onChange={(e) => handleChange('mission_title', e.target.value)}
+                placeholder="Líderes en turismo de experiencias en Andorra y los Pirineos."
+              />
+              <Textarea
+                label="Texto descriptivo"
+                rows={4}
+                value={form.mission_text || ''}
+                onChange={(e) => handleChange('mission_text', e.target.value)}
+                placeholder="Descubre un mundo de experiencias únicas..."
+              />
+            </>
+          ) : (
+            currentNonEs && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Título en {activeLocale.toUpperCase()}
                     </label>
                     <AiTranslateButton
                       sourceText={form.mission_title || ''}
@@ -339,7 +466,6 @@ export const ContentEditorPage: React.FC = () => {
                       onTranslated={(val) => handleTranslationChange(currentNonEs, 'mission_title', val)}
                     />
                   </div>
-                  <p className="text-xs text-muted italic">Base (ES): {form.mission_title || '(vacío)'}</p>
                   <Input
                     value={translations[currentNonEs].mission_title || ''}
                     onChange={(e) => handleTranslationChange(currentNonEs, 'mission_title', e.target.value)}
@@ -347,20 +473,18 @@ export const ContentEditorPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Mission Text */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
-                      Texto descriptivo de la empresa en {activeLocale.toUpperCase()}
+                      Texto descriptivo en {activeLocale.toUpperCase()}
                     </label>
                     <AiTranslateButton
                       sourceText={form.mission_text || ''}
                       targetLocale={activeLocale}
-                      fieldName="Texto descriptivo de la empresa"
+                      fieldName="Texto descriptivo de Sobre Nosotros"
                       onTranslated={(val) => handleTranslationChange(currentNonEs, 'mission_text', val)}
                     />
                   </div>
-                  <p className="text-xs text-muted italic">Base (ES): {form.mission_text || '(vacío)'}</p>
                   <Textarea
                     rows={4}
                     value={translations[currentNonEs].mission_text || ''}
@@ -374,33 +498,37 @@ export const ContentEditorPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* 2. Equipo y Guías */}
+      {/* 4. Nuestro Equipo */}
       <Card
-        title="Nuestro Equipo"
+        title="Sección 'Nuestro Equipo'"
         subtitle={isEs ? 'Presentación del equipo y biografía de Charly Paredes' : `Traducción del equipo para ${activeLocale.toUpperCase()}`}
       >
         <div className="space-y-4">
           {isEs ? (
             <>
               <Input
-                label="Título de la sección equipo"
+                label="Cintillo (Eyebrow)"
+                value={form.team_eyebrow || ''}
+                onChange={(e) => handleChange('team_eyebrow', e.target.value)}
+                placeholder="Nuestro equipo"
+              />
+              <Input
+                label="Título de la sección"
                 value={form.team_title || ''}
                 onChange={(e) => handleChange('team_title', e.target.value)}
                 placeholder="Fundada en 2018. Guiada por expertos locales."
               />
-
               <Textarea
                 label="Biografía / Presentación de Charly"
                 rows={5}
                 value={form.team_bio || ''}
                 onChange={(e) => handleChange('team_bio', e.target.value)}
-                placeholder="iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2..."
+                placeholder="iWE nació en 2018 de la mano de Charly Paredes..."
               />
             </>
           ) : (
             currentNonEs && (
               <div className="space-y-6">
-                {/* Team Title */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
@@ -413,7 +541,6 @@ export const ContentEditorPage: React.FC = () => {
                       onTranslated={(val) => handleTranslationChange(currentNonEs, 'team_title', val)}
                     />
                   </div>
-                  <p className="text-xs text-muted italic">Base (ES): {form.team_title || '(vacío)'}</p>
                   <Input
                     value={translations[currentNonEs].team_title || ''}
                     onChange={(e) => handleTranslationChange(currentNonEs, 'team_title', e.target.value)}
@@ -421,11 +548,10 @@ export const ContentEditorPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Team Bio */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
-                      Biografía / Presentación en {activeLocale.toUpperCase()}
+                      Biografía en {activeLocale.toUpperCase()}
                     </label>
                     <AiTranslateButton
                       sourceText={form.team_bio || ''}
@@ -434,7 +560,6 @@ export const ContentEditorPage: React.FC = () => {
                       onTranslated={(val) => handleTranslationChange(currentNonEs, 'team_bio', val)}
                     />
                   </div>
-                  <p className="text-xs text-muted italic">Base (ES): {form.team_bio || '(vacío)'}</p>
                   <Textarea
                     rows={5}
                     value={translations[currentNonEs].team_bio || ''}
@@ -448,36 +573,92 @@ export const ContentEditorPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* 3. Datos de Contacto (Compartidos, solo visibles en ES) */}
-      {isEs && (
-        <Card title="Datos de Contacto" subtitle="Información visible en el pie de página y botones de contacto (compartida)">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Teléfono de contacto"
-              value={form.contact_phone || ''}
-              onChange={(e) => handleChange('contact_phone', e.target.value)}
-              placeholder="+376 344 870"
-            />
-
-            <Input
-              label="Correo electrónico"
-              type="email"
-              value={form.contact_email || ''}
-              onChange={(e) => handleChange('contact_email', e.target.value)}
-              placeholder="info@i-wildland.com"
-            />
-
-            <div className="sm:col-span-2">
+      {/* 5. Contacto & Newsletter */}
+      <Card
+        title="Sección Contacto y Newsletter"
+        subtitle={isEs ? 'Textos de la llamada a la acción y datos de contacto oficiales' : `Traducción de Contacto para ${activeLocale.toUpperCase()}`}
+      >
+        <div className="space-y-4">
+          {isEs ? (
+            <>
               <Input
-                label="Dirección física"
-                value={form.contact_address || ''}
-                onChange={(e) => handleChange('contact_address', e.target.value)}
-                placeholder="AD100 Canillo, Principat d'Andorra"
+                label="Cintillo (Eyebrow)"
+                value={form.contact_eyebrow || ''}
+                onChange={(e) => handleChange('contact_eyebrow', e.target.value)}
+                placeholder="Mantente inspirado"
               />
-            </div>
-          </div>
-        </Card>
-      )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Título (Línea 1)"
+                  value={form.contact_title_line1 || ''}
+                  onChange={(e) => handleChange('contact_title_line1', e.target.value)}
+                  placeholder="Más montaña."
+                />
+                <Input
+                  label="Título (Línea 2)"
+                  value={form.contact_title_line2 || ''}
+                  onChange={(e) => handleChange('contact_title_line2', e.target.value)}
+                  placeholder="Menos rutina."
+                />
+              </div>
+              <Textarea
+                label="Texto de suscripción / contacto"
+                rows={3}
+                value={form.contact_copy || ''}
+                onChange={(e) => handleChange('contact_copy', e.target.value)}
+                placeholder="Recibe novedades, disponibilidad de actividades..."
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <Input
+                  label="Teléfono de contacto (WhatsApp)"
+                  value={form.contact_phone || ''}
+                  onChange={(e) => handleChange('contact_phone', e.target.value)}
+                  placeholder="+376 653 769"
+                />
+                <Input
+                  label="Correo electrónico"
+                  type="email"
+                  value={form.contact_email || ''}
+                  onChange={(e) => handleChange('contact_email', e.target.value)}
+                  placeholder="info@i-wildland.com"
+                />
+                <div className="sm:col-span-2">
+                  <Input
+                    label="Dirección física"
+                    value={form.contact_address || ''}
+                    onChange={(e) => handleChange('contact_address', e.target.value)}
+                    placeholder="Av. de Sant Antoni, 12, AD400 La Massana, Andorra"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            currentNonEs && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Texto de Contacto en {activeLocale.toUpperCase()}
+                    </label>
+                    <AiTranslateButton
+                      sourceText={form.contact_copy || ''}
+                      targetLocale={activeLocale}
+                      fieldName="Texto de Contacto"
+                      onTranslated={(val) => handleTranslationChange(currentNonEs, 'contact_copy', val)}
+                    />
+                  </div>
+                  <Textarea
+                    rows={3}
+                    value={translations[currentNonEs].contact_copy || ''}
+                    onChange={(e) => handleTranslationChange(currentNonEs, 'contact_copy', e.target.value)}
+                    placeholder={`Traducción de texto de contacto (${activeLocale.toUpperCase()})...`}
+                  />
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </Card>
 
       {/* 4. Redes Sociales Oficiales */}
       {isEs && (

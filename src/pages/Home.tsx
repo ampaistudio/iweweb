@@ -149,6 +149,10 @@ function Home() {
     setReviewIndex((current) => (current + direction + filteredReviews.length) % filteredReviews.length);
   };
 
+  const heroEyebrow = getContent("hero_eyebrow", "Elige tu experiencia con nosotros");
+  const heroTitleLine1 = getContent("hero_title_line1", "Todas las experiencias.");
+  const heroTitleLine2 = getContent("hero_title_line2", "Un solo operador.");
+  const heroCopy = getContent("hero_copy", "iWE, la agencia líder en turismo de experiencias. Esquí, snowboard, raquetas de nieve, BTT, 4x4, vía ferrata, senderismo y mucho más en Andorra y los Pirineos, todo el año.");
   const heroTagline = getContent("hero_tagline", "Fabricamos experiencias.");
   const missionEyebrow = getContent("mission_eyebrow", "Nuestra empresa");
   const missionTitle = getContent("mission_title", "Líderes en turismo de experiencias en Andorra y los Pirineos.");
@@ -169,9 +173,9 @@ function Home() {
         <HeroSlideshow slides={heroSlides} />
         <div className="hero-overlay" />
         <div className="hero-content page-width">
-          <p className="eyebrow light-eyebrow">Elige tu experiencia con nosotros</p>
-          <h1>Todas las experiencias.<br /><em>Un solo operador.</em></h1>
-          <p className="hero-copy">iWE, la agencia líder en turismo de experiencias. Esquí, snowboard, raquetas de nieve, BTT, 4x4, vía ferrata, senderismo y mucho más en Andorra y los Pirineos, todo el año.</p>
+          <p className="eyebrow light-eyebrow">{heroEyebrow}</p>
+          <h1>{heroTitleLine1}<br /><em>{heroTitleLine2}</em></h1>
+          <p className="hero-copy">{heroCopy}</p>
           <div className="hero-actions">
             <a className="button button-light" href="#bike">Ver actividades <ArrowIcon /></a>
             <a className="text-link light-link" href="#contact">Reservar ahora <ArrowIcon /></a>
@@ -394,11 +398,11 @@ function Home() {
 
       <section id="contact" className="contact-section section-space page-width">
         <div>
-          <p className="eyebrow">Mantente inspirado</p>
-          <h2>Más montaña.<br /><em>Menos rutina.</em></h2>
+          <p className="eyebrow">{getContent("contact_eyebrow", "Mantente inspirado")}</p>
+          <h2>{getContent("contact_title_line1", "Más montaña.")}<br /><em>{getContent("contact_title_line2", "Menos rutina.")}</em></h2>
         </div>
         <div className="contact-copy">
-          <p>Recibe novedades, disponibilidad de actividades y un poco de inspiración para tu próxima aventura. Sin ruido. Solo lo bueno.</p>
+          <p>{getContent("contact_copy", "Recibe novedades, disponibilidad de actividades y un poco de inspiración para tu próxima aventura. Sin ruido. Solo lo bueno.")}</p>
           {subscribed ? (
             <p className="success-message">Ya formas parte de la lista. Nos vemos en la montaña.</p>
           ) : (
