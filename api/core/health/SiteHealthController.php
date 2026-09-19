@@ -942,3 +942,4 @@ class SiteHealthController {
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }
+

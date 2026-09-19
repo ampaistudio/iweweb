@@ -106,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Footer / Quick link to public site */}
         <div className="p-4 border-t border-border/80">
           <a
-            href="/"
+            href={import.meta.env.VITE_PUBLIC_SITE_URL || '/'}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-surface-elevated hover:bg-surface-hover text-secondary hover:text-primary text-xs font-medium border border-border transition-colors"
