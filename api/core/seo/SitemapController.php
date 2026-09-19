@@ -120,3 +120,4 @@ class SitemapController {
         echo '</urlset>' . "\n";
     }
 }
+

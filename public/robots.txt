@@ -38,3 +38,4 @@ User-agent: Googlebot
 Allow: /
 
 Sitemap: https://i-wildland.com/sitemap.xml
+

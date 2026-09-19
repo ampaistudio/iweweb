@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
     INDEX idx_newsletter_email (email),
     INDEX idx_newsletter_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

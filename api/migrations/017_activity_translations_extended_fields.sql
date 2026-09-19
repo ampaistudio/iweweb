@@ -27,3 +27,4 @@ CREATE TABLE IF NOT EXISTS activity_image_translations (
   UNIQUE KEY uniq_image_locale (activity_image_id, locale),
   INDEX idx_image_locale (locale)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
