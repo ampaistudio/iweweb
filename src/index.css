@@ -587,6 +587,7 @@ blockquote { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.75rem,
 .site-footer { background: var(--ink-surface); color: var(--ink-surface-text); padding: 65px 0 24px; }
 .footer-top { align-items: start; display: grid; gap: 40px; grid-template-columns: 1.4fr 0.9fr 1.3fr; padding-bottom: 60px; }
 .footer-brand { align-self: start; }
+.footer-logo-image { max-height: 48px; width: auto; object-fit: contain; }
 .footer-brand-desc { color: rgba(255,255,255,.65); font-size: 0.875rem; line-height: 1.55; margin-top: 14px; max-width: 360px; }
 .footer-contact-details { color: rgba(255,255,255,.45); display: flex; flex-direction: column; font-size: 0.8125rem; gap: 4px; margin-top: 14px; }
 .footer-heading { color: white; font-family: "Space Grotesk", sans-serif; font-size: 0.875rem; font-weight: 700; letter-spacing: .08em; margin-bottom: 16px; text-transform: uppercase; }

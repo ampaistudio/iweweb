@@ -325,8 +325,18 @@ function App() {
         <div className="page-width footer-top">
           <div className="footer-col footer-col-brand">
             <Link className="brand-mark footer-brand" to="/" aria-label="iWE Isard Wildland Experience home">
-              <span className="brand-symbol">i<span>WE</span></span>
-              <span className="brand-name">Wildland Experience</span>
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={getContent("business_name", "Isard Wildland Experience")}
+                  className="footer-logo-image"
+                />
+              ) : (
+                <>
+                  <span className="brand-symbol">i<span>WE</span></span>
+                  <span className="brand-name">Wildland Experience</span>
+                </>
+              )}
             </Link>
             <p className="footer-brand-desc">Turismo activo y experiencias de montaña en Andorra y los Pirineos.</p>
             <div className="footer-contact-details">
