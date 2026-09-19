@@ -63,6 +63,8 @@ function Home() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [submittingNewsletter, setSubmittingNewsletter] = useState(false);
+  const [newsletterError, setNewsletterError] = useState<string | null>(null);
   const { activities, heroSlides, getContent } = useSiteData();
 
   useEffect(() => {
@@ -141,9 +143,24 @@ function Home() {
     return allReviews.filter((r) => r.source === selectedSource);
   }, [allReviews, selectedSource]);
 
-  const handleNewsletter = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleNewsletter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (email.trim()) setSubscribed(true);
+    const cleanEmail = email.trim();
+    if (!cleanEmail || submittingNewsletter) return;
+
+    setSubmittingNewsletter(true);
+    setNewsletterError(null);
+
+    try {
+      await publicApi.newsletter.subscribe(cleanEmail);
+      setSubscribed(true);
+      setEmail("");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "No se pudo procesar la suscripción. Inténtalo de nuevo.";
+      setNewsletterError(msg);
+    } finally {
+      setSubmittingNewsletter(false);
+    }
   };
 
   const currentReview = filteredReviews[reviewIndex % (filteredReviews.length || 1)] || initialReviews[0];
@@ -420,11 +437,24 @@ function Home() {
           {subscribed ? (
             <p className="success-message">Ya formas parte de la lista. Nos vemos en la montaña.</p>
           ) : (
-            <form className="newsletter-form" onSubmit={handleNewsletter}>
-              <label className="sr-only" htmlFor="email">Tu correo electrónico</label>
-              <input id="email" type="email" required placeholder="Tu correo electrónico" value={email} onChange={(event) => setEmail(event.target.value)} />
-              <button type="submit" aria-label="Subscribe"><ArrowIcon /></button>
-            </form>
+            <>
+              <form className="newsletter-form" onSubmit={handleNewsletter}>
+                <label className="sr-only" htmlFor="email">Tu correo electrónico</label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  placeholder="Tu correo electrónico"
+                  value={email}
+                  disabled={submittingNewsletter}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+                <button type="submit" aria-label="Subscribe" disabled={submittingNewsletter}>
+                  <ArrowIcon />
+                </button>
+              </form>
+              {newsletterError && <p className="newsletter-error-message">{newsletterError}</p>}
+            </>
           )}
           <a
             className="text-link dark-link"

@@ -136,5 +136,13 @@ export const publicApi = {
     get: (id: string, locale?: string) =>
       request<Package>(`/packages/${encodeURIComponent(id)}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
   },
+
+  newsletter: {
+    subscribe: (email: string) =>
+      request<{ email: string; status: string }>('/newsletter/subscribe', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+  },
 };
 

@@ -598,6 +598,9 @@ blockquote { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.75rem,
 .newsletter-form input::placeholder { color: var(--text-muted); }
 .newsletter-form button { align-items: center; background: transparent; border: 0; cursor: pointer; display: flex; justify-content: center; padding: 0 2px 0 15px; }
 .newsletter-form button:hover { color: var(--forest); }
+.newsletter-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+.newsletter-error-message { color: #dc2626; font-size: 0.875rem; margin-top: -12px; margin-bottom: 16px; }
+.success-message { color: var(--forest); font-size: 1.0625rem; font-weight: 600; margin: 32px 0 22px; }
 .site-footer { background: var(--ink-surface); color: var(--ink-surface-text); padding: 65px 0 24px; }
 .footer-top { align-items: start; display: grid; gap: 40px; grid-template-columns: 1.4fr 0.9fr 1.3fr; padding-bottom: 60px; }
 .footer-brand { align-self: start; }

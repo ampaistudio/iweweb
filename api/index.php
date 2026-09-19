@@ -32,6 +32,7 @@ require_once __DIR__ . '/core/menu/MenuController.php';
 require_once __DIR__ . '/core/packages/PackageController.php';
 require_once __DIR__ . '/core/settings/ApiKeysController.php';
 require_once __DIR__ . '/core/health/SiteHealthController.php';
+require_once __DIR__ . '/core/newsletter/NewsletterController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -377,6 +378,19 @@ try {
             }
         }
         jsonError('Método no permitido para /api/activity-types', 405);
+    }
+
+    // --- Newsletter Endpoints ---
+    if ($resource === 'newsletter') {
+        $newsletterController = new NewsletterController($pdo, $config);
+        $action = $segments[1] ?? '';
+
+        if ($action === 'subscribe' && $method === 'POST') {
+            $newsletterController->subscribe();
+        } elseif ($action === 'subscribers' && $method === 'GET') {
+            $newsletterController->list();
+        }
+        jsonError('Método no permitido para /api/newsletter', 405);
     }
 
     // --- Social / Webhook Endpoints ---
