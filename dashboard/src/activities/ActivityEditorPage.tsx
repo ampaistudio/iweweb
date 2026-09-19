@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
-import { ACTIVITY_TYPES, type Activity, type ActivityType, type ActivityImage } from './types';
+import { DEFAULT_ACTIVITY_TYPES, type Activity, type ActivityType, type ActivityImage } from './types';
 import type { MediaItem, DashboardLocale } from '../api/types';
 import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
@@ -13,6 +13,7 @@ import { Toggle } from '../core/ui/Toggle';
 import { ImagePickerModal } from '../core/media/ImagePickerModal';
 import { CoverImagePickerModal } from './CoverImagePickerModal';
 import { AddToMenuModal } from './AddToMenuModal';
+import { CategoryManagerModal } from './CategoryManagerModal';
 import { LanguageTabs } from '../core/ui/LanguageSelector';
 import { AiTranslateButton } from '../core/ui/AiTranslateButton';
 
@@ -50,6 +51,8 @@ export const ActivityEditorPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [slugId, setSlugId] = useState('');
   const [type, setType] = useState<ActivityType>('BTT');
+  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_ACTIVITY_TYPES);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [region, setRegion] = useState('');
   const [country, setCountry] = useState('Andorra');
   const [level, setLevel] = useState('Todos los niveles');
@@ -87,6 +90,20 @@ export const ActivityEditorPage: React.FC = () => {
 
   const toast = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await api.activityTypes.list();
+        if (cats && cats.length > 0) {
+          setAvailableCategories(cats.map((c) => c.name));
+        }
+      } catch {
+        // Fallback to default categories
+      }
+    };
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -510,13 +527,26 @@ export const ActivityEditorPage: React.FC = () => {
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Select
-                  label="Categoría / Tipo de experiencia"
-                  value={type}
-                  onChange={(e) => setType(e.target.value as ActivityType)}
-                  options={ACTIVITY_TYPES.map((t) => ({ value: t, label: t }))}
-                  helperText="El sitio público agrupa los menús por esta categoría."
-                />
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                      Categoría / Tipo de experiencia
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setCategoryModalOpen(true)}
+                      className="text-xs text-accent hover:underline font-medium cursor-pointer"
+                    >
+                      🏷️ Gestionar
+                    </button>
+                  </div>
+                  <Select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as ActivityType)}
+                    options={availableCategories.map((t) => ({ value: t, label: t }))}
+                    helperText="El sitio público agrupa los menús por esta categoría."
+                  />
+                </div>
 
                 <Input
                   label="Identificador URL (Slug)"
@@ -1131,6 +1161,15 @@ export const ActivityEditorPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        onCategoriesUpdated={(cats) => {
+          setAvailableCategories(cats.map((c) => c.name));
+        }}
+      />
     </form>
   );
 };

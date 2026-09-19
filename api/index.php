@@ -35,6 +35,7 @@ require_once __DIR__ . '/core/health/SiteHealthController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
+require_once __DIR__ . '/activities/ActivityTypeController.php';
 
 // Handle CORS & Options pre-flight
 handleCors($config);
@@ -346,6 +347,28 @@ try {
             }
         }
         jsonError('Método no permitido para /api/packages', 405);
+    }
+
+    // --- Activity Categories (Types) Endpoints ---
+    if ($resource === 'activity-types') {
+        $activityTypeController = new ActivityTypeController($pdo, $config);
+
+        if ($id === null) {
+            if ($method === 'GET') {
+                $activityTypeController->list();
+            } elseif ($method === 'POST') {
+                $activityTypeController->create();
+            }
+        } elseif ($id === 'reorder' && $method === 'PUT') {
+            $activityTypeController->reorder();
+        } else {
+            if ($method === 'PUT') {
+                $activityTypeController->update((int)$id);
+            } elseif ($method === 'DELETE') {
+                $activityTypeController->delete((int)$id);
+            }
+        }
+        jsonError('Método no permitido para /api/activity-types', 405);
     }
 
     // --- Social / Webhook Endpoints ---

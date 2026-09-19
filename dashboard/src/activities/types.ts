@@ -1,13 +1,6 @@
-export type ActivityType =
-  | 'BTT'
-  | '4x4'
-  | 'Vía Ferrata'
-  | 'Senderismo'
-  | 'Esquí-Snow'
-  | 'Rafting'
-  | 'Heliflight';
+export type ActivityType = string;
 
-export const ACTIVITY_TYPES: ActivityType[] = [
+export const DEFAULT_ACTIVITY_TYPES: string[] = [
   'BTT',
   '4x4',
   'Vía Ferrata',
@@ -16,6 +9,8 @@ export const ACTIVITY_TYPES: ActivityType[] = [
   'Rafting',
   'Heliflight',
 ];
+
+export const ACTIVITY_TYPES = DEFAULT_ACTIVITY_TYPES;
 
 export interface ActivityTranslations {
   ca?: {

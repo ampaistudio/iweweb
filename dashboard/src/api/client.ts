@@ -16,6 +16,7 @@ import type {
   SiteHealthStatusResponse,
   BackupCreateResponse,
   BackupListResponse,
+  ActivityTypeItem,
 } from './types';
 
 
@@ -353,6 +354,28 @@ export const api = {
       `${API_BASE}/health/backups/${encodeURIComponent(filename)}`,
     notifyTelegram: () =>
       request<{ success: boolean; message_id?: number }>('/health/notify', { method: 'POST' }),
+  },
+
+  activityTypes: {
+    list: () =>
+      request<ActivityTypeItem[]>('/activity-types', { method: 'GET' }),
+    create: (data: { name: string; display_order?: number }) =>
+      request<ActivityTypeItem>('/activity-types', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: { name?: string; display_order?: number }) =>
+      request<ActivityTypeItem>(`/activity-types/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      request<void>(`/activity-types/${id}`, { method: 'DELETE' }),
+    reorder: (items: Array<{ id: number; display_order?: number }>) =>
+      request<void>('/activity-types/reorder', {
+        method: 'PUT',
+        body: JSON.stringify({ items }),
+      }),
   },
 };
 

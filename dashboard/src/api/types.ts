@@ -359,5 +359,14 @@ export interface BackupListResponse {
   total: number;
 }
 
+export interface ActivityTypeItem {
+  id: number;
+  name: string;
+  display_order: number;
+  activities_count: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export type { ActivityImage, Activity, ActivityType } from '../activities/types';
 

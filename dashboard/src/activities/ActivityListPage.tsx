@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import { ACTIVITY_TYPES, type Activity } from './types';
+import { DEFAULT_ACTIVITY_TYPES, type Activity } from './types';
+import { CategoryManagerModal } from './CategoryManagerModal';
 import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
 import { Button } from '../core/ui/Button';
@@ -11,6 +12,8 @@ import { ConfirmDialog } from '../core/ui/ConfirmDialog';
 
 export const ActivityListPage: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_ACTIVITY_TYPES);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,8 +28,17 @@ export const ActivityListPage: React.FC = () => {
   const loadActivities = async () => {
     try {
       setLoading(true);
-      const res = await api.activities.list();
-      setActivities((res as unknown) as Activity[]);
+      const [actRes, catRes] = await Promise.allSettled([
+        api.activities.list(),
+        api.activityTypes.list(),
+      ]);
+
+      if (actRes.status === 'fulfilled') {
+        setActivities((actRes.value as unknown) as Activity[]);
+      }
+      if (catRes.status === 'fulfilled' && catRes.value.length > 0) {
+        setAvailableCategories(catRes.value.map((c) => c.name));
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cargar actividades';
       toast.error(msg);
@@ -147,11 +159,21 @@ export const ActivityListPage: React.FC = () => {
             Administra los tours, experiencias de montaña, niveles de dificultad, precios y orden de visualización.
           </p>
         </div>
-        <Link to="/activities/new">
-          <Button variant="primary" size="md" leftIcon="➕">
-            Crear nueva actividad
+        <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            size="md"
+            leftIcon="🏷️"
+            onClick={() => setCategoryModalOpen(true)}
+          >
+            Gestionar Categorías
           </Button>
-        </Link>
+          <Link to="/activities/new">
+            <Button variant="primary" size="md" leftIcon="➕">
+              Crear nueva actividad
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -170,7 +192,7 @@ export const ActivityListPage: React.FC = () => {
             >
               Todas ({activities.length})
             </button>
-            {ACTIVITY_TYPES.map((type) => {
+            {availableCategories.map((type) => {
               const count = activities.filter((a) => a.type === type).length;
               return (
                 <button
@@ -374,6 +396,16 @@ export const ActivityListPage: React.FC = () => {
         cancelText="Cancelar"
         variant="danger"
         isLoading={isDeleting}
+      />
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        onCategoriesUpdated={(cats) => {
+          setAvailableCategories(cats.map((c) => c.name));
+          loadActivities();
+        }}
       />
     </div>
   );
