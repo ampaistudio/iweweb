@@ -132,11 +132,14 @@ h3 { color: var(--text-primary); font-size: 1.5625rem; letter-spacing: -.04em; l
 
 .nav-dropdown { padding: 12px 0; position: relative; }
 .nav-dropdown > a { font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; opacity: .9; transition: opacity .2s ease; white-space: nowrap; display: inline-block; }
-.nav-dropdown:hover > a { opacity: .6; }
+.nav-dropdown:hover > a,
+.nav-dropdown:focus-within > a { opacity: .6; }
 .nav-dropdown-menu { background: var(--ink-surface); border-radius: 2px; box-shadow: 0 20px 40px rgba(0,0,0,.25); display: flex; flex-direction: column; left: 50%; min-width: 260px; opacity: 0; padding: 14px 0; pointer-events: none; position: absolute; top: 100%; transform: translate(-50%, 6px); transition: opacity .18s ease, transform .18s ease; z-index: 20; }
-.nav-dropdown:hover .nav-dropdown-menu { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
 .nav-dropdown-menu a { color: white; font-family: "Space Grotesk", sans-serif; font-size: 1.125rem; font-weight: 500; letter-spacing: -.01em; opacity: .85; padding: 9px 24px; text-transform: none; transition: opacity .15s ease, background .15s ease; white-space: nowrap; }
-.nav-dropdown-menu a:hover { background: rgba(255,255,255,.06); opacity: 1; }
+.nav-dropdown-menu a:hover,
+.nav-dropdown-menu a:focus { background: rgba(255,255,255,.06); opacity: 1; outline: none; }
 .nav-dropdown-group { display: flex; flex-direction: column; }
 .nav-dropdown-subheading { color: var(--lime); font-family: "Space Grotesk", sans-serif; font-size: 0.875rem; font-weight: 700; letter-spacing: .08em; padding: 10px 24px 4px; text-transform: uppercase; white-space: nowrap; }
 .nav-dropdown-nested { display: flex; flex-direction: column; }
