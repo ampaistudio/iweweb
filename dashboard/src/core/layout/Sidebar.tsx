@@ -16,10 +16,10 @@ export interface SidebarProps {
 
 const defaultNavItems: NavItem[] = [
   { to: '/', label: 'Resumen (Overview)', icon: '📊' },
+  { to: '/content', label: 'INICIO', icon: '📝' },
   { to: '/activities', label: 'Actividades', icon: '🏔️' },
   { to: '/packages', label: 'Paquetes Multidía', icon: '🎒' },
   { to: '/menu', label: 'Menú de Navegación', icon: '📋' },
-  { to: '/content', label: 'Textos de la Web', icon: '📝' },
   { to: '/posts', label: 'Novedades y Redes', icon: '📢' },
   { to: '/media', label: 'Galería de Fotos', icon: '🖼️' },
   { to: '/settings/api-keys', label: 'Integraciones & API Keys', icon: '🔐' },
