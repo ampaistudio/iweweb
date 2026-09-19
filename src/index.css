@@ -593,7 +593,7 @@ blockquote { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.75rem,
 .footer-links a { color: rgba(255,255,255,.72); font-size: 0.75rem; letter-spacing: .06em; transition: color .2s ease; }
 .footer-links a:hover, .footer-bottom a:hover { color: var(--lime); }
 .footer-bottom { align-items: center; border-top: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.45); display: flex; font-size: 0.625rem; justify-content: space-between; letter-spacing: .08em; padding-top: 20px; text-transform: uppercase; }
-.footer-bottom div { display: flex; gap: 22px; }
+.footer-bottom div, .footer-socials { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
 .footer-bottom a { transition: color .2s ease; }
 .footer-credit { border-top: 1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.3); display: block; font-size: 0.5625rem; letter-spacing: .1em; margin-top: 40px; padding-top: 24px; text-align: center; text-transform: uppercase; width: 100%; }
 .footer-credit a { color: inherit; }

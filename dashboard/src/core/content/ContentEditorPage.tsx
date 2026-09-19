@@ -29,6 +29,12 @@ export const ContentEditorPage: React.FC = () => {
     contact_address: '',
     logo_url: '',
     logo_height: '44',
+    social_instagram: 'https://www.instagram.com/isardwildland/',
+    social_facebook: 'https://www.facebook.com/isardwildland/',
+    social_youtube: '',
+    social_tiktok: '',
+    social_tripadvisor: '',
+    social_strava: '',
   });
 
   // Translations (CA, EN, FR)
@@ -469,6 +475,50 @@ export const ContentEditorPage: React.FC = () => {
                 placeholder="AD100 Canillo, Principat d'Andorra"
               />
             </div>
+          </div>
+        </Card>
+      )}
+
+      {/* 4. Redes Sociales Oficiales */}
+      {isEs && (
+        <Card title="Redes Sociales Oficiales" subtitle="Enlaces a los perfiles y canales de iWE mostrados en el pie de página (Footer)">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="📷 Instagram (URL)"
+              value={form.social_instagram || ''}
+              onChange={(e) => handleChange('social_instagram', e.target.value)}
+              placeholder="https://www.instagram.com/isardwildland/"
+            />
+            <Input
+              label="📘 Facebook (URL)"
+              value={form.social_facebook || ''}
+              onChange={(e) => handleChange('social_facebook', e.target.value)}
+              placeholder="https://www.facebook.com/isardwildland/"
+            />
+            <Input
+              label="▶️ YouTube (URL)"
+              value={form.social_youtube || ''}
+              onChange={(e) => handleChange('social_youtube', e.target.value)}
+              placeholder="https://www.youtube.com/@isardwildland"
+            />
+            <Input
+              label="🎵 TikTok (URL)"
+              value={form.social_tiktok || ''}
+              onChange={(e) => handleChange('social_tiktok', e.target.value)}
+              placeholder="https://www.tiktok.com/@isardwildland"
+            />
+            <Input
+              label="🦉 TripAdvisor (URL)"
+              value={form.social_tripadvisor || ''}
+              onChange={(e) => handleChange('social_tripadvisor', e.target.value)}
+              placeholder="https://www.tripadvisor.com/Attraction_Review..."
+            />
+            <Input
+              label="🚴 Strava (Club / Perfil)"
+              value={form.social_strava || ''}
+              onChange={(e) => handleChange('social_strava', e.target.value)}
+              placeholder="https://www.strava.com/clubs/..."
+            />
           </div>
         </Card>
       )}

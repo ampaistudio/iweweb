@@ -268,9 +268,21 @@ function App() {
         <div className="page-width footer-bottom">
           <span>© 2026 iWE — {getContent("business_name", "Isard Wildland Experience")}</span>
           <span>{contactAddress} · Tel: {contactPhone}</span>
-          <div>
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
-            <a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a>
+          <div className="footer-socials">
+            {[
+              { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },
+              { label: "Facebook", url: getContent("social_facebook", "https://www.facebook.com/isardwildland/") },
+              { label: "YouTube", url: getContent("social_youtube", "") },
+              { label: "TikTok", url: getContent("social_tiktok", "") },
+              { label: "TripAdvisor", url: getContent("social_tripadvisor", "") },
+              { label: "Strava", url: getContent("social_strava", "") },
+            ]
+              .filter((item) => item.url && item.url.trim() !== "")
+              .map((item) => (
+                <a key={item.label} href={item.url} target="_blank" rel="noreferrer">
+                  {item.label}
+                </a>
+              ))}
           </div>
         </div>
         <div className="page-width footer-credit">

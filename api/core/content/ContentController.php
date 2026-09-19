@@ -14,10 +14,18 @@ class ContentController {
     public const SUPPORTED_LOCALES = ['es', 'ca', 'en', 'fr'];
     public const NON_TRANSLATABLE_KEYS = [
         'logo_url',
+        'logo_height',
         'contact_phone',
         'contact_email',
         'contact_address',
         'business_name',
+        'social_links_json',
+        'social_instagram',
+        'social_facebook',
+        'social_youtube',
+        'social_tiktok',
+        'social_tripadvisor',
+        'social_strava',
     ];
 
     public function __construct(PDO $pdo, array $config) {
