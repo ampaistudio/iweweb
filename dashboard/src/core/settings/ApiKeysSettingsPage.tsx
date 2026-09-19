@@ -72,7 +72,7 @@ export const ApiKeysSettingsPage: React.FC = () => {
     }
   };
 
-  const handleTestService = async (serviceId: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor') => {
+  const handleTestService = async (serviceId: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram') => {
     try {
       setTestingService(serviceId);
       const res = await api.settings.apiKeys.testConnection(serviceId);

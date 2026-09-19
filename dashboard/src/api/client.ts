@@ -13,6 +13,9 @@ import type {
   ActivityImage,
   ApiKeysData,
   TestConnectionResult,
+  SiteHealthStatusResponse,
+  BackupCreateResponse,
+  BackupListResponse,
 } from './types';
 
 
@@ -331,12 +334,25 @@ export const api = {
         }),
       deleteCustom: (keyName: string) =>
         request<void>(`/settings/api-keys/${encodeURIComponent(keyName)}`, { method: 'DELETE' }),
-      testConnection: (service: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor') =>
+      testConnection: (service: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram') =>
         request<TestConnectionResult>('/settings/api-keys/test', {
           method: 'POST',
           body: JSON.stringify({ service }),
         }),
     },
+  },
+
+  health: {
+    getStatus: (refresh?: boolean) =>
+      request<SiteHealthStatusResponse>(`/health/status${refresh ? '?refresh=true' : ''}`, { method: 'GET' }),
+    createBackup: () =>
+      request<BackupCreateResponse>('/health/backup', { method: 'POST' }),
+    listBackups: () =>
+      request<BackupListResponse>('/health/backups', { method: 'GET' }),
+    getDownloadUrl: (filename: string) =>
+      `${API_BASE}/health/backups/${encodeURIComponent(filename)}`,
+    notifyTelegram: () =>
+      request<{ success: boolean; message_id?: number }>('/health/notify', { method: 'POST' }),
   },
 };
 

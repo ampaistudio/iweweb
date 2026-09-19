@@ -24,7 +24,7 @@ export interface ApiKeyItem {
 }
 
 export interface ApiServiceInfo {
-  id: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor';
+  id: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram';
   title: string;
   description: string;
   docs_url: string;
@@ -257,6 +257,106 @@ export interface PackagePayload {
   publish_at?: string | null;
   unpublish_at?: string | null;
   translations?: PackageTranslations;
+}
+
+export type HealthSeverity = 'green' | 'yellow' | 'red';
+
+export interface ComponentHealth {
+  package_name: string;
+  description: string;
+  declared_version: string;
+  installed_version: string;
+  latest_version: string;
+  severity: HealthSeverity;
+  status_text: string;
+}
+
+export interface RuntimePhpHealth {
+  name: string;
+  installed_version: string;
+  latest_version: string;
+  severity: HealthSeverity;
+  status_text: string;
+  sapi: string;
+  memory_limit: string;
+  max_execution_time: string;
+  extensions: {
+    pdo_mysql: boolean;
+    curl: boolean;
+    zip: boolean;
+    gd: boolean;
+    mbstring: boolean;
+  };
+}
+
+export interface RuntimeMysqlHealth {
+  name: string;
+  installed_version: string;
+  severity: HealthSeverity;
+  status_text: string;
+  database_name: string;
+}
+
+export interface RuntimeServerHealth {
+  name: string;
+  software: string;
+  os: string;
+  time: string;
+}
+
+export interface SiteHealthRuntime {
+  php: RuntimePhpHealth;
+  mysql: RuntimeMysqlHealth;
+  server: RuntimeServerHealth;
+}
+
+export interface SiteHealthDependencies {
+  web: ComponentHealth[];
+  dashboard: ComponentHealth[];
+}
+
+export interface SiteHealthTelegram {
+  is_configured: boolean;
+  has_bot_token: boolean;
+  has_chat_id: boolean;
+  masked_token: string;
+  chat_id: string;
+  alert_triggered: boolean;
+}
+
+export interface SiteHealthStatusResponse {
+  status: HealthSeverity;
+  summary: {
+    total_components: number;
+    up_to_date_count: number;
+    minor_update_count: number;
+    major_update_count: number;
+  };
+  runtime: SiteHealthRuntime;
+  dependencies: SiteHealthDependencies;
+  telegram: SiteHealthTelegram;
+  checked_at: string;
+}
+
+export interface BackupItem {
+  filename: string;
+  size_bytes: number;
+  size_human: string;
+  created_at: string;
+  download_url: string;
+}
+
+export interface BackupCreateResponse {
+  filename: string;
+  size_bytes: number;
+  size_human: string;
+  created_at: string;
+  download_url: string;
+}
+
+export interface BackupListResponse {
+  backups: BackupItem[];
+  total: number;
 }
 
 export type { ActivityImage, Activity, ActivityType } from '../activities/types';

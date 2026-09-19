@@ -7,5 +7,9 @@ dist/
 api/config/config.local.php
 api/uploads/*
 !api/uploads/.gitkeep
+api/storage/backups/*
+!api/storage/backups/.gitkeep
+api/storage/cache/*
+!api/storage/cache/.gitkeep
 graphify-out/
 .claude-flow/

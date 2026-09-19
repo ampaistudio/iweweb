@@ -73,6 +73,13 @@ $defaultConfig = [
         'api_key'     => getenv('TRIPADVISOR_API_KEY') ?: '',
         'location_id' => getenv('TRIPADVISOR_LOCATION_ID') ?: 'd18719120',
     ],
+    /**
+     * Telegram Bot API Integration (Site Health Alerts)
+     */
+    'telegram' => [
+        'bot_token' => getenv('TELEGRAM_BOT_TOKEN') ?: '',
+        'chat_id'   => getenv('TELEGRAM_CHAT_ID') ?: '',
+    ],
 ];
 
 // Check for local overrides file (outside version control)

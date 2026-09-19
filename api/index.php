@@ -31,6 +31,7 @@ require_once __DIR__ . '/core/reviews/ReviewsController.php';
 require_once __DIR__ . '/core/menu/MenuController.php';
 require_once __DIR__ . '/core/packages/PackageController.php';
 require_once __DIR__ . '/core/settings/ApiKeysController.php';
+require_once __DIR__ . '/core/health/SiteHealthController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -378,6 +379,30 @@ try {
             jsonError('Método no permitido para /api/settings/api-keys', 405);
         }
         jsonError('Ruta de configuración no encontrada.', 404);
+    }
+
+    // --- Site Health, Diagnostics & Backups Endpoints ---
+    if ($resource === 'health') {
+        $healthController = new SiteHealthController($pdo, $config);
+        $sub = $segments[1] ?? '';
+
+        if ($sub === 'status' && $method === 'GET') {
+            $healthController->getStatus();
+        } elseif ($sub === 'backup' && $method === 'POST') {
+            $healthController->createBackup();
+        } elseif ($sub === 'backups') {
+            $backupFilename = $segments[2] ?? null;
+            if ($backupFilename === null && $method === 'GET') {
+                $healthController->listBackups();
+            } elseif ($backupFilename !== null && $method === 'GET') {
+                $healthController->downloadBackup((string)$backupFilename);
+            }
+            jsonError('Método no permitido para /api/health/backups', 405);
+        } elseif ($sub === 'notify' && $method === 'POST') {
+            $healthController->notifyTelegram();
+        }
+
+        jsonError('Ruta de salud del sitio no encontrada.', 404);
     }
 
     // Unmatched route

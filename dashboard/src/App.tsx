@@ -14,6 +14,7 @@ import { ContentEditorPage } from './core/content/ContentEditorPage';
 import { PostsListPage } from './core/posts/PostsListPage';
 import { PostEditorPage } from './core/posts/PostEditorPage';
 import { ApiKeysSettingsPage } from './core/settings/ApiKeysSettingsPage';
+import { SiteHealthPage } from './core/health/SiteHealthPage';
 
 // Domain Pages & Widgets (iWE Tourism Specific)
 import { ActivityListPage } from './activities/ActivityListPage';
@@ -81,6 +82,7 @@ export const App: React.FC = () => {
 
               {/* Core: Settings & Integrations / API Keys */}
               <Route path="settings/api-keys" element={<ApiKeysSettingsPage />} />
+              <Route path="settings/site-health" element={<SiteHealthPage />} />
             </Route>
 
             {/* Fallback */}

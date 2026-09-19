@@ -23,6 +23,7 @@ const defaultNavItems: NavItem[] = [
   { to: '/posts', label: 'Novedades y Redes', icon: '📢' },
   { to: '/media', label: 'Galería de Fotos', icon: '🖼️' },
   { to: '/settings/api-keys', label: 'Integraciones & API Keys', icon: '🔐' },
+  { to: '/settings/site-health', label: 'Salud del Sitio', icon: '🩺' },
 ];
 
 

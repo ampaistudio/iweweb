@@ -25,6 +25,8 @@ class ApiKeysController {
         'GOOGLE_PLACE_ID'          => ['google_places', 'place_id'],
         'TRIPADVISOR_API_KEY'      => ['tripadvisor', 'api_key'],
         'TRIPADVISOR_LOCATION_ID'  => ['tripadvisor', 'location_id'],
+        'TELEGRAM_BOT_TOKEN'       => ['telegram', 'bot_token'],
+        'TELEGRAM_CHAT_ID'         => ['telegram', 'chat_id'],
     ];
 
     public function __construct(PDO $pdo, array $config) {
@@ -181,6 +183,30 @@ class ApiKeysController {
                     ],
                 ],
             ],
+            'telegram' => [
+                'id'          => 'telegram',
+                'title'       => 'Telegram Bot (Alertas y Salud del Sitio)',
+                'description' => 'Bot de Telegram gratuito para recibir alertas de salud del sistema, fallos de seguridad o actualizaciones pendientes.',
+                'docs_url'    => 'https://core.telegram.org/bots',
+                'keys'        => [
+                    [
+                        'key_name'      => 'TELEGRAM_BOT_TOKEN',
+                        'label'         => 'Telegram Bot Token',
+                        'is_required'   => true,
+                        'is_configured' => !empty($this->resolveValue('TELEGRAM_BOT_TOKEN', $localData)),
+                        'masked_value'  => $this->maskValue($this->resolveValue('TELEGRAM_BOT_TOKEN', $localData)),
+                        'description'   => 'Token del bot generado con @BotFather en Telegram (ej: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11).',
+                    ],
+                    [
+                        'key_name'      => 'TELEGRAM_CHAT_ID',
+                        'label'         => 'Telegram Chat ID (Usuario o Canal)',
+                        'is_required'   => true,
+                        'is_configured' => !empty($this->resolveValue('TELEGRAM_CHAT_ID', $localData)),
+                        'masked_value'  => $this->maskValue($this->resolveValue('TELEGRAM_CHAT_ID', $localData)),
+                        'description'   => 'ID numérico del chat donde se enviarán las notificaciones (ej: 123456789 o -100xxxxxxxxxx).',
+                    ],
+                ],
+            ],
         ];
 
         // Format custom generic credentials
@@ -307,6 +333,9 @@ class ApiKeysController {
                 break;
             case 'tripadvisor':
                 $this->testTripAdvisor($localData);
+                break;
+            case 'telegram':
+                $this->testTelegram($localData);
                 break;
             default:
                 jsonError("Servicio de prueba '{$service}' no reconocido.", 422);
@@ -494,6 +523,87 @@ class ApiKeysController {
             $msg = $data['error']['message'] ?? "HTTP {$httpCode}";
             jsonError("Error de TripAdvisor API ({$httpCode}): {$msg}", 400);
         }
+    }
+
+    private function testTelegram(array $localData): void {
+        $botToken = $this->resolveValue('TELEGRAM_BOT_TOKEN', $localData);
+        $chatId = $this->resolveValue('TELEGRAM_CHAT_ID', $localData);
+
+        if (empty($botToken)) {
+            jsonError('TELEGRAM_BOT_TOKEN no está configurado.', 400);
+        }
+
+        $startTime = microtime(true);
+        // Step 1: Verify Bot Token via getMe
+        $getMeUrl = "https://api.telegram.org/bot{$botToken}/getMe";
+        $ch = curl_init($getMeUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 8,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        $latencyMs = round((microtime(true) - $startTime) * 1000);
+
+        if ($curlError) {
+            jsonError("Fallo de red al conectar con Telegram Bot API: {$curlError}", 502);
+        }
+
+        $data = json_decode($response, true);
+        if ($httpCode !== 200 || empty($data['ok'])) {
+            $desc = $data['description'] ?? "HTTP {$httpCode}";
+            jsonError("Error de autenticación con Telegram Bot API: {$desc}", 400);
+        }
+
+        $botUsername = $data['result']['username'] ?? 'Bot';
+        $botName = $data['result']['first_name'] ?? 'Bot';
+
+        // Step 2: If chat_id is provided, send a live test message
+        if (!empty($chatId)) {
+            $msgUrl = "https://api.telegram.org/bot{$botToken}/sendMessage";
+            $msgPayload = json_encode([
+                'chat_id'                  => $chatId,
+                'text'                     => "✅ *iWE Dashboard*: Conexión con bot de Telegram (@{$botUsername}) verificada exitosamente.\n\n_Fecha:_ " . date('Y-m-d H:i:s') . "\n_Entorno:_ " . ($this->config['app']['env'] ?? 'local'),
+                'parse_mode'               => 'Markdown',
+                'disable_web_page_preview' => true,
+            ]);
+
+            $chMsg = curl_init($msgUrl);
+            curl_setopt_array($chMsg, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $msgPayload,
+                CURLOPT_TIMEOUT        => 8,
+                CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            ]);
+
+            $msgResp = curl_exec($chMsg);
+            $msgHttpCode = curl_getinfo($chMsg, CURLINFO_HTTP_CODE);
+            $msgCurlError = curl_error($chMsg);
+            curl_close($chMsg);
+
+            $msgData = json_decode($msgResp, true);
+            if ($msgHttpCode !== 200 || empty($msgData['ok'])) {
+                $msgDesc = $msgData['description'] ?? "HTTP {$msgHttpCode}";
+                jsonError("Bot autenticado (@{$botUsername}), pero falló el envío al Chat ID {$chatId}: {$msgDesc}. Asegurate de haber iniciado conversación con el bot enviándole /start.", 400);
+            }
+
+            jsonSuccess([
+                'success'    => true,
+                'latency_ms' => $latencyMs,
+                'message'    => "Conexión exitosa con Telegram. Mensaje de prueba enviado al Chat ID {$chatId} vía @{$botUsername} ({$botName}).",
+            ]);
+        }
+
+        jsonSuccess([
+            'success'    => true,
+            'latency_ms' => $latencyMs,
+            'message'    => "Token válido. Bot autenticado como @{$botUsername} ({$botName}). Recuerda configurar TELEGRAM_CHAT_ID para recibir alertas.",
+        ]);
     }
 
     // -------------------------------------------------------------------------
