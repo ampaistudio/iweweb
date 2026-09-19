@@ -23,8 +23,11 @@ export interface ApiKeyItem {
   description: string;
 }
 
+export type ApiServiceId = 'nvidia_nim' | 'openai' | 'gemini' | 'anthropic' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram';
+export type AiTranslationProvider = 'nvidia_nim' | 'openai' | 'gemini' | 'anthropic';
+
 export interface ApiServiceInfo {
-  id: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram';
+  id: ApiServiceId;
   title: string;
   description: string;
   docs_url: string;
@@ -42,6 +45,7 @@ export interface CustomApiKey {
 export interface ApiKeysData {
   services: ApiServiceInfo[];
   custom_keys: CustomApiKey[];
+  active_translation_provider: AiTranslationProvider;
   storage_file: string;
   is_writable: boolean;
 }

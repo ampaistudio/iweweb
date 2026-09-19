@@ -17,6 +17,7 @@ import type {
   BackupCreateResponse,
   BackupListResponse,
   ActivityTypeItem,
+  ApiServiceId,
 } from './types';
 
 
@@ -335,7 +336,7 @@ export const api = {
         }),
       deleteCustom: (keyName: string) =>
         request<void>(`/settings/api-keys/${encodeURIComponent(keyName)}`, { method: 'DELETE' }),
-      testConnection: (service: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram') =>
+      testConnection: (service: ApiServiceId | string) =>
         request<TestConnectionResult>('/settings/api-keys/test', {
           method: 'POST',
           body: JSON.stringify({ service }),

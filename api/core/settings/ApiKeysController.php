@@ -27,6 +27,13 @@ class ApiKeysController {
         'TRIPADVISOR_LOCATION_ID'  => ['tripadvisor', 'location_id'],
         'TELEGRAM_BOT_TOKEN'       => ['telegram', 'bot_token'],
         'TELEGRAM_CHAT_ID'         => ['telegram', 'chat_id'],
+        'AI_TRANSLATION_PROVIDER'  => ['ai_translation', 'active_provider'],
+        'OPENAI_API_KEY'           => ['openai', 'api_key'],
+        'OPENAI_MODEL'             => ['openai', 'model'],
+        'GEMINI_API_KEY'           => ['gemini', 'api_key'],
+        'GEMINI_MODEL'             => ['gemini', 'model'],
+        'ANTHROPIC_API_KEY'        => ['anthropic', 'api_key'],
+        'ANTHROPIC_MODEL'          => ['anthropic', 'model'],
     ];
 
     public function __construct(PDO $pdo, array $config) {
@@ -49,14 +56,14 @@ class ApiKeysController {
         $services = [
             'nvidia_nim' => [
                 'id'          => 'nvidia_nim',
-                'title'       => 'NVIDIA NIM (Traducción con IA)',
-                'description' => 'Motor de inferencia de IA para las traducciones automáticas del CMS a Catalán, Inglés y Francés.',
+                'title'       => 'NVIDIA NIM (Traducción con IA - Predeterminado)',
+                'description' => 'Motor de inferencia de IA gratuito de NVIDIA para traducciones automáticas del CMS a Catalán, Inglés y Francés.',
                 'docs_url'    => 'https://build.nvidia.com',
                 'keys'        => [
                     [
                         'key_name'      => 'NVIDIA_NIM_API_KEY',
                         'label'         => 'API Key de NVIDIA NIM',
-                        'is_required'   => true,
+                        'is_required'   => false,
                         'is_configured' => !empty($this->resolveValue('NVIDIA_NIM_API_KEY', $localData)),
                         'masked_value'  => $this->maskValue($this->resolveValue('NVIDIA_NIM_API_KEY', $localData)),
                         'description'   => 'Clave de acceso obtenida gratuitamente en build.nvidia.com.',
@@ -76,6 +83,78 @@ class ApiKeysController {
                         'is_configured' => !empty($this->resolveValue('NVIDIA_NIM_MODEL', $localData)),
                         'masked_value'  => $this->resolveValue('NVIDIA_NIM_MODEL', $localData) ?: 'meta/llama-3.1-70b-instruct',
                         'description'   => 'Identificador del modelo de lenguaje para traducir (meta/llama-3.1-70b-instruct).',
+                    ],
+                ],
+            ],
+            'openai' => [
+                'id'          => 'openai',
+                'title'       => 'OpenAI (ChatGPT / GPT-4o)',
+                'description' => 'Motor de traducción alternativo usando modelos de OpenAI (gpt-4o, gpt-4o-mini).',
+                'docs_url'    => 'https://platform.openai.com/api-keys',
+                'keys'        => [
+                    [
+                        'key_name'      => 'OPENAI_API_KEY',
+                        'label'         => 'OpenAI API Key',
+                        'is_required'   => false,
+                        'is_configured' => !empty($this->resolveValue('OPENAI_API_KEY', $localData)),
+                        'masked_value'  => $this->maskValue($this->resolveValue('OPENAI_API_KEY', $localData)),
+                        'description'   => 'Clave de API secreta de OpenAI (sk-...).',
+                    ],
+                    [
+                        'key_name'      => 'OPENAI_MODEL',
+                        'label'         => 'Modelo OpenAI',
+                        'is_required'   => false,
+                        'is_configured' => !empty($this->resolveValue('OPENAI_MODEL', $localData)),
+                        'masked_value'  => $this->resolveValue('OPENAI_MODEL', $localData) ?: 'gpt-4o-mini',
+                        'description'   => 'Identificador del modelo (ej: gpt-4o-mini, gpt-4o).',
+                    ],
+                ],
+            ],
+            'gemini' => [
+                'id'          => 'gemini',
+                'title'       => 'Google Gemini',
+                'description' => 'Motor de traducción alternativo con Google AI Studio y modelos Gemini Flash / Pro.',
+                'docs_url'    => 'https://aistudio.google.com/app/apikey',
+                'keys'        => [
+                    [
+                        'key_name'      => 'GEMINI_API_KEY',
+                        'label'         => 'Google Gemini API Key',
+                        'is_required'   => false,
+                        'is_configured' => !empty($this->resolveValue('GEMINI_API_KEY', $localData)),
+                        'masked_value'  => $this->maskValue($this->resolveValue('GEMINI_API_KEY', $localData)),
+                        'description'   => 'Clave de API obtenida en Google AI Studio.',
+                    ],
+                    [
+                        'key_name'      => 'GEMINI_MODEL',
+                        'label'         => 'Modelo Gemini',
+                        'is_required'   => false,
+                        'is_configured' => !empty($this->resolveValue('GEMINI_MODEL', $localData)),
+                        'masked_value'  => $this->resolveValue('GEMINI_MODEL', $localData) ?: 'gemini-1.5-flash',
+                        'description'   => 'Identificador del modelo (ej: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash).',
+                    ],
+                ],
+            ],
+            'anthropic' => [
+                'id'          => 'anthropic',
+                'title'       => 'Anthropic Claude',
+                'description' => 'Motor de traducción alternativo usando la API de Claude (Haiku / Sonnet).',
+                'docs_url'    => 'https://console.anthropic.com/settings/keys',
+                'keys'        => [
+                    [
+                        'key_name'      => 'ANTHROPIC_API_KEY',
+                        'label'         => 'Anthropic API Key',
+                        'is_required'   => false,
+                        'is_configured' => !empty($this->resolveValue('ANTHROPIC_API_KEY', $localData)),
+                        'masked_value'  => $this->maskValue($this->resolveValue('ANTHROPIC_API_KEY', $localData)),
+                        'description'   => 'Clave secreta de Anthropic (sk-ant-...).',
+                    ],
+                    [
+                        'key_name'      => 'ANTHROPIC_MODEL',
+                        'label'         => 'Modelo Claude',
+                        'is_required'   => false,
+                        'is_configured' => !empty($this->resolveValue('ANTHROPIC_MODEL', $localData)),
+                        'masked_value'  => $this->resolveValue('ANTHROPIC_MODEL', $localData) ?: 'claude-3-5-haiku-20241022',
+                        'description'   => 'Identificador del modelo (ej: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022).',
                     ],
                 ],
             ],
@@ -227,11 +306,14 @@ class ApiKeysController {
             }
         }
 
+        $activeProvider = $this->resolveValue('AI_TRANSLATION_PROVIDER', $localData) ?: ($this->config['ai_translation']['active_provider'] ?? 'nvidia_nim');
+
         jsonSuccess([
-            'services'     => array_values($services),
-            'custom_keys'  => $customKeys,
-            'storage_file' => 'api/config/config.local.php',
-            'is_writable'  => $isWritable,
+            'services'                    => array_values($services),
+            'custom_keys'                 => $customKeys,
+            'active_translation_provider' => $activeProvider,
+            'storage_file'                => 'api/config/config.local.php',
+            'is_writable'                 => $isWritable,
         ]);
     }
 
@@ -325,6 +407,15 @@ class ApiKeysController {
             case 'nvidia_nim':
                 $this->testNvidiaNim($localData);
                 break;
+            case 'openai':
+                $this->testOpenAi($localData);
+                break;
+            case 'gemini':
+                $this->testGemini($localData);
+                break;
+            case 'anthropic':
+                $this->testAnthropic($localData);
+                break;
             case 'meta':
                 $this->testMeta($localData);
                 break;
@@ -397,6 +488,167 @@ class ApiKeysController {
             $parsed = json_decode($response, true);
             $msg = $parsed['error']['message'] ?? $parsed['detail'] ?? "HTTP {$httpCode}";
             jsonError("Error de autenticación con NVIDIA NIM ({$httpCode}): {$msg}", 400);
+        }
+    }
+
+    private function testOpenAi(array $localData): void {
+        $apiKey = $this->resolveValue('OPENAI_API_KEY', $localData);
+        $model = $this->resolveValue('OPENAI_MODEL', $localData) ?: 'gpt-4o-mini';
+
+        if (empty($apiKey)) {
+            jsonError('OPENAI_API_KEY no está configurada.', 400);
+        }
+
+        $startTime = microtime(true);
+        $payload = json_encode([
+            'model'      => $model,
+            'messages'   => [
+                ['role' => 'user', 'content' => 'Ping']
+            ],
+            'max_tokens' => 5,
+        ]);
+
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_TIMEOUT        => 8,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey,
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        $latencyMs = round((microtime(true) - $startTime) * 1000);
+
+        if ($curlError) {
+            jsonError("Fallo de red al conectar con OpenAI: {$curlError}", 502);
+        }
+
+        if ($httpCode === 200) {
+            jsonSuccess([
+                'success'    => true,
+                'latency_ms' => $latencyMs,
+                'message'    => "Conexión exitosa con OpenAI ({$model}). La API key es válida.",
+            ]);
+        } else {
+            $parsed = json_decode($response, true);
+            $msg = $parsed['error']['message'] ?? "HTTP {$httpCode}";
+            jsonError("Error de autenticación con OpenAI ({$httpCode}): {$msg}", 400);
+        }
+    }
+
+    private function testGemini(array $localData): void {
+        $apiKey = $this->resolveValue('GEMINI_API_KEY', $localData);
+        $model = $this->resolveValue('GEMINI_MODEL', $localData) ?: 'gemini-1.5-flash';
+
+        if (empty($apiKey)) {
+            jsonError('GEMINI_API_KEY no está configurada.', 400);
+        }
+
+        $startTime = microtime(true);
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . urlencode($apiKey);
+        $payload = json_encode([
+            'contents' => [
+                ['parts' => [['text' => 'Ping']]]
+            ],
+            'generationConfig' => [
+                'maxOutputTokens' => 5
+            ]
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_TIMEOUT        => 8,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        $latencyMs = round((microtime(true) - $startTime) * 1000);
+
+        if ($curlError) {
+            jsonError("Fallo de red al conectar con Google Gemini: {$curlError}", 502);
+        }
+
+        if ($httpCode === 200) {
+            jsonSuccess([
+                'success'    => true,
+                'latency_ms' => $latencyMs,
+                'message'    => "Conexión exitosa con Google Gemini ({$model}). La API key es válida.",
+            ]);
+        } else {
+            $parsed = json_decode($response, true);
+            $msg = $parsed['error']['message'] ?? "HTTP {$httpCode}";
+            jsonError("Error de autenticación con Google Gemini ({$httpCode}): {$msg}", 400);
+        }
+    }
+
+    private function testAnthropic(array $localData): void {
+        $apiKey = $this->resolveValue('ANTHROPIC_API_KEY', $localData);
+        $model = $this->resolveValue('ANTHROPIC_MODEL', $localData) ?: 'claude-3-5-haiku-20241022';
+
+        if (empty($apiKey)) {
+            jsonError('ANTHROPIC_API_KEY no está configurada.', 400);
+        }
+
+        $startTime = microtime(true);
+        $payload = json_encode([
+            'model'      => $model,
+            'max_tokens' => 5,
+            'messages'   => [
+                ['role' => 'user', 'content' => 'Ping']
+            ],
+        ]);
+
+        $ch = curl_init('https://api.anthropic.com/v1/messages');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_TIMEOUT        => 8,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'x-api-key: ' . $apiKey,
+                'anthropic-version: 2023-06-01',
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        $latencyMs = round((microtime(true) - $startTime) * 1000);
+
+        if ($curlError) {
+            jsonError("Fallo de red al conectar con Anthropic: {$curlError}", 502);
+        }
+
+        if ($httpCode === 200) {
+            jsonSuccess([
+                'success'    => true,
+                'latency_ms' => $latencyMs,
+                'message'    => "Conexión exitosa con Anthropic Claude ({$model}). La API key es válida.",
+            ]);
+        } else {
+            $parsed = json_decode($response, true);
+            $msg = $parsed['error']['message'] ?? "HTTP {$httpCode}";
+            jsonError("Error de autenticación con Anthropic Claude ({$httpCode}): {$msg}", 400);
         }
     }
 

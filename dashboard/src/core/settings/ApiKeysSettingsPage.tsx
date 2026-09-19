@@ -1,16 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api/client';
-import type { ApiKeysData, TestConnectionResult } from '../../api/types';
+import type { ApiKeysData, TestConnectionResult, ApiServiceId, AiTranslationProvider } from '../../api/types';
 import { useToast } from '../ui/ToastContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
+const AI_PROVIDERS: Array<{
+  id: AiTranslationProvider;
+  name: string;
+  badge: string;
+  description: string;
+  icon: string;
+}> = [
+  {
+    id: 'nvidia_nim',
+    name: 'NVIDIA NIM',
+    badge: 'Predeterminado / Gratuito',
+    description: 'Llama-3.1 70B Instruct en la nube de NVIDIA. Alta fidelidad turística.',
+    icon: '🟢',
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI (ChatGPT)',
+    badge: 'GPT-4o mini / GPT-4o',
+    description: 'Modelos de OpenAI con alta velocidad y consistencia multilingüe.',
+    icon: '⚡',
+  },
+  {
+    id: 'gemini',
+    name: 'Google Gemini',
+    badge: 'Gemini 1.5 Flash / Pro',
+    description: 'API de Google AI Studio con ventana amplia y respuesta inmediata.',
+    icon: '✨',
+  },
+  {
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    badge: 'Claude 3.5 Haiku',
+    description: 'Redacción y tono con máxima naturalidad y matiz en catalán y francés.',
+    icon: '🟣',
+  },
+];
+
 export const ApiKeysSettingsPage: React.FC = () => {
   const [data, setData] = useState<ApiKeysData | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [switchingProvider, setSwitchingProvider] = useState(false);
   const [testingService, setTestingService] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, TestConnectionResult | { success: false; message: string }>>({});
 
@@ -49,6 +87,20 @@ export const ApiKeysSettingsPage: React.FC = () => {
     loadApiKeys();
   }, []);
 
+  const handleSelectAiProvider = async (providerId: AiTranslationProvider) => {
+    try {
+      setSwitchingProvider(true);
+      await api.settings.apiKeys.save('AI_TRANSLATION_PROVIDER', providerId, 'Proveedor activo de traducción con IA');
+      toast.success(`Proveedor de traducción cambiado a ${providerId.toUpperCase()}.`);
+      await loadApiKeys();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al cambiar proveedor de IA';
+      toast.error(msg);
+    } finally {
+      setSwitchingProvider(false);
+    }
+  };
+
   const handleSaveStandardKey = async (keyName: string) => {
     const val = inputValues[keyName];
     if (val === undefined) return;
@@ -72,7 +124,7 @@ export const ApiKeysSettingsPage: React.FC = () => {
     }
   };
 
-  const handleTestService = async (serviceId: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor' | 'telegram') => {
+  const handleTestService = async (serviceId: ApiServiceId) => {
     try {
       setTestingService(serviceId);
       const res = await api.settings.apiKeys.testConnection(serviceId);
@@ -150,6 +202,8 @@ export const ApiKeysSettingsPage: React.FC = () => {
     );
   }
 
+  const activeProvider = data?.active_translation_provider || 'nvidia_nim';
+
   return (
     <div className="space-y-10 max-w-5xl mx-auto pb-16">
       {/* Header */}
@@ -194,6 +248,66 @@ export const ApiKeysSettingsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* 0. AI Translation Provider Selector */}
+      <Card
+        title="🤖 Motor de Traducción con Inteligencia Artificial"
+        subtitle="Elige qué proveedor de IA procesará las traducciones automáticas al catalán, inglés y francés en las actividades y textos del CMS."
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {AI_PROVIDERS.map((prov) => {
+              const isSelected = activeProvider === prov.id;
+              return (
+                <button
+                  key={prov.id}
+                  type="button"
+                  disabled={switchingProvider}
+                  onClick={() => handleSelectAiProvider(prov.id)}
+                  className={`relative p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between gap-2.5 ${
+                    isSelected
+                      ? 'border-accent bg-accent/10 shadow-sm ring-1 ring-accent'
+                      : 'border-border bg-bg/50 hover:bg-surface-elevated hover:border-border-hover'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-xl">{prov.icon}</span>
+                    {isSelected ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent text-accent-contrast">
+                        ACTIVO
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-elevated border border-border text-muted">
+                        Seleccionar
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-bold text-primary flex items-center gap-1.5">
+                      {prov.name}
+                    </h4>
+                    <p className="text-[11px] text-muted line-clamp-2 mt-0.5">
+                      {prov.description}
+                    </p>
+                  </div>
+
+                  <span className="text-[10px] font-semibold text-secondary opacity-80">
+                    {prov.badge}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="p-3 rounded-xl bg-surface-elevated/60 border border-border text-xs text-muted flex items-center justify-between gap-2">
+            <span>
+              ℹ️ Motor activo actual:{' '}
+              <strong className="text-primary font-mono uppercase">{activeProvider}</strong>. Asegúrate de configurar su API key debajo.
+            </span>
+          </div>
+        </div>
+      </Card>
+
       {/* 1. Standard Integrations */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -207,6 +321,7 @@ export const ApiKeysSettingsPage: React.FC = () => {
           {data?.services.map((service) => {
             const hasAnyConfigured = service.keys.some((k) => k.is_configured);
             const isAllConfigured = service.keys.filter((k) => k.is_required).every((k) => k.is_configured);
+            const isCurrentAiActive = service.id === activeProvider;
             const testRes = testResults[service.id];
 
             return (
@@ -216,16 +331,25 @@ export const ApiKeysSettingsPage: React.FC = () => {
                 subtitle={service.description}
                 action={
                   <div className="flex items-center gap-2">
+                    {isCurrentAiActive && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent text-accent-contrast">
+                        MOTOR IA ACTIVO
+                      </span>
+                    )}
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                        isAllConfigured
+                        isAllConfigured && hasAnyConfigured
                           ? 'bg-success/15 text-success border border-success/30'
                           : hasAnyConfigured
                           ? 'bg-warning/15 text-warning border border-warning/30'
                           : 'bg-muted/15 text-muted border border-border'
                       }`}
                     >
-                      {isAllConfigured ? '● Activa y configurada' : hasAnyConfigured ? '◐ Parcialmente configurada' : '○ No configurada'}
+                      {isAllConfigured && hasAnyConfigured
+                        ? '● Configurada'
+                        : hasAnyConfigured
+                        ? '◐ Parcialmente configurada'
+                        : '○ No configurada'}
                     </span>
                   </div>
                 }
@@ -448,47 +572,47 @@ export const ApiKeysSettingsPage: React.FC = () => {
                 <div key={ck.key_name} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-sm text-primary">{ck.key_name}</span>
-                      <span className="font-mono text-xs text-muted bg-surface-elevated px-2 py-0.5 rounded border border-border">
-                        {ck.masked_value}
+                      <span className="font-mono text-xs font-bold text-primary">{ck.key_name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-elevated border border-border text-secondary">
+                        {ck.is_configured ? 'Configurada' : 'Vacía'}
                       </span>
                     </div>
-                    {ck.description && <p className="text-xs text-secondary">{ck.description}</p>}
-                    {ck.updated_at && <p className="text-[10px] text-muted">Última actualización: {ck.updated_at}</p>}
+                    {ck.description && <p className="text-xs text-muted">{ck.description}</p>}
+                    <div className="flex items-center gap-3 text-[11px] text-muted">
+                      <span>Valor: <code className="font-mono text-primary">{ck.masked_value || '(vacío)'}</code></span>
+                      {ck.updated_at && <span>• Actualizado: {ck.updated_at}</span>}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setKeyToDelete(ck.key_name)}
-                      className="text-danger-text hover:text-danger hover:bg-danger/10"
-                    >
-                      🗑️ Eliminar
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setKeyToDelete(ck.key_name)}
+                  >
+                    🗑️ Eliminar
+                  </Button>
                 </div>
               ))}
             </div>
           </Card>
-        ) : (
-          <div className="p-8 rounded-2xl bg-surface-elevated border border-dashed border-border text-center text-muted text-xs">
-            No hay credenciales personalizadas adicionales registradas aún.
-          </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={keyToDelete !== null}
-        onClose={() => setKeyToDelete(null)}
-        onConfirm={handleDeleteCustomKey}
-        title="Eliminar credencial personalizada"
-        message={`¿Estás seguro de que deseas eliminar la variable '${keyToDelete}' del archivo de configuración del servidor?`}
-        confirmText="Eliminar credencial"
-        isLoading={isDeleting}
-      />
+      {/* Delete Confirmation Modal */}
+      {keyToDelete && (
+        <ConfirmDialog
+          isOpen={true}
+          title="Eliminar Credencial Personalizada"
+          message={`¿Estás seguro de que deseas eliminar permanentemente la credencial '${keyToDelete}' de config.local.php? Las integraciones que dependan de esta variable podrían dejar de funcionar.`}
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          variant="danger"
+          isLoading={isDeleting}
+          onConfirm={handleDeleteCustomKey}
+          onClose={() => setKeyToDelete(null)}
+        />
+      )}
     </div>
   );
 };

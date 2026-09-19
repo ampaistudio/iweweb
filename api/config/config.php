@@ -49,10 +49,25 @@ $defaultConfig = [
         'verify_token'      => getenv('META_VERIFY_TOKEN') ?: '',
         'api_version'       => 'v21.0',
     ],
+    'ai_translation' => [
+        'active_provider' => getenv('AI_TRANSLATION_PROVIDER') ?: 'nvidia_nim',
+    ],
     'nvidia_nim' => [
         'api_key' => getenv('NVIDIA_NIM_API_KEY') ?: '',
         'api_url' => getenv('NVIDIA_NIM_API_URL') ?: 'https://integrate.api.nvidia.com/v1/chat/completions',
         'model'   => getenv('NVIDIA_NIM_MODEL') ?: 'meta/llama-3.1-70b-instruct',
+    ],
+    'openai' => [
+        'api_key' => getenv('OPENAI_API_KEY') ?: '',
+        'model'   => getenv('OPENAI_MODEL') ?: 'gpt-4o-mini',
+    ],
+    'gemini' => [
+        'api_key' => getenv('GEMINI_API_KEY') ?: '',
+        'model'   => getenv('GEMINI_MODEL') ?: 'gemini-1.5-flash',
+    ],
+    'anthropic' => [
+        'api_key' => getenv('ANTHROPIC_API_KEY') ?: '',
+        'model'   => getenv('ANTHROPIC_MODEL') ?: 'claude-3-5-haiku-20241022',
     ],
     /**
      * Google Places API Integration
