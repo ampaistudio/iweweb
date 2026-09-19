@@ -22,6 +22,7 @@ const defaultNavItems: NavItem[] = [
   { to: '/content', label: 'Textos de la Web', icon: '📝' },
   { to: '/posts', label: 'Novedades y Redes', icon: '📢' },
   { to: '/media', label: 'Galería de Fotos', icon: '🖼️' },
+  { to: '/settings/api-keys', label: 'Integraciones & API Keys', icon: '🔐' },
 ];
 
 

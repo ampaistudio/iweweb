@@ -13,6 +13,7 @@ import { MediaPage } from './core/media/MediaPage';
 import { ContentEditorPage } from './core/content/ContentEditorPage';
 import { PostsListPage } from './core/posts/PostsListPage';
 import { PostEditorPage } from './core/posts/PostEditorPage';
+import { ApiKeysSettingsPage } from './core/settings/ApiKeysSettingsPage';
 
 // Domain Pages & Widgets (iWE Tourism Specific)
 import { ActivityListPage } from './activities/ActivityListPage';
@@ -77,6 +78,9 @@ export const App: React.FC = () => {
 
               {/* Core: Media Library */}
               <Route path="media" element={<MediaPage />} />
+
+              {/* Core: Settings & Integrations / API Keys */}
+              <Route path="settings/api-keys" element={<ApiKeysSettingsPage />} />
             </Route>
 
             {/* Fallback */}

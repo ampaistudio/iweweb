@@ -10,7 +10,46 @@ export interface AuthUser {
   id: number;
   email: string;
   display_name: string;
+  role: 'admin' | 'user';
   created_at: string;
+}
+
+export interface ApiKeyItem {
+  key_name: string;
+  label: string;
+  is_required: boolean;
+  is_configured: boolean;
+  masked_value: string;
+  description: string;
+}
+
+export interface ApiServiceInfo {
+  id: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor';
+  title: string;
+  description: string;
+  docs_url: string;
+  keys: ApiKeyItem[];
+}
+
+export interface CustomApiKey {
+  key_name: string;
+  is_configured: boolean;
+  masked_value: string;
+  description: string;
+  updated_at: string;
+}
+
+export interface ApiKeysData {
+  services: ApiServiceInfo[];
+  custom_keys: CustomApiKey[];
+  storage_file: string;
+  is_writable: boolean;
+}
+
+export interface TestConnectionResult {
+  success: boolean;
+  latency_ms: number;
+  message: string;
 }
 
 export interface MediaItem {

@@ -11,6 +11,8 @@ import type {
   PackageItem,
   PackagePayload,
   ActivityImage,
+  ApiKeysData,
+  TestConnectionResult,
 } from './types';
 
 
@@ -317,6 +319,24 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify({ items }),
       }),
+  },
+
+  settings: {
+    apiKeys: {
+      get: () => request<ApiKeysData>('/settings/api-keys', { method: 'GET' }),
+      save: (keyName: string, value: string, description?: string) =>
+        request<{ key_name: string; is_configured: boolean; masked_value: string }>('/settings/api-keys', {
+          method: 'POST',
+          body: JSON.stringify({ key_name: keyName, value, description }),
+        }),
+      deleteCustom: (keyName: string) =>
+        request<void>(`/settings/api-keys/${encodeURIComponent(keyName)}`, { method: 'DELETE' }),
+      testConnection: (service: 'nvidia_nim' | 'meta' | 'google_places' | 'tripadvisor') =>
+        request<TestConnectionResult>('/settings/api-keys/test', {
+          method: 'POST',
+          body: JSON.stringify({ service }),
+        }),
+    },
   },
 };
 

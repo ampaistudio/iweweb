@@ -30,6 +30,7 @@ require_once __DIR__ . '/core/translation/TranslationController.php';
 require_once __DIR__ . '/core/reviews/ReviewsController.php';
 require_once __DIR__ . '/core/menu/MenuController.php';
 require_once __DIR__ . '/core/packages/PackageController.php';
+require_once __DIR__ . '/core/settings/ApiKeysController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
@@ -354,6 +355,29 @@ try {
             $webhookController->handle();
         }
         jsonError('Ruta social no encontrada.', 404);
+    }
+
+    // --- Settings & API Keys Endpoints ---
+    if ($resource === 'settings') {
+        $sub = $segments[1] ?? '';
+        if ($sub === 'api-keys') {
+            $apiKeysController = new ApiKeysController($pdo, $config);
+            $action = $segments[2] ?? null;
+
+            if ($action === null) {
+                if ($method === 'GET') {
+                    $apiKeysController->getKeys();
+                } elseif ($method === 'POST') {
+                    $apiKeysController->saveKey();
+                }
+            } elseif ($action === 'test' && $method === 'POST') {
+                $apiKeysController->testConnection();
+            } elseif ($method === 'DELETE' && $action !== null) {
+                $apiKeysController->deleteCustomKey((string)$action);
+            }
+            jsonError('Método no permitido para /api/settings/api-keys', 405);
+        }
+        jsonError('Ruta de configuración no encontrada.', 404);
     }
 
     // Unmatched route

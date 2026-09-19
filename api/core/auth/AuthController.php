@@ -26,7 +26,7 @@ class AuthController {
             jsonError('Email y contraseña son obligatorios.', 422);
         }
 
-        $stmt = $this->pdo->prepare('SELECT id, email, password_hash, display_name, created_at FROM users WHERE email = :email LIMIT 1');
+        $stmt = $this->pdo->prepare('SELECT id, email, password_hash, display_name, role, created_at FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => strtolower($email)]);
         $user = $stmt->fetch();
 

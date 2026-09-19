@@ -51,13 +51,14 @@ function jsonError(string $message, int $status = 400, $details = null): void {
 function getRequestBody(): array {
     $contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
     
-    if (stripos($contentType, 'application/json') !== false) {
+    if (stripos($contentType, 'application/json') !== false || empty($_POST)) {
         $raw = file_get_contents('php://input');
-        if (empty($raw)) {
-            return [];
+        if (!empty($raw)) {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
         }
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
     }
     
     return $_POST ?? [];
@@ -100,7 +101,7 @@ function getAuthenticatedUser(PDO $pdo): ?array {
     }
 
     $userId = (int)$_SESSION['user_id'];
-    $stmt = $pdo->prepare('SELECT id, email, display_name, created_at FROM users WHERE id = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, display_name, role, created_at FROM users WHERE id = :id LIMIT 1');
     $stmt->execute(['id' => $userId]);
     $user = $stmt->fetch();
 
@@ -111,6 +112,14 @@ function requireAuth(PDO $pdo): array {
     $user = getAuthenticatedUser($pdo);
     if (!$user) {
         jsonError('No autenticado. Se requiere una sesión activa para realizar esta acción.', 401);
+    }
+    return $user;
+}
+
+function requireAdmin(PDO $pdo): array {
+    $user = requireAuth($pdo);
+    if (($user['role'] ?? 'user') !== 'admin') {
+        jsonError('Acceso denegado. Se requieren privilegios de administrador para esta acción.', 403);
     }
     return $user;
 }

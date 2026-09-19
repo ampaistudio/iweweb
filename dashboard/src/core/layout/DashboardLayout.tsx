@@ -19,6 +19,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ customNavItems
     if (pathname.startsWith('/content')) return 'Textos de la Web';
     if (pathname.startsWith('/posts')) return 'Novedades y Redes Sociales';
     if (pathname.startsWith('/media')) return 'Galería Multimedia';
+    if (pathname.startsWith('/settings')) return 'Configuración de Integraciones & API Keys';
     return 'Panel Editorial';
   };
 
