@@ -16,3 +16,4 @@ INSERT INTO `activity_types` (`name`, `display_order`) VALUES
 ('Rafting', 6),
 ('Heliflight', 7)
 ON DUPLICATE KEY UPDATE `display_order` = VALUES(`display_order`);
+

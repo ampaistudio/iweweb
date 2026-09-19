@@ -16,3 +16,4 @@ CREATE TABLE IF NOT EXISTS activity_social_links (
     UNIQUE KEY uq_activity_platform (activity_id, platform),
     CONSTRAINT fk_activity_social_links_activity FOREIGN KEY (activity_id) REFERENCES activities (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
