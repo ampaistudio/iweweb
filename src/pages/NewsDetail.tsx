@@ -5,6 +5,7 @@ import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
 import { formatDate, formatTextParagraphs } from '../utils/sanitize';
 import { usePreferences } from '../context/PreferencesContext';
+import { updateSeo } from '../utils/seo';
 
 function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
   return (
@@ -25,6 +26,18 @@ export default function NewsDetail() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (post) {
+      const coverUrl = post.cover_image_url || (post.cover_filename ? resolveMediaUrl(post.cover_filename) : undefined);
+      updateSeo({
+        title: `${post.title} | iWE Andorra`,
+        description: post.body,
+        image: coverUrl,
+        type: "article",
+      });
+    }
+  }, [post]);
 
   useEffect(() => {
     let isMounted = true;

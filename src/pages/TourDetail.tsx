@@ -8,6 +8,7 @@ import { resolveMediaUrl } from "../utils/media";
 import { buildWhatsAppUrl } from "../utils/whatsapp";
 import TourHero from "../components/TourHero";
 import type { HeroSlide } from "../components/HeroSlideshow";
+import { updateSeo } from "../utils/seo";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -141,6 +142,17 @@ function TourDetail() {
     itinerary: baseActivity?.itinerary,
     technicalSpecs: baseActivity?.technicalSpecs,
   };
+
+  useEffect(() => {
+    if (activity.title) {
+      updateSeo({
+        title: `${activity.title} | iWE Andorra`,
+        description: activity.description || `${activity.type} en ${activity.region}, Andorra. Rutas y expediciones guiadas con iWE.`,
+        image: activity.image,
+        type: "article",
+      });
+    }
+  }, [activity.title, activity.description, activity.image, activity.type, activity.region]);
 
   // Build gallery images array
   const rawImages = fullActivity?.images || baseActivity?.images;

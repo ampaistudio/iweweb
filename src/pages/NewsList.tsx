@@ -5,6 +5,7 @@ import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
 import { formatDate, generateExcerpt } from '../utils/sanitize';
 import { usePreferences } from '../context/PreferencesContext';
+import { updateSeo } from '../utils/seo';
 
 function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
   return (
@@ -24,6 +25,13 @@ export default function NewsList() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    updateSeo({
+      title: "Novedades y Rutas | iWE Andorra",
+      description: "Actualidad de montaña, estado de senderos, relatos de expediciones y consejos técnicos en Andorra y los Pirineos.",
+    });
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { updateSeo } from "../utils/seo";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -14,6 +16,13 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
 }
 
 function Privacy() {
+  useEffect(() => {
+    updateSeo({
+      title: "Política de Privacidad | iWE Andorra",
+      description: "Información legal, protección de datos y condiciones de privacidad de Isard Wildland Experience (iWE).",
+    });
+  }, []);
+
   return (
     <main className="tour-detail page-width">
       <div className="tour-detail-back">
