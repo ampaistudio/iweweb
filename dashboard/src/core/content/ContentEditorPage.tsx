@@ -51,10 +51,13 @@ export const ContentEditorPage: React.FC = () => {
     seo_og_image: '',
     social_instagram: 'https://www.instagram.com/isardwildland/',
     social_facebook: 'https://www.facebook.com/isardwildland/',
+    social_tripadvisor: '',
+    social_whatsapp: '',
     social_youtube: '',
     social_tiktok: '',
-    social_tripadvisor: '',
     social_strava: '',
+    social_linkedin: '',
+    social_twitter: '',
   });
 
   // Translations (CA, EN, FR)
@@ -1046,6 +1049,18 @@ export const ContentEditorPage: React.FC = () => {
               placeholder="https://www.facebook.com/isardwildland/"
             />
             <Input
+              label="🦉 TripAdvisor (URL)"
+              value={form.social_tripadvisor || ''}
+              onChange={(e) => handleChange('social_tripadvisor', e.target.value)}
+              placeholder="https://www.tripadvisor.com/Attraction_Review..."
+            />
+            <Input
+              label="💬 WhatsApp (Enlace directo o wa.me)"
+              value={form.social_whatsapp || ''}
+              onChange={(e) => handleChange('social_whatsapp', e.target.value)}
+              placeholder="https://wa.me/376344870"
+            />
+            <Input
               label="▶️ YouTube (URL)"
               value={form.social_youtube || ''}
               onChange={(e) => handleChange('social_youtube', e.target.value)}
@@ -1058,16 +1073,22 @@ export const ContentEditorPage: React.FC = () => {
               placeholder="https://www.tiktok.com/@isardwildland"
             />
             <Input
-              label="🦉 TripAdvisor (URL)"
-              value={form.social_tripadvisor || ''}
-              onChange={(e) => handleChange('social_tripadvisor', e.target.value)}
-              placeholder="https://www.tripadvisor.com/Attraction_Review..."
-            />
-            <Input
               label="🚴 Strava (Club / Perfil)"
               value={form.social_strava || ''}
               onChange={(e) => handleChange('social_strava', e.target.value)}
               placeholder="https://www.strava.com/clubs/..."
+            />
+            <Input
+              label="💼 LinkedIn (Página de Empresa / Perfil)"
+              value={form.social_linkedin || ''}
+              onChange={(e) => handleChange('social_linkedin', e.target.value)}
+              placeholder="https://www.linkedin.com/company/isardwildland"
+            />
+            <Input
+              label="✖️ X / Twitter (Perfil)"
+              value={form.social_twitter || ''}
+              onChange={(e) => handleChange('social_twitter', e.target.value)}
+              placeholder="https://x.com/isardwildland"
             />
           </div>
         </Card>
