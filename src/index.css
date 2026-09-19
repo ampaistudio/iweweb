@@ -461,6 +461,20 @@ h3 { color: var(--text-primary); font-size: 1.5625rem; letter-spacing: -.04em; l
 .tour-booking-cta { padding-top: 8px; }
 .tour-booking-button { width: 100%; justify-content: center; padding: 18px 28px; font-size: 0.9375rem; font-weight: 600; }
 
+/* Tour Share Widget */
+.tour-share-box { margin-top: 24px; padding: 18px 20px; background: var(--sand); border: 1px solid var(--line); border-radius: 8px; display: flex; flex-direction: column; gap: 12px; }
+.tour-share-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.tour-share-title { font-family: "Space Grotesk", sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+.tour-share-toast { font-size: 0.75rem; font-weight: 600; color: var(--forest); background: rgba(163, 230, 53, 0.18); padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(163, 230, 53, 0.4); }
+.tour-share-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.tour-share-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 0.8125rem; font-weight: 600; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--text-primary); text-decoration: none; cursor: pointer; transition: all 0.2s ease; }
+.tour-share-btn:hover { border-color: var(--text-muted); transform: translateY(-1px); }
+.tour-share-btn .tour-share-svg { width: 16px; height: 16px; flex-shrink: 0; }
+.tour-share-btn.share-wa:hover { color: #25D366; border-color: #25D366; background: rgba(37, 211, 102, 0.08); }
+.tour-share-btn.share-fb:hover { color: #1877F2; border-color: #1877F2; background: rgba(24, 119, 242, 0.08); }
+.tour-share-btn.share-ig:hover { color: #E4405F; border-color: #E4405F; background: rgba(228, 64, 95, 0.08); }
+.tour-share-btn.share-copy:hover { color: var(--forest); border-color: var(--forest); background: rgba(45, 80, 50, 0.08); }
+
 /* Lightbox Modal */
 .tour-lightbox-backdrop { position: fixed; inset: 0; background: rgba(10,24,18,.88); backdrop-filter: blur(10px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; }
 .tour-lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }

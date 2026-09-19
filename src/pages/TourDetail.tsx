@@ -9,6 +9,7 @@ import { buildWhatsAppUrl } from "../utils/whatsapp";
 import TourHero from "../components/TourHero";
 import type { HeroSlide } from "../components/HeroSlideshow";
 import { updateSeo } from "../utils/seo";
+import { TourShareWidget } from "../components/TourShareWidget";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -339,6 +340,13 @@ function TourDetail() {
                 Reservar esta experiencia <ArrowIcon />
               </a>
             </div>
+
+            {/* Public Tour Share Widget */}
+            <TourShareWidget
+              title={activity.title}
+              type={activity.type}
+              region={activity.region}
+            />
           </div>
         </div>
 
