@@ -7,13 +7,13 @@ SET NAMES utf8mb4;
 
 -- -----------------------------------------------------------------------------
 -- 1. Initial Users (Christian & Charly)
--- Default password: password (Hash generated via PHP password_hash(..., PASSWORD_DEFAULT))
--- Hash: $2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
+-- Contraseña temporal aleatoria de un solo uso. Cambiarla inmediatamente
+-- despues de correr esta migracion en cualquier entorno nuevo.
 -- -----------------------------------------------------------------------------
 INSERT INTO users (id, email, password_hash, display_name, created_at)
-VALUES 
-  (1, 'christian@nodoai.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Christian Rotger', NOW()),
-  (2, 'charly@isardwildland.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Charly Paredes', NOW())
+VALUES
+  (1, 'christian@nodoai.com', '$2y$12$1fRgMDP4EsD5TJGHOwT4v.Mmx1lX7pw.4CWtqjpMp2Hp9b21NwhYm', 'Christian Rotger', NOW()),
+  (2, 'charly@isardwildland.com', '$2y$12$1fRgMDP4EsD5TJGHOwT4v.Mmx1lX7pw.4CWtqjpMp2Hp9b21NwhYm', 'Charly Paredes', NOW())
 ON DUPLICATE KEY UPDATE display_name = VALUES(display_name);
 
 -- -----------------------------------------------------------------------------
