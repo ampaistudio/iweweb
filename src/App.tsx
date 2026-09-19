@@ -64,7 +64,9 @@ function App() {
   const contactPhone = getContent("contact_phone", "+376 344 870");
   const logoUrl = getContent("logo_url", "");
   const logoHeight = getContent("logo_height", "44");
-  const logoStyle = { height: `${logoHeight}px`, maxHeight: "72px" };
+  const logoHeightNum = parseInt(logoHeight, 10) || 44;
+  const currentLogoHeight = scrolled ? Math.min(logoHeightNum, 52) : logoHeightNum;
+  const logoStyle = { height: `${currentLogoHeight}px`, maxHeight: scrolled ? "52px" : "120px" };
 
   return (
     <div className="site-shell">

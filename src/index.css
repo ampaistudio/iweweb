@@ -78,7 +78,7 @@ h3 { color: var(--text-primary); font-size: 1.5625rem; letter-spacing: -.04em; l
 .dark-link { color: var(--ink); }
 
 /* Header */
-.site-header { align-items: center; background: transparent; display: flex; height: 100px; justify-content: space-between; left: 0; padding: 0 clamp(20px, 3vw, 48px); position: absolute; right: 0; top: 0; transition: background .3s ease, color .3s ease, height .3s ease, border-color .3s ease; z-index: 10; }
+.site-header { align-items: center; background: transparent; display: flex; min-height: 100px; height: auto; justify-content: space-between; left: 0; padding: 14px clamp(20px, 3vw, 48px); position: absolute; right: 0; top: 0; transition: background .3s ease, color .3s ease, min-height .3s ease, padding .3s ease, border-color .3s ease; z-index: 10; }
 
 /* Default Header (over normal page content) */
 .site-header-default { color: var(--text-primary); }
@@ -97,7 +97,7 @@ h3 { color: var(--text-primary); font-size: 1.5625rem; letter-spacing: -.04em; l
 .site-header-hero .preferences-language-select { border-color: rgba(255,255,255,.4); color: inherit; }
 
 /* Scrolled Header (sticky solid dark bar) */
-.site-header-scrolled { background: rgba(29, 39, 34, .95) !important; color: white !important; height: 76px; position: fixed; }
+.site-header-scrolled { background: rgba(29, 39, 34, .95) !important; color: white !important; min-height: 72px; height: auto; padding-block: 8px; position: fixed; }
 .site-header-scrolled .brand-name { border-left-color: rgba(255,255,255,.45) !important; }
 .site-header-scrolled .brand-logo-placeholder { border-color: rgba(255,255,255,.35) !important; color: rgba(255,255,255,.7) !important; }
 .site-header-scrolled .preferences-button { border-color: rgba(255,255,255,.4) !important; color: white !important; }
@@ -108,10 +108,10 @@ h3 { color: var(--text-primary); font-size: 1.5625rem; letter-spacing: -.04em; l
 .brand-symbol { font-family: "Space Grotesk", sans-serif; font-size: 1.6875rem; font-weight: 700; letter-spacing: -.14em; line-height: 1; }
 .brand-symbol span { color: var(--lime); display: inline-block; margin: 0 2px; }
 .brand-name { border-left: 1px solid rgba(255,255,255,.45); font-family: "Space Grotesk", sans-serif; font-size: 0.625rem; letter-spacing: .2em; padding-left: 12px; text-transform: uppercase; }
-.brand-logo-placeholder { align-items: center; border: 1px dashed rgba(255,255,255,.5); border-radius: 4px; color: rgba(255,255,255,.8); display: inline-flex; font-family: "Space Grotesk", sans-serif; font-size: 0.75rem; gap: 6px; justify-content: center; letter-spacing: .08em; padding: 0 14px; text-transform: uppercase; transition: height .2s ease; }
+.brand-logo-placeholder { align-items: center; border: 1px dashed rgba(255,255,255,.5); border-radius: 4px; color: rgba(255,255,255,.8); display: inline-flex; font-family: "Space Grotesk", sans-serif; font-size: 0.75rem; gap: 6px; justify-content: center; letter-spacing: .08em; padding: 0 14px; text-transform: uppercase; transition: height .2s ease, max-height .2s ease; max-height: 120px; }
 .brand-logo-placeholder .brand-logo-symbol { font-weight: 700; color: var(--lime); font-size: 1.125rem; }
 .brand-logo-placeholder .brand-logo-sub { font-size: 0.625rem; opacity: 0.8; letter-spacing: 0.12em; }
-.brand-logo-image { height: 44px; width: auto; object-fit: contain; transition: height .2s ease; }
+.brand-logo-image { max-height: 120px; width: auto; object-fit: contain; transition: height .2s ease, max-height .2s ease; }
 
 .desktop-nav { align-items: center; display: flex; gap: clamp(1rem, 1.8vw, 2rem); margin-left: auto; margin-right: clamp(1rem, 1.8vw, 2rem); }
 .desktop-nav > a, .header-contact { font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; opacity: .9; transition: opacity .2s ease; white-space: nowrap; }

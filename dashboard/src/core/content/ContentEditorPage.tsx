@@ -270,7 +270,7 @@ export const ContentEditorPage: React.FC = () => {
                 <input
                   type="range"
                   min="24"
-                  max="72"
+                  max="120"
                   step="2"
                   value={form.logo_height || '44'}
                   onChange={(e) => handleChange('logo_height', e.target.value)}
@@ -280,6 +280,7 @@ export const ContentEditorPage: React.FC = () => {
                   <span>24px (compacto)</span>
                   <span>44px (estándar)</span>
                   <span>72px (grande)</span>
+                  <span>120px (máximo)</span>
                 </div>
               </div>
 
