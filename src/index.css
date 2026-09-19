@@ -67,8 +67,8 @@ h3 { color: var(--text-primary); font-size: 1.5625rem; letter-spacing: -.04em; l
 .large-copy { color: var(--text-muted); font-size: 1.1875rem; line-height: 1.6; max-width: 500px; }
 .button { align-items: center; border: 1px solid transparent; display: inline-flex; font-size: 0.75rem; font-weight: 700; gap: 22px; justify-content: center; letter-spacing: .1em; padding: 17px 20px; text-transform: uppercase; transition: background .25s ease, color .25s ease, transform .25s ease; }
 .button:hover { transform: translateY(-3px); }
-.button-light { background: white; color: var(--ink); }
-.button-light:hover { background: var(--lime); }
+.button-light { background: var(--surface); color: var(--text-primary); }
+.button-light:hover { background: var(--lime); color: var(--ink); }
 .button-dark { background: var(--ink-surface); color: var(--ink-surface-text); }
 .button-dark:hover { background: var(--forest); }
 .text-link { align-items: center; display: inline-flex; font-size: 0.75rem; font-weight: 700; gap: 16px; letter-spacing: .1em; padding-bottom: 8px; position: relative; text-transform: uppercase; }

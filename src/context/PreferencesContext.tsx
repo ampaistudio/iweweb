@@ -2,15 +2,13 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Theme = "light" | "dark";
 export type FontScale = "normal" | "large" | "xlarge";
-export type LanguageCode = "es" | "ca" | "en" | "fr" | "de" | "zh";
+export type LanguageCode = "es" | "ca" | "en" | "fr";
 
 export const languages: { code: LanguageCode; label: string }[] = [
   { code: "es", label: "Español" },
   { code: "ca", label: "Català" },
   { code: "en", label: "English" },
   { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "zh", label: "中文" },
 ];
 
 type PreferencesContextValue = {
