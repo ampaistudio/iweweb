@@ -88,13 +88,13 @@ class ActivityController {
                 SELECT 
                     a.id, 
                     COALESCE(NULLIF(t.title, ""), a.title) AS title,
-                    a.region, 
-                    a.country, 
+                    COALESCE(NULLIF(t.region, ""), a.region) AS region, 
+                    COALESCE(NULLIF(t.country, ""), a.country) AS country, 
                     a.type, 
-                    a.level, 
-                    a.duration, 
+                    COALESCE(NULLIF(t.level, ""), a.level) AS level, 
+                    COALESCE(NULLIF(t.duration, ""), a.duration) AS duration, 
                     a.image_url, 
-                    a.alt_text, 
+                    COALESCE(NULLIF(t.alt_text, ""), a.alt_text) AS alt_text, 
                     a.price,
                     COALESCE(NULLIF(t.description, ""), a.description) AS description,
                     COALESCE(NULLIF(t.intro_title, ""), a.intro_title) AS intro_title,
@@ -192,20 +192,25 @@ class ActivityController {
 
         // Fetch translations for all locales (CA, EN, FR)
         $translations = [
-            'ca' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'highlights' => []],
-            'en' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'highlights' => []],
-            'fr' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'highlights' => []],
+            'ca' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'region' => '', 'country' => '', 'level' => '', 'duration' => '', 'alt_text' => '', 'highlights' => []],
+            'en' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'region' => '', 'country' => '', 'level' => '', 'duration' => '', 'alt_text' => '', 'highlights' => []],
+            'fr' => ['title' => '', 'description' => '', 'intro_title' => '', 'intro_text' => '', 'region' => '', 'country' => '', 'level' => '', 'duration' => '', 'alt_text' => '', 'highlights' => []],
         ];
 
-        $stmtT = $this->pdo->prepare('SELECT locale, title, description, intro_title, intro_text FROM activity_translations WHERE activity_id = :id');
+        $stmtT = $this->pdo->prepare('SELECT locale, title, description, intro_title, intro_text, region, country, level, duration, alt_text FROM activity_translations WHERE activity_id = :id');
         $stmtT->execute(['id' => $id]);
         while ($t = $stmtT->fetch()) {
             $loc = $t['locale'];
             if (isset($translations[$loc])) {
-                $translations[$loc]['title'] = $t['title'];
-                $translations[$loc]['description'] = $t['description'];
+                $translations[$loc]['title'] = $t['title'] ?? '';
+                $translations[$loc]['description'] = $t['description'] ?? '';
                 $translations[$loc]['intro_title'] = $t['intro_title'] ?? '';
                 $translations[$loc]['intro_text'] = $t['intro_text'] ?? '';
+                $translations[$loc]['region'] = $t['region'] ?? '';
+                $translations[$loc]['country'] = $t['country'] ?? '';
+                $translations[$loc]['level'] = $t['level'] ?? '';
+                $translations[$loc]['duration'] = $t['duration'] ?? '';
+                $translations[$loc]['alt_text'] = $t['alt_text'] ?? '';
             }
         }
 
@@ -245,6 +250,11 @@ class ActivityController {
         $displayDescription = $activity['description'];
         $displayIntroTitle = $activity['intro_title'] ?? null;
         $displayIntroText = $activity['intro_text'] ?? null;
+        $displayRegion = $activity['region'];
+        $displayCountry = $activity['country'];
+        $displayLevel = $activity['level'];
+        $displayDuration = $activity['duration'];
+        $displayAltText = $activity['alt_text'];
         $displayHighlights = $baseHighlights;
 
         if ($locale !== 'es' && isset($translations[$locale])) {
@@ -259,6 +269,21 @@ class ActivityController {
             }
             if (!empty($translations[$locale]['intro_text'])) {
                 $displayIntroText = $translations[$locale]['intro_text'];
+            }
+            if (!empty($translations[$locale]['region'])) {
+                $displayRegion = $translations[$locale]['region'];
+            }
+            if (!empty($translations[$locale]['country'])) {
+                $displayCountry = $translations[$locale]['country'];
+            }
+            if (!empty($translations[$locale]['level'])) {
+                $displayLevel = $translations[$locale]['level'];
+            }
+            if (!empty($translations[$locale]['duration'])) {
+                $displayDuration = $translations[$locale]['duration'];
+            }
+            if (!empty($translations[$locale]['alt_text'])) {
+                $displayAltText = $translations[$locale]['alt_text'];
             }
             if (!empty($translations[$locale]['highlights'])) {
                 $displayHighlights = array_map(function ($idx, $baseH) use ($translations, $locale) {
@@ -295,6 +320,12 @@ class ActivityController {
             'description' => $displayDescription,
             'intro_title' => $displayIntroTitle,
             'intro_text'  => $displayIntroText,
+            'region'      => $displayRegion,
+            'country'     => $displayCountry,
+            'level'       => $displayLevel,
+            'duration'    => $displayDuration,
+            'alt_text'    => $displayAltText,
+            'alt'         => $displayAltText,
         ], $displayHighlights);
 
         $formatted['translations'] = $translations;
@@ -808,16 +839,26 @@ class ActivityController {
             $tDesc = sanitizeRichText((string)($translations[$loc]['description'] ?? ''));
             $tIntroTitle = trim((string)($translations[$loc]['intro_title'] ?? ''));
             $tIntroText = sanitizeRichText((string)($translations[$loc]['intro_text'] ?? ''));
+            $tRegion = trim((string)($translations[$loc]['region'] ?? ''));
+            $tCountry = trim((string)($translations[$loc]['country'] ?? ''));
+            $tLevel = trim((string)($translations[$loc]['level'] ?? ''));
+            $tDuration = trim((string)($translations[$loc]['duration'] ?? ''));
+            $tAltText = trim((string)($translations[$loc]['alt_text'] ?? ''));
 
-            if ($tTitle !== '' || $tDesc !== '' || $tIntroTitle !== '' || $tIntroText !== '') {
+            if ($tTitle !== '' || $tDesc !== '' || $tIntroTitle !== '' || $tIntroText !== '' || $tRegion !== '' || $tCountry !== '' || $tLevel !== '' || $tDuration !== '' || $tAltText !== '') {
                 $stmt = $this->pdo->prepare('
-                    INSERT INTO activity_translations (activity_id, locale, title, description, intro_title, intro_text, created_at, updated_at)
-                    VALUES (:activity_id, :locale, :title, :description, :intro_title, :intro_text, NOW(), NOW())
+                    INSERT INTO activity_translations (activity_id, locale, title, description, intro_title, intro_text, region, country, level, duration, alt_text, created_at, updated_at)
+                    VALUES (:activity_id, :locale, :title, :description, :intro_title, :intro_text, :region, :country, :level, :duration, :alt_text, NOW(), NOW())
                     ON DUPLICATE KEY UPDATE
                         title = VALUES(title),
                         description = VALUES(description),
                         intro_title = VALUES(intro_title),
                         intro_text = VALUES(intro_text),
+                        region = VALUES(region),
+                        country = VALUES(country),
+                        level = VALUES(level),
+                        duration = VALUES(duration),
+                        alt_text = VALUES(alt_text),
                         updated_at = NOW()
                 ');
                 $stmt->execute([
@@ -827,6 +868,11 @@ class ActivityController {
                     'description' => $tDesc,
                     'intro_title' => $tIntroTitle !== '' ? $tIntroTitle : null,
                     'intro_text'  => $tIntroText !== '' ? $tIntroText : null,
+                    'region'      => $tRegion !== '' ? $tRegion : null,
+                    'country'     => $tCountry !== '' ? $tCountry : null,
+                    'level'       => $tLevel !== '' ? $tLevel : null,
+                    'duration'    => $tDuration !== '' ? $tDuration : null,
+                    'alt_text'    => $tAltText !== '' ? $tAltText : null,
                 ]);
             } else {
                 $stmt = $this->pdo->prepare('DELETE FROM activity_translations WHERE activity_id = :activity_id AND locale = :locale');

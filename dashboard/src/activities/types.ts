@@ -12,28 +12,23 @@ export const DEFAULT_ACTIVITY_TYPES: string[] = [
 
 export const ACTIVITY_TYPES = DEFAULT_ACTIVITY_TYPES;
 
+export interface LocaleActivityTranslation {
+  title?: string;
+  description?: string;
+  intro_title?: string;
+  intro_text?: string;
+  region?: string;
+  duration?: string;
+  level?: string;
+  country?: string;
+  alt_text?: string;
+  highlights?: string[];
+}
+
 export interface ActivityTranslations {
-  ca?: {
-    title?: string;
-    description?: string;
-    intro_title?: string;
-    intro_text?: string;
-    highlights?: string[];
-  };
-  en?: {
-    title?: string;
-    description?: string;
-    intro_title?: string;
-    intro_text?: string;
-    highlights?: string[];
-  };
-  fr?: {
-    title?: string;
-    description?: string;
-    intro_title?: string;
-    intro_text?: string;
-    highlights?: string[];
-  };
+  ca?: LocaleActivityTranslation;
+  en?: LocaleActivityTranslation;
+  fr?: LocaleActivityTranslation;
 }
 
 export interface ActivityImage {

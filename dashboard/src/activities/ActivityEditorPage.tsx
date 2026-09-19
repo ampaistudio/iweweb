@@ -24,6 +24,11 @@ interface LocaleActivityData {
   description: string;
   intro_title: string;
   intro_text: string;
+  region: string;
+  country: string;
+  level: string;
+  duration: string;
+  alt_text: string;
   highlights: string[];
 }
 
@@ -85,9 +90,9 @@ export const ActivityEditorPage: React.FC = () => {
 
   // Translations (CA, EN, FR)
   const [translations, setTranslations] = useState<Record<NonEsLocale, LocaleActivityData>>({
-    ca: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
-    en: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
-    fr: { title: '', description: '', intro_title: '', intro_text: '', highlights: [] },
+    ca: { title: '', description: '', intro_title: '', intro_text: '', region: '', country: '', level: '', duration: '', alt_text: '', highlights: [] },
+    en: { title: '', description: '', intro_title: '', intro_text: '', region: '', country: '', level: '', duration: '', alt_text: '', highlights: [] },
+    fr: { title: '', description: '', intro_title: '', intro_text: '', region: '', country: '', level: '', duration: '', alt_text: '', highlights: [] },
   });
 
   const [loading, setLoading] = useState(isEdit);
@@ -149,6 +154,11 @@ export const ActivityEditorPage: React.FC = () => {
                 description: act.translations.ca?.description || '',
                 intro_title: act.translations.ca?.intro_title || '',
                 intro_text: act.translations.ca?.intro_text || '',
+                region: act.translations.ca?.region || '',
+                country: act.translations.ca?.country || '',
+                level: act.translations.ca?.level || '',
+                duration: act.translations.ca?.duration || '',
+                alt_text: act.translations.ca?.alt_text || '',
                 highlights: act.translations.ca?.highlights || [],
               },
               en: {
@@ -156,6 +166,11 @@ export const ActivityEditorPage: React.FC = () => {
                 description: act.translations.en?.description || '',
                 intro_title: act.translations.en?.intro_title || '',
                 intro_text: act.translations.en?.intro_text || '',
+                region: act.translations.en?.region || '',
+                country: act.translations.en?.country || '',
+                level: act.translations.en?.level || '',
+                duration: act.translations.en?.duration || '',
+                alt_text: act.translations.en?.alt_text || '',
                 highlights: act.translations.en?.highlights || [],
               },
               fr: {
@@ -163,6 +178,11 @@ export const ActivityEditorPage: React.FC = () => {
                 description: act.translations.fr?.description || '',
                 intro_title: act.translations.fr?.intro_title || '',
                 intro_text: act.translations.fr?.intro_text || '',
+                region: act.translations.fr?.region || '',
+                country: act.translations.fr?.country || '',
+                level: act.translations.fr?.level || '',
+                duration: act.translations.fr?.duration || '',
+                alt_text: act.translations.fr?.alt_text || '',
                 highlights: act.translations.fr?.highlights || [],
               },
             });
@@ -361,7 +381,11 @@ export const ActivityEditorPage: React.FC = () => {
     });
   };
 
-  const updateTranslationField = (locale: NonEsLocale, field: 'title' | 'description' | 'intro_title' | 'intro_text', val: string) => {
+  const updateTranslationField = (
+    locale: NonEsLocale,
+    field: 'title' | 'description' | 'intro_title' | 'intro_text' | 'region' | 'country' | 'level' | 'duration' | 'alt_text',
+    val: string
+  ) => {
     setTranslations((prev) => ({
       ...prev,
       [locale]: {
@@ -391,7 +415,18 @@ export const ActivityEditorPage: React.FC = () => {
   const hasTranslationForLocale = (loc: DashboardLocale): boolean => {
     if (loc === 'es') return Boolean(title.trim());
     const t = translations[loc as NonEsLocale];
-    return Boolean(t?.title?.trim() || t?.description?.trim() || t?.highlights?.some((h) => h.trim()));
+    return Boolean(
+      t?.title?.trim() ||
+      t?.description?.trim() ||
+      t?.intro_title?.trim() ||
+      t?.intro_text?.trim() ||
+      t?.region?.trim() ||
+      t?.country?.trim() ||
+      t?.level?.trim() ||
+      t?.duration?.trim() ||
+      t?.alt_text?.trim() ||
+      t?.highlights?.some((h) => h.trim())
+    );
   };
 
   const handleManualSocialShare = async () => {
@@ -615,7 +650,7 @@ export const ActivityEditorPage: React.FC = () => {
             </>
           ) : (
             currentNonEs && (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="p-3 bg-bg rounded-xl border border-border text-xs text-muted">
                   <span className="font-semibold text-primary block mb-1">Título base en Español:</span>
                   <p className="italic">{title || '(Sin título ingresado aún)'}</p>
@@ -639,14 +674,58 @@ export const ActivityEditorPage: React.FC = () => {
                     placeholder={`Título traducido (${activeLocale.toUpperCase()})...`}
                   />
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                        Región / Zona ({activeLocale.toUpperCase()})
+                      </label>
+                      {region && (
+                        <AiTranslateButton
+                          sourceText={region}
+                          targetLocale={activeLocale}
+                          fieldName="Región / Zona"
+                          onTranslated={(val) => updateTranslationField(currentNonEs, 'region', val)}
+                        />
+                      )}
+                    </div>
+                    <Input
+                      value={translations[currentNonEs].region}
+                      onChange={(e) => updateTranslationField(currentNonEs, 'region', e.target.value)}
+                      placeholder={region || `Región traducida (${activeLocale.toUpperCase()})...`}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                        País ({activeLocale.toUpperCase()})
+                      </label>
+                      {country && (
+                        <AiTranslateButton
+                          sourceText={country}
+                          targetLocale={activeLocale}
+                          fieldName="País"
+                          onTranslated={(val) => updateTranslationField(currentNonEs, 'country', val)}
+                        />
+                      )}
+                    </div>
+                    <Input
+                      value={translations[currentNonEs].country}
+                      onChange={(e) => updateTranslationField(currentNonEs, 'country', e.target.value)}
+                      placeholder={country || `País traducido (${activeLocale.toUpperCase()})...`}
+                    />
+                  </div>
+                </div>
               </div>
             )
           )}
         </div>
       </Card>
 
-      {/* 2. Detalles de la Experiencia (Solo en modo ES ya que son datos no editoriales) */}
-      {isEs && (
+      {/* 2. Detalles del Recorrido */}
+      {isEs ? (
         <Card title="Detalles del Recorrido" subtitle="Nivel, duración y precio (compartidos)">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input
@@ -674,10 +753,61 @@ export const ActivityEditorPage: React.FC = () => {
             />
           </div>
         </Card>
+      ) : (
+        currentNonEs && (
+          <Card
+            title="Detalles del Recorrido"
+            subtitle={`Nivel y duración traducidos para ${activeLocale.toUpperCase()} (el precio es compartido)`}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                    Nivel / Dificultad ({activeLocale.toUpperCase()})
+                  </label>
+                  {level && (
+                    <AiTranslateButton
+                      sourceText={level}
+                      targetLocale={activeLocale}
+                      fieldName="Nivel / Dificultad"
+                      onTranslated={(val) => updateTranslationField(currentNonEs, 'level', val)}
+                    />
+                  )}
+                </div>
+                <Input
+                  value={translations[currentNonEs].level}
+                  onChange={(e) => updateTranslationField(currentNonEs, 'level', e.target.value)}
+                  placeholder={level || `Nivel (${activeLocale.toUpperCase()})...`}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                    Duración ({activeLocale.toUpperCase()})
+                  </label>
+                  {duration && (
+                    <AiTranslateButton
+                      sourceText={duration}
+                      targetLocale={activeLocale}
+                      fieldName="Duración"
+                      onTranslated={(val) => updateTranslationField(currentNonEs, 'duration', val)}
+                    />
+                  )}
+                </div>
+                <Input
+                  value={translations[currentNonEs].duration}
+                  onChange={(e) => updateTranslationField(currentNonEs, 'duration', e.target.value)}
+                  placeholder={duration || `Duración (${activeLocale.toUpperCase()})...`}
+                />
+              </div>
+            </div>
+          </Card>
+        )
       )}
 
-      {/* 3. Foto de la Actividad (Compartida) */}
-      {isEs && (
+      {/* 3. Foto de la Actividad y Accesibilidad */}
+      {isEs ? (
         <Card title="Foto Principal" subtitle="Imagen de cabecera y accesibilidad">
           <div className="space-y-4">
             {imageUrl ? (
@@ -740,6 +870,35 @@ export const ActivityEditorPage: React.FC = () => {
             />
           </div>
         </Card>
+      ) : (
+        currentNonEs && (
+          <Card
+            title="Texto Alternativo de Foto (Accesibilidad & SEO)"
+            subtitle={`Descripción de la foto principal en ${activeLocale.toUpperCase()} para buscadores y lectores de pantalla`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-secondary uppercase tracking-wider">
+                  Texto alternativo (Alt text) en {activeLocale.toUpperCase()}
+                </label>
+                {altText && (
+                  <AiTranslateButton
+                    sourceText={altText}
+                    targetLocale={activeLocale}
+                    fieldName="Texto alternativo de foto"
+                    onTranslated={(val) => updateTranslationField(currentNonEs, 'alt_text', val)}
+                  />
+                )}
+              </div>
+              <Input
+                value={translations[currentNonEs].alt_text}
+                onChange={(e) => updateTranslationField(currentNonEs, 'alt_text', e.target.value)}
+                placeholder={altText || `Texto alternativo (${activeLocale.toUpperCase()})...`}
+                helperText="Traducción del atributo alt para SEO y accesibilidad en este idioma."
+              />
+            </div>
+          </Card>
+        )
       )}
 
       {/* 3.1. Galería de Fotos y Videos (Solo en ES y modo edición) */}
