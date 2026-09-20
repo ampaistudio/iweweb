@@ -334,3 +334,4 @@ export const ActivityTranslationsSection: React.FC<ActivityTranslationsSectionPr
     </>
   );
 };
+

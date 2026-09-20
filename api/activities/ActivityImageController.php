@@ -235,3 +235,4 @@ class ActivityImageController {
         return 'https://i-wildland.com/' . ltrim($imageUrl, '/');
     }
 }
+

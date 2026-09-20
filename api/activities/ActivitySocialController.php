@@ -75,3 +75,4 @@ class ActivitySocialController {
         return 'https://i-wildland.com/' . ltrim($imageUrl, '/');
     }
 }
+

@@ -113,3 +113,4 @@ export const ActivitySocialShareSection: React.FC<ActivitySocialShareSectionProp
     </Card>
   );
 };
+

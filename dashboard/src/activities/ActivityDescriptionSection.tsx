@@ -104,3 +104,4 @@ export const ActivityDescriptionSection: React.FC<ActivityDescriptionSectionProp
     </Card>
   );
 };
+

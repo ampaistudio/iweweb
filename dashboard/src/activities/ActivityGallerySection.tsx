@@ -153,3 +153,4 @@ export const ActivityGallerySection: React.FC<ActivityGallerySectionProps> = ({
     </div>
   );
 };
+

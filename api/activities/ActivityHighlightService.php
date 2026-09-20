@@ -99,3 +99,4 @@ class ActivityHighlightService {
         $stmtDel->execute(['id' => $activityId]);
     }
 }
+
