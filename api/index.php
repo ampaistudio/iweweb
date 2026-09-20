@@ -38,6 +38,9 @@ require_once __DIR__ . '/core/seo/SitemapController.php';
 
 // Load Domain Controllers (iWE Tourism)
 require_once __DIR__ . '/activities/ActivityController.php';
+require_once __DIR__ . '/activities/ActivityImageController.php';
+require_once __DIR__ . '/activities/ActivitySocialController.php';
+require_once __DIR__ . '/activities/ActivityDuplicationService.php';
 require_once __DIR__ . '/activities/ActivityTypeController.php';
 
 // Handle CORS & Options pre-flight
@@ -181,19 +184,20 @@ try {
 
         // Sub-resource: /api/activities/:id/images[/:imageId[/cover]]
         if ($subresource === 'images') {
+            $imageController = new ActivityImageController($pdo, $config);
             $activityId = (string)$id;
             if ($subId === null) {
                 if ($method === 'POST') {
-                    $activityController->addImage($activityId);
+                    $imageController->addImage($activityId);
                 } elseif ($method === 'PUT') {
-                    $activityController->reorderImages($activityId);
+                    $imageController->reorderImages($activityId);
                 }
             } elseif ($subAction === 'cover' && $method === 'PUT') {
-                $activityController->setCoverImage((int)$subId);
+                $imageController->setCoverImage((int)$subId);
             } elseif ($method === 'DELETE') {
-                $activityController->removeImage((int)$subId);
+                $imageController->removeImage((int)$subId);
             } elseif ($method === 'PUT') {
-                $activityController->setCoverImage((int)$subId);
+                $imageController->setCoverImage((int)$subId);
             }
             jsonError('Método no permitido para /api/activities/:id/images', 405);
         }
@@ -201,7 +205,8 @@ try {
         // Sub-resource: /api/activities/:id/duplicate
         if ($subresource === 'duplicate' && $id !== null) {
             if ($method === 'POST') {
-                $activityController->duplicate((string)$id);
+                $duplicationService = new ActivityDuplicationService($pdo, $config);
+                $duplicationService->duplicate((string)$id);
             }
             jsonError('Método no permitido para /api/activities/:id/duplicate', 405);
         }
@@ -209,7 +214,8 @@ try {
         // Sub-resource: /api/activities/:id/social-share
         if ($subresource === 'social-share' && $id !== null) {
             if ($method === 'POST') {
-                $activityController->shareSocial((string)$id);
+                $socialController = new ActivitySocialController($pdo, $config);
+                $socialController->shareSocial((string)$id);
             }
             jsonError('Método no permitido para /api/activities/:id/social-share', 405);
         }
