@@ -269,6 +269,8 @@ function Home() {
     "iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés.\n\nCada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto."
   );
   const teamImage = getContent("team_image", "https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg");
+  const teamImageNoteLine1 = getContent("team_image_note_line1", "Conocimiento local.");
+  const teamImageNoteLine2 = getContent("team_image_note_line2", "Experiencia real.");
   const toursPublished = getContent("tours_section_published", "true") !== "false" && getContent("tours_section_published", "true") !== "0";
   const toursEyebrow = getContent("tours_eyebrow", "Tours en Andorra");
   const toursTitleLine1 = getContent("tours_title_line1", "Vacaciones");
@@ -308,6 +310,8 @@ function Home() {
   const weatherTitleLine1 = getContent("weather_title_line1", "El tiempo en Andorra");
   const weatherTitleLine2 = getContent("weather_title_line2", "y los Pirineos.");
   const weatherCopy = getContent("weather_copy", "Previsión meteorológica y mapa interactivo de viento en directo para planificar tus salidas de BTT, senderismo o esquí con la máxima seguridad.");
+  const weatherMapLat = getContent("weather_map_lat", "42.5459743");
+  const weatherMapLon = getContent("weather_map_lon", "1.5140217");
   const weatherMetaLocation = getContent("weather_meta_location", "Andorra (42.55° N, 1.51° E) • Modelo ECMWF");
   const weatherMetaBadge = getContent("weather_meta_badge", "Viento & Previsión en vivo");
 
@@ -365,7 +369,7 @@ function Home() {
             src={teamImage}
             alt="Equipo de iWE guiando una experiencia de montaña"
           />
-          <div className="why-image-note"><span>01</span><span>Conocimiento local.<br />Experiencia real.</span></div>
+          <div className="why-image-note"><span>01</span><span>{teamImageNoteLine1}<br />{teamImageNoteLine2}</span></div>
         </div>
         <div className="why-copy-panel">
           <p className="eyebrow">{teamEyebrow}</p>
@@ -472,7 +476,7 @@ function Home() {
             <iframe
               className="weather-map-frame"
               title="Mapa meteorológico y viento en Andorra - Windy"
-              src="https://embed.windy.com/embed2.html?lat=42.5459743&lon=1.5140217&detailLat=42.5459743&detailLon=1.5140217&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+              src={`https://embed.windy.com/embed2.html?lat=${encodeURIComponent(weatherMapLat)}&lon=${encodeURIComponent(weatherMapLon)}&detailLat=${encodeURIComponent(weatherMapLat)}&detailLon=${encodeURIComponent(weatherMapLon)}&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`}
               loading="lazy"
             />
             <div className="weather-meta-bar">

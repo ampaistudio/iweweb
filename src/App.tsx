@@ -338,7 +338,12 @@ function App() {
                 </>
               )}
             </Link>
-            <p className="footer-brand-desc">Turismo activo y experiencias de montaña en Andorra y los Pirineos.</p>
+            <p className="footer-brand-desc">
+              {getContent(
+                "footer_brand_desc",
+                "Turismo activo y experiencias de montaña en Andorra y los Pirineos."
+              )}
+            </p>
             <div className="footer-contact-details">
               <span>{contactAddress}</span>
               <span>Tel: {contactPhone}</span>
@@ -346,7 +351,7 @@ function App() {
           </div>
 
           <div className="footer-col footer-col-links">
-            <h4 className="footer-heading">Navegación</h4>
+            <h4 className="footer-heading">{getContent("footer_nav_heading", "Navegación")}</h4>
             <div className="footer-links">
               <a href="/#bike">Bike</a>
               <a href="/#tours">Tours en Andorra</a>
@@ -358,8 +363,10 @@ function App() {
           </div>
 
           <div className="footer-col footer-col-social">
-            <h4 className="footer-heading">Síguenos</h4>
-            <p className="footer-social-desc">Conéctate con nuestra comunidad en la montaña:</p>
+            <h4 className="footer-heading">{getContent("footer_social_heading", "Síguenos")}</h4>
+            <p className="footer-social-desc">
+              {getContent("footer_social_desc", "Conéctate con nuestra comunidad en la montaña:")}
+            </p>
             <div className="footer-social-grid">
               {[
                 { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },

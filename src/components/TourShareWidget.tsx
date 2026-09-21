@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSiteData } from "../context/SiteDataContext";
 
 interface TourShareWidgetProps {
   title: string;
@@ -7,6 +8,7 @@ interface TourShareWidgetProps {
 }
 
 export function TourShareWidget({ title, type, region }: TourShareWidgetProps) {
+  const { getContent } = useSiteData();
   const [copiedStatus, setCopiedStatus] = useState<"instagram" | "link" | null>(null);
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -42,7 +44,7 @@ export function TourShareWidget({ title, type, region }: TourShareWidgetProps) {
   return (
     <div className="tour-share-box">
       <div className="tour-share-header">
-        <span className="tour-share-title">Compartir experiencia</span>
+        <span className="tour-share-title">{getContent("tour_share_title", "Compartir experiencia")}</span>
         {copiedStatus && (
           <span className="tour-share-toast">
             {copiedStatus === "instagram"

@@ -8,12 +8,16 @@ $defaultConfig = [
     'app' => [
         'name'        => 'iWE Dashboard API',
         'env'         => getenv('APP_ENV') ?: 'production',
+        'site_url'    => getenv('APP_SITE_URL') ?: 'https://i-wildland.com',
         'base_url'    => getenv('APP_BASE_URL') ?: '/api',
         'cors_origins'=> [
             'https://i-wildland.com',
             'http://localhost:5173',
             'http://localhost:3000',
         ],
+    ],
+    'seo' => [
+        'default_og_image' => getenv('SEO_DEFAULT_OG_IMAGE') ?: 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg',
     ],
     'db' => [
         'host'     => getenv('DB_HOST') ?: '127.0.0.1',

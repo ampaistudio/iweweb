@@ -109,6 +109,65 @@ export const DEFAULT_SITE_CONTENT: SiteContentMap = {
   tours_copy:
     'Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.',
   tours_cta_text: 'Consultar disponibilidad',
+  weather_map_lat: '42.5459743',
+  weather_map_lon: '1.5140217',
+
+  // TourDetail keys
+  tour_detail_location: 'Ubicación',
+  tour_detail_level: 'Nivel',
+  tour_detail_duration: 'Duración',
+  tour_detail_price: 'Precio',
+  tour_detail_consult_price: 'Consultar precio',
+  tour_detail_distance: 'Distancia',
+  tour_detail_elevation: 'Desnivel',
+  tour_detail_min_age: 'Edad mínima',
+  tour_detail_itinerary: 'Itinerario',
+  tour_detail_highlights: 'Qué incluye / Puntos destacados',
+  tour_detail_reserve_cta: 'Reservar esta experiencia',
+  tour_detail_related_title: 'También te puede interesar',
+
+  // NewsList keys
+  news_list_back_home: 'Volver al inicio',
+  news_list_eyebrow: 'Actualidad & Rutas',
+  news_list_title: 'Novedades de la montaña',
+  news_list_copy:
+    'Descubre las últimas noticias, estados de senderos, consejos técnicos y relatos de nuestras expediciones en Andorra y los Pirineos.',
+  news_list_loading: 'Cargando novedades...',
+  news_list_contact_cta: 'Contactar con nosotros',
+  news_list_empty_title: 'Próximamente nuevas publicaciones',
+  news_list_empty_copy:
+    'Estamos preparando nuevas historias y reportes de temporada. ¡Vuelve a visitarnos pronto!',
+  news_list_explore_cta: 'Explorar actividades',
+
+  // NewsDetail keys
+  news_detail_loading: 'Cargando publicación...',
+  news_detail_back_link: 'Volver a novedades',
+  news_detail_not_found_title: 'Publicación no encontrada',
+  news_detail_not_found_copy: 'La noticia que buscas no existe o ha sido despublicada.',
+  news_detail_see_all: 'Ver todas las novedades',
+  news_detail_eyebrow: 'Novedades iWE',
+  news_detail_social_title: 'Ver también en redes',
+  news_detail_social_instagram: '📷 Ver en Instagram',
+  news_detail_social_facebook: '📘 Ver en Facebook',
+  news_detail_cta_eyebrow: '¿Te inspiró esta experiencia?',
+  news_detail_cta_title: 'Planifica tu aventura con nosotros',
+  news_detail_cta_button: 'Contactar a un guía',
+
+  // Footer keys
+  footer_brand_desc: 'Turismo activo y experiencias de montaña en Andorra y los Pirineos.',
+  footer_nav_heading: 'Navegación',
+  footer_social_heading: 'Síguenos',
+  footer_social_desc: 'Conéctate con nuestra comunidad en la montaña:',
+
+  // TourHero keys
+  tour_hero_scroll_hint: 'Descubre más',
+
+  // TourShareWidget keys
+  tour_share_title: 'Compartir experiencia',
+
+  // Team section note keys
+  team_image_note_line1: 'Conocimiento local.',
+  team_image_note_line2: 'Experiencia real.',
 };
 
 export const FALLBACK_NAV_SECTIONS: NavSection[] = [

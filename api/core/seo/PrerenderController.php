@@ -20,12 +20,35 @@ class PrerenderController {
         $this->config = $config;
     }
 
+    private function getBaseUrl(): string {
+        $url = $this->config['app']['site_url'] ?? '';
+        if (empty($url) || !is_string($url)) {
+            throw new \RuntimeException('site_url config missing');
+        }
+        return rtrim($url, '/');
+    }
+
+    private function getSeoOgImage(): string {
+        try {
+            $stmt = $this->pdo->prepare("SELECT content_value FROM site_content WHERE content_key = 'seo_og_image' LIMIT 1");
+            $stmt->execute();
+            $val = $stmt->fetchColumn();
+            if (!empty($val) && is_string($val)) {
+                return trim($val);
+            }
+        } catch (\Throwable $e) {
+            error_log('Prerender getSeoOgImage DB error: ' . $e->getMessage());
+        }
+        $defaultImg = $this->config['seo']['default_og_image'] ?? '';
+        return is_string($defaultImg) ? trim($defaultImg) : '';
+    }
+
     /**
      * Renders full HTML with dynamic Open Graph & JSON-LD for a given tour ID.
      */
     public function renderTour(string $tourId): void {
         $tourId = trim($tourId);
-        $baseUrl = 'https://i-wildland.com';
+        $baseUrl = $this->getBaseUrl();
 
         try {
             $stmt = $this->pdo->prepare('SELECT * FROM activities WHERE id = :id LIMIT 1');
@@ -44,7 +67,7 @@ class PrerenderController {
                 $description .= '...';
             }
 
-            $image = $activity['image_url'] ?: ($activity['image'] ?: 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg');
+            $image = $activity['image_url'] ?: ($activity['image'] ?: $this->getSeoOgImage());
             if (str_starts_with($image, '/')) {
                 $image = $baseUrl . $image;
             }
@@ -91,7 +114,7 @@ class PrerenderController {
         } else {
             $title = 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra';
             $description = 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.';
-            $image = 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg';
+            $image = $this->getSeoOgImage();
             $canonicalUrl = $baseUrl . '/tour/' . rawurlencode($tourId);
             $schema = [
                 '@context' => 'https://schema.org',
@@ -160,7 +183,7 @@ class PrerenderController {
      */
     public function renderPost(string $slug): void {
         $slug     = trim($slug);
-        $baseUrl  = 'https://i-wildland.com';
+        $baseUrl  = $this->getBaseUrl();
         $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
 
         try {
@@ -196,7 +219,7 @@ class PrerenderController {
             if (!empty($post['cover_filename'])) {
                 $image = $baseUrl . $publicBase . '/' . $post['cover_filename'];
             } else {
-                $image = 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg';
+                $image = $this->getSeoOgImage();
             }
 
             $canonicalUrl = $baseUrl . '/novedades/' . rawurlencode($slug);
@@ -219,7 +242,7 @@ class PrerenderController {
             // Fallback — same generic card as renderTour() for missing/unpublished content
             $title        = 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra';
             $description  = 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.';
-            $image        = 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg';
+            $image        = $this->getSeoOgImage();
             $canonicalUrl = $baseUrl . '/novedades/' . rawurlencode($slug);
             $schema = [
                 '@context' => 'https://schema.org',
