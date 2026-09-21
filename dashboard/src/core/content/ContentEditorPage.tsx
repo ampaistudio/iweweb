@@ -13,6 +13,48 @@ import { HeroSlidesTab } from './HeroSlidesTab';
 
 type NonEsLocale = 'ca' | 'en' | 'fr';
 
+interface DirectReviewItem {
+  name: string;
+  quote: string;
+  rating: number;
+  location?: string;
+  tour?: string;
+}
+
+const DEFAULT_DIRECT_REVIEWS_JSON = JSON.stringify([
+  {
+    quote: 'Charlie fue un guía excepcional en nuestra ruta 4x4 hasta Tor: gran conocedor de la zona, muy buen conductor y siempre atento a que disfrutáramos cada parada para sacar fotos.',
+    name: 'Joan',
+    location: 'Andorra la Vella',
+    tour: '4x4 a Tor',
+    rating: 5,
+  },
+  {
+    quote: 'Salimos en e-bike por las montañas de Andorra con Carlos como guía. Se adaptó a nuestro nivel técnico y físico desde el primer momento y nos llevó por rutas que jamás hubiéramos encontrado solos.',
+    name: 'Cliente verificado',
+    location: 'Begur, España',
+    tour: 'E-Bike Enduro',
+    rating: 5,
+  },
+  {
+    quote: 'Reservamos una excursión 4x4 con nuestro perro y aprendimos sobre la naturaleza y la historia de la zona durante todo el recorrido. Una experiencia que recomendamos sin dudar.',
+    name: 'Melanie',
+    location: 'Países Bajos',
+    tour: '4x4 Lagos Off-Road',
+    rating: 5,
+  },
+]);
+
+const parseDirectReviews = (raw?: string): DirectReviewItem[] => {
+  try {
+    const text = raw || DEFAULT_DIRECT_REVIEWS_JSON;
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export const ContentEditorPage: React.FC = () => {
   const [activeLocale, setActiveLocale] = useState<DashboardLocale>('es');
 
@@ -64,6 +106,10 @@ export const ContentEditorPage: React.FC = () => {
     weather_meta_location: 'Andorra (42.55° N, 1.51° E) • Modelo ECMWF',
     weather_meta_badge: 'Viento & Previsión en vivo',
     reviews_eyebrow: 'Opiniones de clientes',
+    reviews_google_published: 'true',
+    reviews_tripadvisor_published: 'true',
+    reviews_direct_published: 'true',
+    reviews_direct_items: DEFAULT_DIRECT_REVIEWS_JSON,
     reviews_tab_all: 'Todas',
     reviews_tab_google: 'Google ★ 4.9',
     reviews_tab_tripadvisor: 'TripAdvisor ★ 5.0',
@@ -1292,6 +1338,69 @@ export const ContentEditorPage: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-secondary mb-2">Sección de Reseñas</label>
               <div className="space-y-4">
+                {/* Toggles de publicación por fuente */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3.5 bg-surface-elevated rounded-xl border border-border">
+                    <div>
+                      <p className="text-sm font-semibold text-primary">Publicar reseñas de Google</p>
+                      <p className="text-xs text-muted">
+                        {form.reviews_google_published !== 'false' && form.reviews_google_published !== '0'
+                          ? 'Las reseñas de Google se muestran actualmente en la página principal.'
+                          : 'Las reseñas de Google están ocultas en la página principal.'}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.reviews_google_published !== 'false' && form.reviews_google_published !== '0'}
+                        onChange={(e) => handleChange('reviews_google_published', e.target.checked ? 'true' : 'false')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" />
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-surface-elevated rounded-xl border border-border">
+                    <div>
+                      <p className="text-sm font-semibold text-primary">Publicar reseñas de TripAdvisor</p>
+                      <p className="text-xs text-muted">
+                        {form.reviews_tripadvisor_published !== 'false' && form.reviews_tripadvisor_published !== '0'
+                          ? 'Las reseñas de TripAdvisor se muestran actualmente en la página principal.'
+                          : 'Las reseñas de TripAdvisor están ocultas en la página principal.'}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.reviews_tripadvisor_published !== 'false' && form.reviews_tripadvisor_published !== '0'}
+                        onChange={(e) => handleChange('reviews_tripadvisor_published', e.target.checked ? 'true' : 'false')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" />
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-surface-elevated rounded-xl border border-border">
+                    <div>
+                      <p className="text-sm font-semibold text-primary">Publicar reseñas directas (iWE)</p>
+                      <p className="text-xs text-muted">
+                        {form.reviews_direct_published !== 'false' && form.reviews_direct_published !== '0'
+                          ? 'Las reseñas directas se muestran actualmente en la página principal.'
+                          : 'Las reseñas directas están ocultas en la página principal.'}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.reviews_direct_published !== 'false' && form.reviews_direct_published !== '0'}
+                        onChange={(e) => handleChange('reviews_direct_published', e.target.checked ? 'true' : 'false')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" />
+                    </label>
+                  </div>
+                </div>
+
                 <Input label="Cintillo (Eyebrow)" value={form.reviews_eyebrow || ''} onChange={(e) => handleChange('reviews_eyebrow', e.target.value)} placeholder="Opiniones de clientes" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input label="Tab: Todas" value={form.reviews_tab_all || ''} onChange={(e) => handleChange('reviews_tab_all', e.target.value)} placeholder="Todas" />
@@ -1300,6 +1409,91 @@ export const ContentEditorPage: React.FC = () => {
                   <Input label="Tab: iWE" value={form.reviews_tab_direct || ''} onChange={(e) => handleChange('reviews_tab_direct', e.target.value)} placeholder="iWE" />
                 </div>
                 <p className="text-[11px] text-muted">El conteo entre paréntesis del tab "Todas" es dinámico y no se edita aquí.</p>
+
+                <div className="pt-4 border-t border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-primary">Gestionar Reseñas Directas (iWE)</p>
+                      <p className="text-xs text-muted">Añade o edita los testimonios de clientes guardados en el sistema.</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const current = parseDirectReviews(form.reviews_direct_items);
+                        handleChange('reviews_direct_items', JSON.stringify([...current, { name: '', quote: '', rating: 5 }]));
+                      }}
+                    >
+                      + Agregar reseña
+                    </Button>
+                  </div>
+                  {parseDirectReviews(form.reviews_direct_items).length === 0 ? (
+                    <p className="text-xs text-muted italic">No hay reseñas directas configuradas.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {parseDirectReviews(form.reviews_direct_items).map((item, idx, arr) => (
+                        <div key={idx} className="p-4 bg-surface-elevated rounded-xl border border-border space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-primary">Reseña #{idx + 1}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const updated = arr.filter((_, i) => i !== idx);
+                                handleChange('reviews_direct_items', JSON.stringify(updated));
+                              }}
+                              className="text-danger-text hover:text-danger text-xs h-7 px-2"
+                            >
+                              Eliminar
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="sm:col-span-2">
+                              <Input
+                                label="Nombre del cliente"
+                                value={item.name || ''}
+                                onChange={(e) => {
+                                  const updated = arr.map((it, i) => i === idx ? { ...it, name: e.target.value } : it);
+                                  handleChange('reviews_direct_items', JSON.stringify(updated));
+                                }}
+                                placeholder="Ej. Joan"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-secondary mb-1">Calificación (1-5)</label>
+                              <select
+                                value={item.rating ?? 5}
+                                onChange={(e) => {
+                                  const updated = arr.map((it, i) => i === idx ? { ...it, rating: parseInt(e.target.value, 10) || 5 } : it);
+                                  handleChange('reviews_direct_items', JSON.stringify(updated));
+                                }}
+                                className="w-full h-10 px-3 py-2 text-sm bg-bg border border-border rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent"
+                              >
+                                <option value={5}>5 ★★★★★</option>
+                                <option value={4}>4 ★★★★☆</option>
+                                <option value={3}>3 ★★★☆☆</option>
+                                <option value={2}>2 ★★☆☆☆</option>
+                                <option value={1}>1 ★☆☆☆☆</option>
+                              </select>
+                            </div>
+                          </div>
+                          <Textarea
+                            label="Texto de la reseña"
+                            rows={2}
+                            value={item.quote || ''}
+                            onChange={(e) => {
+                              const updated = arr.map((it, i) => i === idx ? { ...it, quote: e.target.value } : it);
+                              handleChange('reviews_direct_items', JSON.stringify(updated));
+                            }}
+                            placeholder="Escribe el testimonio del cliente..."
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
