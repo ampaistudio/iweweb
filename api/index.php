@@ -106,6 +106,18 @@ try {
     $resource = $segments[0] ?? '';
     $id = $segments[1] ?? null;
 
+    // Defense-in-depth: If logged in user must change password, block all endpoints
+    // except auth management (change-password, logout, me)
+    $sessionUser = getAuthenticatedUser($pdo);
+    if ($sessionUser && !empty($sessionUser['must_change_password'])) {
+        $allowedAuthActions = ['change-password', 'logout', 'me'];
+        if ($resource !== 'auth' || !in_array($id ?? '', $allowedAuthActions, true)) {
+            jsonError('Debes cambiar tu contraseña antes de realizar cualquier otra acción.', 403, [
+                'must_change_password' => true
+            ]);
+        }
+    }
+
     // --- Static uploads (PHP built-in server only; Apache/.htaccess serves these directly in production) ---
     if ($resource === 'uploads') {
         if ($method !== 'GET') {
@@ -174,6 +186,8 @@ try {
             $authController->forgotPassword();
         } elseif ($action === 'reset-password' && $method === 'POST') {
             $authController->resetPassword();
+        } elseif ($action === 'change-password' && $method === 'POST') {
+            $authController->changePassword();
         } else {
             jsonError('Acción de autenticación no válida.', 404);
         }

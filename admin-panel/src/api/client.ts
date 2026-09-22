@@ -104,6 +104,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ token, password }),
       }),
+    changePassword: (password: string) =>
+      request<void>('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      }),
   },
 
   overview: {

@@ -39,8 +39,13 @@ export const LoginPage: React.FC = () => {
 
     try {
       const user = await login(email.trim(), password);
-      toast.success(`¡Bienvenido, ${user.display_name}!`, 'Sesión iniciada');
-      navigate(from, { replace: true });
+      if (user.must_change_password) {
+        toast.warning('Por seguridad debes cambiar tu contraseña inicial antes de continuar.', 'Cambio obligatorio');
+        navigate('/change-password', { replace: true });
+      } else {
+        toast.success(`¡Bienvenido, ${user.display_name}!`, 'Sesión iniciada');
+        navigate(from, { replace: true });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al iniciar sesión. Verifica tus credenciales.';
       setErrorMsg(msg);

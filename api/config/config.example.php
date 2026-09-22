@@ -14,6 +14,8 @@ return [
         'name'        => 'iWE Dashboard API',
         'env'         => 'production', // 'development' or 'production'
         'base_url'    => 'https://i-wildland.com/api',
+        // Secret URL slug for the admin panel (must NOT be committed; set in config.local.php or env)
+        'panel_slug'  => getenv('APP_PANEL_SLUG') ?: 'your-secret-panel-slug',
         'cors_origins'=> [
             'https://i-wildland.com',
             'http://localhost:5173',
@@ -22,7 +24,10 @@ return [
     ],
 
     // -------------------------------------------------------------------------
-    // MySQL Database (Hostinger Native)
+    // MySQL Database (Hostinger Native / Local Development)
+    // NOTE (NAES §8.2 / §8.4): DB_USER and DB_PASS are mandatory and have no
+    // insecure default fallbacks in config.php. You MUST provide them via
+    // environment variables (DB_USER, DB_PASS) or define them here in config.local.php.
     // -------------------------------------------------------------------------
     'db' => [
         'host'     => getenv('DB_HOST') ?: 'localhost',

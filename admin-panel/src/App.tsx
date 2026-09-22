@@ -10,6 +10,7 @@ import { DashboardLayout } from './core/layout/DashboardLayout';
 import { LoginPage } from './core/auth/LoginPage';
 import { ForgotPasswordPage } from './core/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './core/auth/ResetPasswordPage';
+import { ChangePasswordPage } from './core/auth/ChangePasswordPage';
 import { OverviewPage } from './core/overview/OverviewPage';
 import { MediaPage } from './core/media/MediaPage';
 import { ContentEditorPage } from './core/content/ContentEditorPage';
@@ -29,9 +30,33 @@ import {
   ActivityRecentEdit,
 } from './activities/ActivityOverviewWidget';
 
+const getBasename = (): string => {
+  if (typeof window !== 'undefined' && (window as unknown as { __PANEL_BASENAME__?: string }).__PANEL_BASENAME__) {
+    return (window as unknown as { __PANEL_BASENAME__: string }).__PANEL_BASENAME__;
+  }
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  const knownSubroutes = [
+    'login',
+    'forgot-password',
+    'reset-password',
+    'change-password',
+    'activities',
+    'packages',
+    'menu',
+    'content',
+    'posts',
+    'media',
+    'settings',
+  ];
+  if (segments.length > 0 && !knownSubroutes.includes(segments[0])) {
+    return `/${segments[0]}`;
+  }
+  return '/';
+};
+
 export const App: React.FC = () => {
   return (
-    <BrowserRouter basename="/panel-a3b5789b6538ee865ba75cec">
+    <BrowserRouter basename={getBasename()}>
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
@@ -40,6 +65,14 @@ export const App: React.FC = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/change-password"
+              element={
+                <ProtectedRoute>
+                  <ChangePasswordPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Protected Dashboard Routes */}
             <Route

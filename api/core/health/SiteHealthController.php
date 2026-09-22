@@ -39,8 +39,9 @@ class SiteHealthController {
 
         $this->ensureDirectories();
 
+        $panelDir = $this->config['app']['panel_dir'] ?? 'admin-panel';
         $this->runtimeChecker = new HealthRuntimeChecker($this->pdo, $this->config, $this->cacheDir);
-        $this->dependencyChecker = new HealthDependencyChecker($this->rootDir, $this->cacheDir);
+        $this->dependencyChecker = new HealthDependencyChecker($this->rootDir, $this->cacheDir, $panelDir);
         $this->backupService = new HealthBackupService($this->pdo, $this->config, $this->backupsDir);
         $this->telegramNotifier = new HealthTelegramNotifier($this->config, $this->cacheDir);
     }

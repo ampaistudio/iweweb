@@ -26,7 +26,7 @@ class AuthController {
             jsonError('Email y contraseña son obligatorios.', 422);
         }
 
-        $stmt = $this->pdo->prepare('SELECT id, email, password_hash, display_name, role, created_at FROM users WHERE email = :email LIMIT 1');
+        $stmt = $this->pdo->prepare('SELECT id, email, password_hash, display_name, role, must_change_password, created_at FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => strtolower($email)]);
         $user = $stmt->fetch();
 
@@ -39,9 +39,11 @@ class AuthController {
         $_SESSION['user_id'] = $user['id'];
 
         unset($user['password_hash']);
+        $user['must_change_password'] = (bool)($user['must_change_password'] ?? false);
 
         jsonSuccess([
-            'user' => $user
+            'user' => $user,
+            'must_change_password' => $user['must_change_password']
         ], 'Inicio de sesión exitoso.');
     }
 
@@ -116,7 +118,8 @@ class AuthController {
                 'expires_at' => $expiresAt,
             ]);
 
-            $resetUrl = rtrim($this->config['app']['site_url'] ?? '', '/') . '/panel-a3b5789b6538ee865ba75cec/reset-password?token=' . $rawToken;
+            $panelSlug = trim((string)($this->config['app']['panel_slug'] ?? ''), '/');
+            $resetUrl = rtrim($this->config['app']['site_url'] ?? '', '/') . ($panelSlug !== '' ? '/' . $panelSlug : '') . '/reset-password?token=' . $rawToken;
 
             $subject = 'Recuperar contraseña — iWE Dashboard';
             $html = sprintf(
@@ -161,7 +164,7 @@ class AuthController {
 
         $this->pdo->beginTransaction();
         try {
-            $update = $this->pdo->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
+            $update = $this->pdo->prepare('UPDATE users SET password_hash = :hash, must_change_password = 0 WHERE id = :id');
             $update->execute(['hash' => $passwordHash, 'id' => $resetToken['user_id']]);
 
             $markUsed = $this->pdo->prepare('UPDATE password_reset_tokens SET used_at = NOW() WHERE id = :id');
@@ -174,5 +177,27 @@ class AuthController {
         }
 
         jsonSuccess(null, 'Contraseña actualizada correctamente. Ya podés iniciar sesión.');
+    }
+
+    /**
+     * POST /api/auth/change-password
+     */
+    public function changePassword(): void {
+        $user = requireAuth($this->pdo);
+        $body = getRequestBody();
+        $newPassword = $body['password'] ?? '';
+
+        if (empty($newPassword) || strlen($newPassword) < 8) {
+            jsonError('La contraseña debe tener al menos 8 caracteres.', 422);
+        }
+
+        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->pdo->prepare('UPDATE users SET password_hash = :hash, must_change_password = 0 WHERE id = :id');
+        $stmt->execute([
+            'hash' => $passwordHash,
+            'id'   => $user['id'],
+        ]);
+
+        jsonSuccess(null, 'Contraseña actualizada correctamente.');
     }
 }

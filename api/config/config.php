@@ -10,6 +10,8 @@ $defaultConfig = [
         'env'         => getenv('APP_ENV') ?: 'production',
         'site_url'    => getenv('APP_SITE_URL') ?: 'https://i-wildland.com',
         'base_url'    => getenv('APP_BASE_URL') ?: '/api',
+        'panel_slug'  => getenv('APP_PANEL_SLUG') ?: null,
+        'panel_dir'   => 'admin-panel',
         'cors_origins'=> [
             'https://i-wildland.com',
             'http://localhost:5173',
@@ -23,8 +25,8 @@ $defaultConfig = [
         'host'     => getenv('DB_HOST') ?: '127.0.0.1',
         'port'     => getenv('DB_PORT') ?: 3306,
         'database' => getenv('DB_NAME') ?: 'iwe_dashboard',
-        'username' => getenv('DB_USER') ?: 'root',
-        'password' => getenv('DB_PASS') ?: '',
+        'username' => getenv('DB_USER') !== false ? getenv('DB_USER') : null,
+        'password' => getenv('DB_PASS') !== false ? getenv('DB_PASS') : null,
         'charset'  => 'utf8mb4',
     ],
     'session' => [
@@ -61,6 +63,13 @@ $defaultConfig = [
     ],
     'ai_translation' => [
         'active_provider' => getenv('AI_TRANSLATION_PROVIDER') ?: 'nvidia_nim',
+        'domain_context'  => getenv('AI_TRANSLATION_DOMAIN_CONTEXT') ?: 'turismo activo, deportes de montaña y aventura en Andorra y los Pirineos para la agencia "Isard Wildland Experience" (iWE)',
+        'protected_terms' => [
+            'Grandvalira', 'Vallnord', 'Canillo', 'Forn de Canillo', 'La Cova', 'LLosada',
+            'Encamp', 'Arcalís', 'Tor', 'Claror', 'Pic Negre', 'Vall d\'Incles', 'Jucla',
+            'Noguera Pallaresa', 'Charly Paredes', 'iWE', 'Isard Wildland Experience',
+            'Land Rover Defender', 'EFPEM', 'AADIDES', 'ISIA', 'UIMLA', 'AGAMA',
+        ],
     ],
     'nvidia_nim' => [
         'api_key' => getenv('NVIDIA_NIM_API_KEY') ?: '',
@@ -81,22 +90,20 @@ $defaultConfig = [
     ],
     /**
      * Google Places API Integration
-     * Business CID: 0x364c511f18f0fa2c ("Isard Wildland" in Google Maps)
-     * NOTE: Requires GOOGLE_PLACES_API_KEY and Place ID (resolved from CID) in config.local.php or env.
+     * NOTE: Requires GOOGLE_PLACES_API_KEY and Place ID (or CID) in config.local.php or env.
      */
     'google_places' => [
         'api_key'  => getenv('GOOGLE_PLACES_API_KEY') ?: '',
         'place_id' => getenv('GOOGLE_PLACE_ID') ?: '',
-        'cid'      => '0x364c511f18f0fa2c',
+        'cid'      => getenv('GOOGLE_PLACES_CID') ?: '',
     ],
     /**
      * TripAdvisor Content API Integration
-     * Business Location ID: d18719120 ("IWE" in TripAdvisor Andorra)
-     * NOTE: Requires TRIPADVISOR_API_KEY (partner approval required) in config.local.php or env.
+     * NOTE: Requires TRIPADVISOR_API_KEY and location_id in config.local.php or env.
      */
     'tripadvisor' => [
         'api_key'     => getenv('TRIPADVISOR_API_KEY') ?: '',
-        'location_id' => getenv('TRIPADVISOR_LOCATION_ID') ?: 'd18719120',
+        'location_id' => getenv('TRIPADVISOR_LOCATION_ID') ?: '',
     ],
     /**
      * Telegram Bot API Integration (Site Health Alerts)
@@ -118,6 +125,14 @@ if (file_exists($localConfigFile)) {
     }
 } else {
     $config = $defaultConfig;
+}
+
+// NAES §8.4 / SEC-02: Explicit failure if critical database credentials are not configured
+if (empty($config['db']['username'])) {
+    throw new \RuntimeException('Database configuration error: DB_USER is not configured. Set DB_USER environment variable or configure db.username in config.local.php.');
+}
+if (!isset($config['db']['password']) || $config['db']['password'] === null) {
+    throw new \RuntimeException('Database configuration error: DB_PASS is not configured. Set DB_PASS environment variable or configure db.password in config.local.php.');
 }
 
 return $config;

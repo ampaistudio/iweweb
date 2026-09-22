@@ -11,6 +11,7 @@ declare(strict_types=1);
 class HealthDependencyChecker {
     private string $rootDir;
     private string $cacheDir;
+    private string $panelDir;
 
     private array $knownDescriptions = [
         'react'                        => 'Framework UI Principal',
@@ -33,9 +34,10 @@ class HealthDependencyChecker {
         '@types/react-dom'             => 'Definiciones de Tipos para React DOM',
     ];
 
-    public function __construct(string $rootDir, string $cacheDir) {
+    public function __construct(string $rootDir, string $cacheDir, string $panelDir = 'admin-panel') {
         $this->rootDir = $rootDir;
         $this->cacheDir = $cacheDir;
+        $this->panelDir = $panelDir;
     }
 
     public function inspectDependencies(bool $forceRefresh = false): array {
@@ -61,7 +63,10 @@ class HealthDependencyChecker {
         }
 
         $dashResults = [];
-        $dashDir = $this->rootDir . '/panel-a3b5789b6538ee865ba75cec';
+        $dashDir = $this->rootDir . '/' . $this->panelDir;
+        if (!is_dir($dashDir) && is_dir($this->rootDir . '/admin-panel')) {
+            $dashDir = $this->rootDir . '/admin-panel';
+        }
         $dashPkgJson = $this->readJsonFile($dashDir . '/package.json') ?: [];
         $dashLockJson = $this->readJsonFile($dashDir . '/package-lock.json');
 

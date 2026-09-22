@@ -101,11 +101,16 @@ function getAuthenticatedUser(PDO $pdo): ?array {
     }
 
     $userId = (int)$_SESSION['user_id'];
-    $stmt = $pdo->prepare('SELECT id, email, display_name, role, created_at FROM users WHERE id = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, display_name, role, must_change_password, created_at FROM users WHERE id = :id LIMIT 1');
     $stmt->execute(['id' => $userId]);
     $user = $stmt->fetch();
 
-    return $user ?: null;
+    if ($user) {
+        $user['must_change_password'] = (bool)($user['must_change_password'] ?? false);
+        return $user;
+    }
+
+    return null;
 }
 
 function requireAuth(PDO $pdo): array {

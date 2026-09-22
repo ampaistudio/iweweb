@@ -50,13 +50,20 @@ class TranslationController {
         $targetName = self::LOCALE_NAMES[$targetLocale] ?? $targetLocale;
         $sourceName = self::LOCALE_NAMES[$sourceLocale] ?? $sourceLocale;
 
+        $domainContext = $this->config['ai_translation']['domain_context'] ?? 'turismo activo y deportes de aventura';
+        $protectedTermsList = $this->config['ai_translation']['protected_terms'] ?? [];
+        $protectedTermsStr = !empty($protectedTermsList) ? implode(', ', $protectedTermsList) : '';
+        $ruleToponyms = !empty($protectedTermsStr)
+            ? "2. NO traduzcas nombres propios, marcas o topónimos locales (por ejemplo: {$protectedTermsStr})."
+            : "2. NO traduzcas nombres propios, marcas o topónimos locales.";
+
         $systemPrompt = <<<PROMPT
-Eres un traductor profesional y redactor turístico especializado en turismo activo, deportes de montaña y aventura en Andorra y los Pirineos para la agencia "Isard Wildland Experience" (iWE).
+Eres un traductor profesional y redactor especializado en {$domainContext}.
 Tu misión es traducir con máxima naturalidad y fidelidad del {$sourceName} al {$targetName}.
 
 Reglas de traducción indispensables:
 1. Mantén un tono cercano, aventurero, dinámico pero profesional y pulcro.
-2. NO traduzcas nombres propios, marcas o topónimos locales (por ejemplo: Grandvalira, Vallnord, Canillo, Forn de Canillo, La Cova, LLosada, Encamp, Arcalís, Tor, Claror, Pic Negre, Vall d'Incles, Jucla, Noguera Pallaresa, Charly Paredes, iWE, Isard Wildland Experience, Land Rover Defender, EFPEM, AADIDES, ISIA, UIMLA, AGAMA).
+{$ruleToponyms}
 3. Devuelve EXCLUSIVAMENTE el texto traducido, sin explicaciones, sin saludos, sin comillas envolventes ni prefijos como "Traducción:".
 PROMPT;
 

@@ -125,8 +125,10 @@ class HealthTelegramNotifier {
         }
 
         $lines[] = "";
-        $lines[] = "👉 _Ingresa al dashboard para gestionar respaldos e información:_";
-        $lines[] = "[Abrir Dashboard de iWE](https://i-wildland.com/panel-a3b5789b6538ee865ba75cec/settings/site-health)";
+        $siteUrl = rtrim($this->config['app']['site_url'] ?? 'https://i-wildland.com', '/');
+        $panelSlug = trim((string)($this->config['app']['panel_slug'] ?? ''), '/');
+        $dashboardUrl = $siteUrl . ($panelSlug !== '' ? '/' . $panelSlug : '') . '/settings/site-health';
+        $lines[] = "[Abrir Dashboard]({$dashboardUrl})";
 
         return implode("\n", $lines);
     }

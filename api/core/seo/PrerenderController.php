@@ -7,6 +7,9 @@
  * and generative AI crawlers (GPTBot, PerplexityBot, ClaudeBot, etc.) for:
  *   - Dynamic tour routes  (/tour/:id)
  *   - Article detail routes (/novedades/:slug)
+ *
+ * All branding, institutional texts, contacts, and meta descriptions are read
+ * dynamically from site_content (CMS) to avoid domain hardcoding (NAES §8.2).
  */
 
 declare(strict_types=1);
@@ -14,6 +17,7 @@ declare(strict_types=1);
 class PrerenderController {
     private PDO $pdo;
     private array $config;
+    private ?array $siteContentCache = null;
 
     public function __construct(PDO $pdo, array $config = []) {
         $this->pdo = $pdo;
@@ -28,16 +32,26 @@ class PrerenderController {
         return rtrim($url, '/');
     }
 
-    private function getSeoOgImage(): string {
-        try {
-            $stmt = $this->pdo->prepare("SELECT content_value FROM site_content WHERE content_key = 'seo_og_image' LIMIT 1");
-            $stmt->execute();
-            $val = $stmt->fetchColumn();
-            if (!empty($val) && is_string($val)) {
-                return trim($val);
+    private function getSiteContent(string $key, string $default = ''): string {
+        if ($this->siteContentCache === null) {
+            $this->siteContentCache = [];
+            try {
+                $stmt = $this->pdo->query('SELECT content_key, content_value FROM site_content');
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $this->siteContentCache[$row['content_key']] = (string)$row['content_value'];
+                }
+            } catch (\Throwable $e) {
+                error_log('Prerender getSiteContent DB error: ' . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            error_log('Prerender getSeoOgImage DB error: ' . $e->getMessage());
+        }
+        $val = $this->siteContentCache[$key] ?? '';
+        return (!empty($val) && is_string($val)) ? trim($val) : $default;
+    }
+
+    private function getSeoOgImage(): string {
+        $val = $this->getSiteContent('seo_og_image', '');
+        if (!empty($val)) {
+            return $val;
         }
         $defaultImg = $this->config['seo']['default_og_image'] ?? '';
         return is_string($defaultImg) ? trim($defaultImg) : '';
@@ -50,6 +64,12 @@ class PrerenderController {
         $tourId = trim($tourId);
         $baseUrl = $this->getBaseUrl();
 
+        $businessName = $this->getSiteContent('business_name', 'Isard Wildland Experience');
+        $phone        = $this->getSiteContent('contact_phone', '');
+        $email        = $this->getSiteContent('contact_email', '');
+        $defaultTitle = $this->getSiteContent('seo_meta_title', $businessName . ' — Turismo Activo y Aventura');
+        $defaultDesc  = $this->getSiteContent('seo_meta_description', 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.');
+
         try {
             $stmt = $this->pdo->prepare('SELECT * FROM activities WHERE id = :id LIMIT 1');
             $stmt->execute([':id' => $tourId]);
@@ -60,8 +80,8 @@ class PrerenderController {
         }
 
         if ($activity) {
-            $title = $activity['title'] . ' | iWE Andorra';
-            $rawDesc = $activity['intro_text'] ?: ($activity['description'] ?: 'Experiencias de turismo activo y aventura en Andorra y los Pirineos guiadas por expertos.');
+            $title = $activity['title'] . ' | ' . $businessName;
+            $rawDesc = $activity['intro_text'] ?: ($activity['description'] ?: $defaultDesc);
             $description = mb_substr(trim(strip_tags(str_replace(['<br>', '<br/>', '</p>'], ' ', $rawDesc))), 0, 220);
             if (mb_strlen($rawDesc) > 220) {
                 $description .= '...';
@@ -86,19 +106,19 @@ class PrerenderController {
                 'touristType' => $type,
                 'touristDestination' => [
                     '@type'   => 'Place',
-                    'name'    => $region . ', Andorra',
+                    'name'    => $region,
                     'address' => [
                         '@type'           => 'PostalAddress',
                         'addressCountry'  => 'AD',
-                        'addressLocality' => 'Andorra',
+                        'addressLocality' => $region,
                     ],
                 ],
                 'provider' => [
                     '@type'     => 'Organization',
-                    'name'      => 'Isard Wildland Experience (iWE)',
+                    'name'      => $businessName,
                     'url'       => $baseUrl,
-                    'telephone' => '+376 653 769',
-                    'email'     => 'info@i-wildland.com',
+                    'telephone' => $phone,
+                    'email'     => $email,
                 ],
             ];
 
@@ -112,16 +132,16 @@ class PrerenderController {
                 ];
             }
         } else {
-            $title = 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra';
-            $description = 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.';
+            $title = $defaultTitle;
+            $description = $defaultDesc;
             $image = $this->getSeoOgImage();
             $canonicalUrl = $baseUrl . '/tour/' . rawurlencode($tourId);
             $schema = [
                 '@context' => 'https://schema.org',
                 '@type'    => 'TravelAgency',
-                'name'     => 'Isard Wildland Experience',
+                'name'     => $businessName,
                 'url'      => $baseUrl,
-                'telephone'=> '+376 653 769',
+                'telephone'=> $phone,
             ];
         }
 
@@ -138,7 +158,7 @@ class PrerenderController {
     <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:site_name" content="iWE — Isard Wildland Experience">
+    <meta property="og:site_name" content="<?= htmlspecialchars($businessName, ENT_QUOTES, 'UTF-8') ?>">
     <meta property="og:type" content="article">
     <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
     <meta property="og:title" content="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>">
@@ -159,7 +179,7 @@ class PrerenderController {
 <?= json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
     </script>
 
-    <!-- Fallback redirect for regular web browsers -->
+    <!-- Fallback redirect for regular web browsers that hit this URL directly -->
     <meta http-equiv="refresh" content="0;url=/tour/<?= htmlspecialchars($tourId, ENT_QUOTES, 'UTF-8') ?>">
     <script>
         if (typeof window !== 'undefined' && !navigator.userAgent.match(/bot|crawl|spider|facebook|twitter|whatsapp|telegram|slack|pinterest|perplexity|chatgpt|claude/i)) {
@@ -170,7 +190,7 @@ class PrerenderController {
 <body style="font-family: sans-serif; padding: 2rem; background: #1d2722; color: #f5f5f5;">
     <h1><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></h1>
     <p><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?></p>
-    <p><a style="color: #c4f039;" href="/tour/<?= htmlspecialchars($tourId, ENT_QUOTES, 'UTF-8') ?>">Haz clic aquí para abrir esta experiencia en iWE</a></p>
+    <p><a style="color: #c4f039;" href="/tour/<?= htmlspecialchars($tourId, ENT_QUOTES, 'UTF-8') ?>">Haz clic aquí para abrir esta experiencia en <?= htmlspecialchars($businessName, ENT_QUOTES, 'UTF-8') ?></a></p>
 </body>
 </html>
 <?php
@@ -179,12 +199,17 @@ class PrerenderController {
 
     /**
      * Renders full HTML with dynamic Open Graph & JSON-LD for a given article slug.
-     * Only published posts are served; unpublished slugs fall back to the generic iWE card.
+     * Only published posts are served; unpublished slugs fall back to the generic brand card.
      */
     public function renderPost(string $slug): void {
         $slug     = trim($slug);
         $baseUrl  = $this->getBaseUrl();
         $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
+
+        $businessName = $this->getSiteContent('business_name', 'Isard Wildland Experience');
+        $phone        = $this->getSiteContent('contact_phone', '');
+        $defaultTitle = $this->getSiteContent('seo_meta_title', $businessName . ' — Turismo Activo y Aventura');
+        $defaultDesc  = $this->getSiteContent('seo_meta_description', 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.');
 
         try {
             // JOIN media to resolve cover_media_id → absolute URL (same pattern as PostsController)
@@ -205,17 +230,13 @@ class PrerenderController {
         }
 
         if ($post) {
-            $title = $post['title'] . ' | iWE Andorra';
-
-            // Sanitize & truncate body to 220 chars — same rule as renderTour()
-            $rawDesc = $post['body'] ?: 'Novedades, rutas y relatos de expediciones en Andorra y los Pirineos.';
-            $cleanDesc = mb_substr(trim(strip_tags(str_replace(['<br>', '<br/>', '</p>'], ' ', $rawDesc))), 0, 220);
-            if (mb_strlen(strip_tags($rawDesc)) > 220) {
-                $cleanDesc .= '...';
+            $title = $post['title'] . ' | ' . $businessName;
+            $rawBody = $post['body'] ?: $defaultDesc;
+            $description = mb_substr(trim(strip_tags(str_replace(['<br>', '<br/>', '</p>'], ' ', $rawBody))), 0, 220);
+            if (mb_strlen($rawBody) > 220) {
+                $description .= '...';
             }
-            $description = $cleanDesc;
 
-            // Resolve cover image — cover_filename comes from LEFT JOIN media
             if (!empty($post['cover_filename'])) {
                 $image = $baseUrl . $publicBase . '/' . $post['cover_filename'];
             } else {
@@ -234,22 +255,22 @@ class PrerenderController {
                 'datePublished'    => $post['published_at'] ?? '',
                 'publisher'        => [
                     '@type' => 'Organization',
-                    'name'  => 'Isard Wildland Experience (iWE)',
+                    'name'  => $businessName,
                     'url'   => $baseUrl,
                 ],
             ];
         } else {
             // Fallback — same generic card as renderTour() for missing/unpublished content
-            $title        = 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra';
-            $description  = 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.';
+            $title        = $defaultTitle;
+            $description  = $defaultDesc;
             $image        = $this->getSeoOgImage();
             $canonicalUrl = $baseUrl . '/novedades/' . rawurlencode($slug);
             $schema = [
                 '@context' => 'https://schema.org',
                 '@type'    => 'TravelAgency',
-                'name'     => 'Isard Wildland Experience',
+                'name'     => $businessName,
                 'url'      => $baseUrl,
-                'telephone'=> '+376 653 769',
+                'telephone'=> $phone,
             ];
         }
 
@@ -266,7 +287,7 @@ class PrerenderController {
     <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:site_name" content="iWE — Isard Wildland Experience">
+    <meta property="og:site_name" content="<?= htmlspecialchars($businessName, ENT_QUOTES, 'UTF-8') ?>">
     <meta property="og:type" content="article">
     <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
     <meta property="og:title" content="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>">
@@ -298,11 +319,10 @@ class PrerenderController {
 <body style="font-family: sans-serif; padding: 2rem; background: #1d2722; color: #f5f5f5;">
     <h1><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></h1>
     <p><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?></p>
-    <p><a style="color: #c4f039;" href="/novedades/<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>">Haz clic aquí para leer este artículo en iWE</a></p>
+    <p><a style="color: #c4f039;" href="/novedades/<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>">Haz clic aquí para leer este artículo en <?= htmlspecialchars($businessName, ENT_QUOTES, 'UTF-8') ?></a></p>
 </body>
 </html>
 <?php
         exit;
     }
 }
-

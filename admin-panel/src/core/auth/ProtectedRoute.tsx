@@ -19,5 +19,15 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Force password change: prevent accessing any other route while flag is active
+  if (user.must_change_password && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  // If password change is not required, prevent hanging on the change-password page
+  if (!user.must_change_password && location.pathname === '/change-password') {
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 };

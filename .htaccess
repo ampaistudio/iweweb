@@ -20,13 +20,16 @@
     # 3. Dynamic XML Sitemap (queried live from database for search engines & AI bots)
     RewriteRule ^sitemap\.xml$ api/index.php?sitemap=1 [L]
 
-    # 4. Pass existing files and directories through without rewriting
+    # 4. Block direct access to physical admin-panel folder (Security by Design - NAES §9)
+    RewriteRule ^admin-panel(/.*)?$ - [F,L]
+
+    # 5. Pass existing files and directories through without rewriting
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # 5. SPA Fallback: Route all non-file/non-directory requests to index.html for React Router
-    RewriteRule ^ index.html [L]
+    # 6. Front Controller: Route dynamic requests (secret panel slug & SPA fallback) to index.php
+    RewriteRule ^ index.php [L]
 </IfModule>
 
 # Security Headers

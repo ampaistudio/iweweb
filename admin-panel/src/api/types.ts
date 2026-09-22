@@ -12,6 +12,7 @@ export interface AuthUser {
   display_name: string;
   role: 'admin' | 'user';
   created_at: string;
+  must_change_password?: boolean;
 }
 
 export interface ApiKeyItem {
