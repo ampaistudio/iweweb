@@ -116,7 +116,7 @@ class AuthController {
                 'expires_at' => $expiresAt,
             ]);
 
-            $resetUrl = rtrim($this->config['app']['site_url'] ?? '', '/') . '/dashboard/reset-password?token=' . $rawToken;
+            $resetUrl = rtrim($this->config['app']['site_url'] ?? '', '/') . '/panel-a3b5789b6538ee865ba75cec/reset-password?token=' . $rawToken;
 
             $subject = 'Recuperar contraseña — iWE Dashboard';
             $html = sprintf(

@@ -126,7 +126,7 @@ class HealthTelegramNotifier {
 
         $lines[] = "";
         $lines[] = "👉 _Ingresa al dashboard para gestionar respaldos e información:_";
-        $lines[] = "[Abrir Dashboard de iWE](https://i-wildland.com/dashboard/settings/site-health)";
+        $lines[] = "[Abrir Dashboard de iWE](https://i-wildland.com/panel-a3b5789b6538ee865ba75cec/settings/site-health)";
 
         return implode("\n", $lines);
     }

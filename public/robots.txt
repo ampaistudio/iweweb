@@ -4,7 +4,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /dashboard/
 
 # Explicit permissions for Generative AI & LLM Search Agents
 User-agent: GPTBot

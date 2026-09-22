@@ -61,7 +61,7 @@ class HealthDependencyChecker {
         }
 
         $dashResults = [];
-        $dashDir = $this->rootDir . '/dashboard';
+        $dashDir = $this->rootDir . '/panel-a3b5789b6538ee865ba75cec';
         $dashPkgJson = $this->readJsonFile($dashDir . '/package.json') ?: [];
         $dashLockJson = $this->readJsonFile($dashDir . '/package-lock.json');
 

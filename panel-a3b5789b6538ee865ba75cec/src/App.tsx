@@ -31,7 +31,7 @@ import {
 
 export const App: React.FC = () => {
   return (
-    <BrowserRouter basename="/dashboard">
+    <BrowserRouter basename="/panel-a3b5789b6538ee865ba75cec">
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
