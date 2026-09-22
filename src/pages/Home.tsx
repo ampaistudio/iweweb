@@ -26,7 +26,7 @@ function Home() {
   const { heroSlides, getContent } = useSiteData();
 
   useEffect(() => {
-    const title = getContent("seo_meta_title", "iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra");
+    const title = getContent("seo_meta_title", "");
     const description = getContent("seo_meta_description", getContent("mission_text") || "Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.");
     const image = getContent("seo_og_image", "");
     updateSeo({
@@ -39,10 +39,10 @@ function Home() {
   const heroEyebrow = getContent("hero_eyebrow", "Elige tu experiencia con nosotros");
   const heroTitleLine1 = getContent("hero_title_line1", "Todas las experiencias.");
   const heroTitleLine2 = getContent("hero_title_line2", "Un solo operador.");
-  const heroCopy = getContent("hero_copy", "iWE, la agencia líder en turismo de experiencias. Esquí, snowboard, raquetas de nieve, BTT, 4x4, vía ferrata, senderismo y mucho más en Andorra y los Pirineos, todo el año.");
+  const heroCopy = getContent("hero_copy", "");
   const heroTagline = getContent("hero_tagline", "Fabricamos experiencias.");
   const missionEyebrow = getContent("mission_eyebrow", "Nuestra empresa");
-  const missionTitle = getContent("mission_title", "Líderes en turismo de experiencias en Andorra y los Pirineos.");
+  const missionTitle = getContent("mission_title", "");
   const missionText = getContent(
     "mission_text",
     "Descubre un mundo de experiencias únicas con un solo operador turístico. Esquí, snowboard, raquetas de nieve, tours culturales y todo lo que te puedas imaginar para vivir la montaña, guiado por expertos locales como Charly Paredes."

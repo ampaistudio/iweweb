@@ -154,7 +154,7 @@ function TourDetail() {
       });
 
       const siteUrl = getContent("site_url", "https://i-wildland.com").replace(/\/$/, "");
-      const businessName = getContent("business_name", "Isard Wildland Experience");
+      const businessName = getContent("business_name", "");
       const contactPhone = getContent("contact_phone", "+376 653 769");
       const contactAddress = getContent("contact_address", "AD100 Canillo, Principat d'Andorra");
 

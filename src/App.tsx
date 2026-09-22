@@ -364,7 +364,7 @@ function App() {
               {logoUrl ? (
                 <img
                   src={logoUrl}
-                  alt={getContent("business_name", "Isard Wildland Experience")}
+                  alt={getContent("business_name", "")}
                   className="footer-logo-image"
                 />
               ) : (
@@ -434,7 +434,7 @@ function App() {
         </div>
 
         <div className="page-width footer-bottom">
-          <span>© 2026 iWE — {getContent("business_name", "Isard Wildland Experience")}</span>
+          <span>© 2026 iWE — {getContent("business_name", "")}</span>
           <span>{contactAddress} · Tel: {contactPhone}</span>
         </div>
         <div className="page-width footer-credit">

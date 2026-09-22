@@ -64,11 +64,11 @@ class PrerenderController {
         $tourId = trim($tourId);
         $baseUrl = $this->getBaseUrl();
 
-        $businessName = $this->getSiteContent('business_name', 'Isard Wildland Experience');
+        $businessName = $this->getSiteContent('business_name', '');
         $phone        = $this->getSiteContent('contact_phone', '');
         $email        = $this->getSiteContent('contact_email', '');
-        $defaultTitle = $this->getSiteContent('seo_meta_title', $businessName . ' — Turismo Activo y Aventura');
-        $defaultDesc  = $this->getSiteContent('seo_meta_description', 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.');
+        $defaultTitle = $this->getSiteContent('seo_meta_title', $businessName);
+        $defaultDesc  = $this->getSiteContent('seo_meta_description', '');
 
         try {
             $stmt = $this->pdo->prepare('SELECT * FROM activities WHERE id = :id LIMIT 1');
@@ -206,10 +206,10 @@ class PrerenderController {
         $baseUrl  = $this->getBaseUrl();
         $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
 
-        $businessName = $this->getSiteContent('business_name', 'Isard Wildland Experience');
+        $businessName = $this->getSiteContent('business_name', '');
         $phone        = $this->getSiteContent('contact_phone', '');
-        $defaultTitle = $this->getSiteContent('seo_meta_title', $businessName . ' — Turismo Activo y Aventura');
-        $defaultDesc  = $this->getSiteContent('seo_meta_description', 'Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.');
+        $defaultTitle = $this->getSiteContent('seo_meta_title', $businessName);
+        $defaultDesc  = $this->getSiteContent('seo_meta_description', '');
 
         try {
             // JOIN media to resolve cover_media_id → absolute URL (same pattern as PostsController)
