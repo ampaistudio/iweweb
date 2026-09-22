@@ -3,6 +3,7 @@ import { packages } from "../data/activities";
 import HeroSlideshow from "../components/HeroSlideshow";
 import { useSiteData } from "../context/SiteDataContext";
 import { updateSeo } from "../utils/seo";
+import { buildWhatsAppUrl } from "../utils/whatsapp";
 import { HomeAdventuresSection } from "../components/home/HomeAdventuresSection";
 import { HomeWeatherSection } from "../components/home/HomeWeatherSection";
 import { HomeReviewsSection } from "../components/home/HomeReviewsSection";
@@ -65,6 +66,8 @@ function Home() {
 
   const heroCtaActivities = getContent("hero_cta_activities", "Ver actividades");
   const heroCtaReserve = getContent("hero_cta_reserve", "Reservar ahora");
+  const contactPhone = getContent("contact_phone", "+376 653 769");
+  const heroWhatsappUrl = buildWhatsAppUrl(contactPhone, "Hola! Quisiera reservar una experiencia con iWE.");
   const heroScrollHint = getContent("hero_scroll_hint", "Descubre más");
   const missionTeamLink = getContent("mission_team_link", "Nuestro equipo");
   const missionStat1Value = getContent("mission_stat1_value", "2018");
@@ -91,7 +94,14 @@ function Home() {
           <p className="hero-copy">{heroCopy}</p>
           <div className="hero-actions">
             <a className="button button-light" href="#bike">{heroCtaActivities} <ArrowIcon /></a>
-            <a className="text-link light-link" href="#contact">{heroCtaReserve} <ArrowIcon /></a>
+            <a
+              className="text-link light-link"
+              href={heroWhatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {heroCtaReserve} <ArrowIcon />
+            </a>
           </div>
         </div>
         <a className="hero-scroll" href="#mission"><span />{heroScrollHint}</a>
