@@ -233,7 +233,7 @@ function TourDetail() {
   const contactPhone = getContent("contact_phone", "+376 653 769");
   const whatsappUrl = buildWhatsAppUrl(
     contactPhone,
-    `Hola! Quisiera reservar la experiencia "${activity.title}" (${activity.type}).`
+    `Hola! Quiero reservar una experiencia con iWE: ${activity.title}`
   );
 
   return (

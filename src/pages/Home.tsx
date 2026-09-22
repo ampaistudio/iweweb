@@ -67,7 +67,7 @@ function Home() {
   const heroCtaActivities = getContent("hero_cta_activities", "Ver actividades");
   const heroCtaReserve = getContent("hero_cta_reserve", "Reservar ahora");
   const contactPhone = getContent("contact_phone", "+376 653 769");
-  const heroWhatsappUrl = buildWhatsAppUrl(contactPhone, "Hola! Quisiera reservar una experiencia con iWE.");
+  const heroWhatsappUrl = buildWhatsAppUrl(contactPhone, "Hola! Quiero reservar una experiencia con iWE");
   const heroScrollHint = getContent("hero_scroll_hint", "Descubre más");
   const missionTeamLink = getContent("mission_team_link", "Nuestro equipo");
   const missionStat1Value = getContent("mission_stat1_value", "2018");
