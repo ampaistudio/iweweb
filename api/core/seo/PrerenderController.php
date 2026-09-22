@@ -92,8 +92,8 @@ class PrerenderController {
                 $image = $baseUrl . $image;
             }
 
-            $region = $activity['region'] ?: 'Andorra';
-            $type = $activity['type'] ?: 'Aventura';
+            $region = $activity['region'] ?: '';
+            $type = $activity['type'] ?: '';
             $price = $activity['price'] ?? null;
             $canonicalUrl = $baseUrl . '/tour/' . rawurlencode($tourId);
 
