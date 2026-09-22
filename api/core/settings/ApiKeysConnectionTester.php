@@ -352,10 +352,13 @@ class ApiKeysConnectionTester {
 
     private function testTripAdvisor(array $localData): void {
         $apiKey = ApiKeysMasker::resolveValue('TRIPADVISOR_API_KEY', $localData, $this->config);
-        $locationId = ApiKeysMasker::resolveValue('TRIPADVISOR_LOCATION_ID', $localData, $this->config) ?: 'd18719120';
+        $locationId = ApiKeysMasker::resolveValue('TRIPADVISOR_LOCATION_ID', $localData, $this->config);
 
         if (empty($apiKey)) {
             jsonError('TRIPADVISOR_API_KEY no está configurada.', 400);
+        }
+        if (empty($locationId)) {
+            jsonError('TRIPADVISOR_LOCATION_ID no está configurado.', 400);
         }
 
         $startTime = microtime(true);

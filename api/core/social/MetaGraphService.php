@@ -8,10 +8,12 @@
 
 class MetaGraphService {
     private array $metaConfig;
+    private array $config;
     private PDO $pdo;
 
     public function __construct(PDO $pdo, array $config) {
         $this->pdo = $pdo;
+        $this->config = $config;
         $this->metaConfig = $config['meta'] ?? [];
     }
 
@@ -52,7 +54,8 @@ class MetaGraphService {
             $cleanDesc = mb_substr($cleanDesc, 0, 347) . '...';
         }
 
-        $message = "🏔️ {$title}\n\n{$cleanDesc}\n\n👉 Descubre todos los detalles y reserva tu plaza: https://i-wildland.com/tour/" . urlencode($activityId);
+        $siteUrl = rtrim($this->config['app']['site_url'] ?? 'https://i-wildland.com', '/');
+        $message = "🏔️ {$title}\n\n{$cleanDesc}\n\n👉 Descubre todos los detalles y reserva tu plaza: {$siteUrl}/tour/" . urlencode($activityId);
 
         if ($toFacebook) {
             $results['facebook'] = $this->publishActivityToFacebook($activityId, $message, $imageUrl);

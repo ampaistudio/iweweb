@@ -153,6 +153,11 @@ function TourDetail() {
         type: "article",
       });
 
+      const siteUrl = getContent("site_url", "https://i-wildland.com").replace(/\/$/, "");
+      const businessName = getContent("business_name", "Isard Wildland Experience");
+      const contactPhone = getContent("contact_phone", "+376 653 769");
+      const contactAddress = getContent("contact_address", "AD100 Canillo, Principat d'Andorra");
+
       const schema = {
         "@context": "https://schema.org",
         "@type": "TouristTrip",
@@ -166,16 +171,16 @@ function TourDetail() {
           "price": activity.price ? activity.price.replace(/[^0-9.,]/g, "") : "0",
           "priceCurrency": "EUR",
           "availability": "https://schema.org/InStock",
-          "url": typeof window !== "undefined" ? window.location.href : `https://i-wildland.com/tour/${activity.id}`,
+          "url": typeof window !== "undefined" ? window.location.href : `${siteUrl}/tour/${activity.id}`,
         },
         "provider": {
           "@type": "TravelAgency",
-          "name": "iWE — Isard Wildland Experience",
-          "url": "https://i-wildland.com",
-          "telephone": "+376653769",
+          "name": businessName,
+          "url": siteUrl,
+          "telephone": contactPhone,
           "address": {
             "@type": "PostalAddress",
-            "addressLocality": activity.region || "Canillo",
+            "addressLocality": activity.region || contactAddress,
             "addressCountry": "AD",
           },
         },
@@ -187,7 +192,7 @@ function TourDetail() {
     return () => {
       setJsonLd(null);
     };
-  }, [activity.id, activity.title, activity.description, activity.introText, activity.image, activity.type, activity.region, activity.price, activity.itinerary]);
+  }, [activity.id, activity.title, activity.description, activity.introText, activity.image, activity.type, activity.region, activity.price, activity.itinerary, getContent]);
 
   // Build gallery images array
   const rawImages = fullActivity?.images || baseActivity?.images;
