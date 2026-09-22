@@ -5,6 +5,7 @@ import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
 import { formatDate, formatTextParagraphs } from '../utils/sanitize';
 import { usePreferences } from '../context/PreferencesContext';
+import { useSiteData } from '../context/SiteDataContext';
 import { updateSeo } from '../utils/seo';
 
 function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
@@ -23,6 +24,7 @@ function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
 export default function NewsDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { language } = usePreferences();
+  const { getContent } = useSiteData();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +76,7 @@ export default function NewsDetail() {
       <main className="news-detail-page page-width section-space">
         <div className="news-loading-state">
           <div className="news-spinner" />
-          <p>Cargando publicación...</p>
+          <p>{getContent("news_detail_loading", "Cargando publicación...")}</p>
         </div>
       </main>
     );
@@ -84,15 +86,18 @@ export default function NewsDetail() {
     return (
       <main className="news-detail-page page-width section-space">
         <Link className="text-link dark-link news-back-link" to="/novedades">
-          <ArrowIcon direction="left" /> Volver a novedades
+          <ArrowIcon direction="left" /> {getContent("news_detail_back_link", "Volver a novedades")}
         </Link>
         <div className="news-empty-state">
-          <h2>Publicación no encontrada</h2>
+          <h2>{getContent("news_detail_not_found_title", "Publicación no encontrada")}</h2>
           <p className="news-state-message">
-            La noticia que buscas no existe o ha sido despublicada.
+            {getContent(
+              "news_detail_not_found_copy",
+              "La noticia que buscas no existe o ha sido despublicada."
+            )}
           </p>
           <Link to="/novedades" className="button button-dark">
-            Ver todas las novedades <ArrowIcon />
+            {getContent("news_detail_see_all", "Ver todas las novedades")} <ArrowIcon />
           </Link>
         </div>
       </main>
@@ -106,12 +111,12 @@ export default function NewsDetail() {
   return (
     <main className="news-detail-page page-width section-space">
       <Link className="text-link dark-link news-back-link" to="/novedades">
-        <ArrowIcon direction="left" /> Volver a novedades
+        <ArrowIcon direction="left" /> {getContent("news_detail_back_link", "Volver a novedades")}
       </Link>
 
       <article className="news-article">
         <header className="news-article-header">
-          <p className="eyebrow">Novedades iWE</p>
+          <p className="eyebrow">{getContent("news_detail_eyebrow", "Novedades iWE")}</p>
           <h1>{post.title}</h1>
           <div className="news-article-meta">
             {dateStr && <span className="news-meta-date">{dateStr}</span>}
@@ -135,7 +140,7 @@ export default function NewsDetail() {
 
         {post.social_links && post.social_links.length > 0 && (
           <div className="news-social-links">
-            <p className="eyebrow">Ver también en redes</p>
+            <p className="eyebrow">{getContent("news_detail_social_title", "Ver también en redes")}</p>
             <div className="news-social-badges">
               {post.social_links
                 .filter((link) => link.external_permalink)
@@ -147,7 +152,9 @@ export default function NewsDetail() {
                     rel="noreferrer"
                     className="news-social-pill"
                   >
-                    {link.platform === 'instagram' ? '📷 Ver en Instagram' : '📘 Ver en Facebook'}
+                    {link.platform === 'instagram'
+                      ? getContent("news_detail_social_instagram", "📷 Ver en Instagram")
+                      : getContent("news_detail_social_facebook", "📘 Ver en Facebook")}
                     <ArrowIcon />
                   </a>
                 ))}
@@ -157,11 +164,11 @@ export default function NewsDetail() {
 
         <div className="news-article-cta">
           <div>
-            <p className="eyebrow">¿Te inspiró esta experiencia?</p>
-            <h2>Planifica tu aventura con nosotros</h2>
+            <p className="eyebrow">{getContent("news_detail_cta_eyebrow", "¿Te inspiró esta experiencia?")}</p>
+            <h2>{getContent("news_detail_cta_title", "Planifica tu aventura con nosotros")}</h2>
           </div>
           <a href="/#contact" className="button button-dark">
-            Contactar a un guía <ArrowIcon />
+            {getContent("news_detail_cta_button", "Contactar a un guía")} <ArrowIcon />
           </a>
         </div>
       </article>

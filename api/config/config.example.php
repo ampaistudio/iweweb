@@ -45,6 +45,14 @@ return [
     ],
 
     // -------------------------------------------------------------------------
+    // Transactional Email (password reset) — sent via Hostinger's mail() relay
+    // -------------------------------------------------------------------------
+    'mail' => [
+        'from_address' => getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@i-wildland.com',
+        'from_name'    => getenv('MAIL_FROM_NAME') ?: 'iWE Dashboard',
+    ],
+
+    // -------------------------------------------------------------------------
     // Media & Uploads
     // -------------------------------------------------------------------------
     'media' => [

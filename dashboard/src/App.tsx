@@ -8,6 +8,8 @@ import { DashboardLayout } from './core/layout/DashboardLayout';
 
 // Core Pages (Generic)
 import { LoginPage } from './core/auth/LoginPage';
+import { ForgotPasswordPage } from './core/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './core/auth/ResetPasswordPage';
 import { OverviewPage } from './core/overview/OverviewPage';
 import { MediaPage } from './core/media/MediaPage';
 import { ContentEditorPage } from './core/content/ContentEditorPage';
@@ -36,6 +38,8 @@ export const App: React.FC = () => {
           <Routes>
             {/* Public Login Route */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected Dashboard Routes */}
             <Route

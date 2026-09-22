@@ -5,6 +5,7 @@ import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
 import { formatDate, generateExcerpt } from '../utils/sanitize';
 import { usePreferences } from '../context/PreferencesContext';
+import { useSiteData } from '../context/SiteDataContext';
 import { updateSeo } from '../utils/seo';
 
 function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
@@ -22,6 +23,7 @@ function ArrowIcon({ direction = 'right' }: { direction?: 'right' | 'left' }) {
 
 export default function NewsList() {
   const { language } = usePreferences();
+  const { getContent } = useSiteData();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,19 +69,22 @@ export default function NewsList() {
     <main className="news-page page-width section-space">
       <div className="news-header">
         <Link className="text-link dark-link news-back-link" to="/">
-          <ArrowIcon direction="left" /> Volver al inicio
+          <ArrowIcon direction="left" /> {getContent("news_list_back_home", "Volver al inicio")}
         </Link>
-        <p className="eyebrow">Actualidad &amp; Rutas</p>
-        <h1>Novedades de la montaña</h1>
+        <p className="eyebrow">{getContent("news_list_eyebrow", "Actualidad & Rutas")}</p>
+        <h1>{getContent("news_list_title", "Novedades de la montaña")}</h1>
         <p className="large-copy">
-          Descubre las últimas noticias, estados de senderos, consejos técnicos y relatos de nuestras expediciones en Andorra y los Pirineos.
+          {getContent(
+            "news_list_copy",
+            "Descubre las últimas noticias, estados de senderos, consejos técnicos y relatos de nuestras expediciones en Andorra y los Pirineos."
+          )}
         </p>
       </div>
 
       {loading && (
         <div className="news-loading-state">
           <div className="news-spinner" />
-          <p>Cargando novedades...</p>
+          <p>{getContent("news_list_loading", "Cargando novedades...")}</p>
         </div>
       )}
 
@@ -87,19 +92,22 @@ export default function NewsList() {
         <div className="news-empty-state">
           <p className="news-state-message">{error}</p>
           <a href="/#contact" className="button button-dark">
-            Contactar con nosotros <ArrowIcon />
+            {getContent("news_list_contact_cta", "Contactar con nosotros")} <ArrowIcon />
           </a>
         </div>
       )}
 
       {!loading && !error && posts.length === 0 && (
         <div className="news-empty-state">
-          <h3>Próximamente nuevas publicaciones</h3>
+          <h3>{getContent("news_list_empty_title", "Próximamente nuevas publicaciones")}</h3>
           <p className="news-state-message">
-            Estamos preparando nuevas historias y reportes de temporada. ¡Vuelve a visitarnos pronto!
+            {getContent(
+              "news_list_empty_copy",
+              "Estamos preparando nuevas historias y reportes de temporada. ¡Vuelve a visitarnos pronto!"
+            )}
           </p>
           <Link to="/" className="button button-dark">
-            Explorar actividades <ArrowIcon />
+            {getContent("news_list_explore_cta", "Explorar actividades")} <ArrowIcon />
           </Link>
         </div>
       )}

@@ -1,0 +1,96 @@
+@media (max-width: 900px) {
+  .page-width { width: min(100% - 56px, 700px); }
+  .site-header { padding-inline: 28px; }
+  .desktop-nav { display: none; }
+  .menu-toggle { display: block; }
+  .header-contact { display: none; }
+  .header-actions { gap: 14px; }
+  .preferences-controls { gap: 6px; }
+  .preferences-button, .preferences-language-select { height: 32px; }
+  .preferences-language-select { max-width: 84px; }
+  .hero-section { min-height: 760px; padding-bottom: 105px; }
+  .hero-image { object-position: 56% center; }
+  .hero-scroll { display: none; }
+  .hero-slideshow-dots { left: 28px; }
+  .section-space { padding-block: 96px; }
+  .mission-section, .calendar-section, .contact-section { gap: 55px; grid-template-columns: 1fr; }
+  .mission-image-wrap { height: 500px; max-width: none; }
+  .mission-numbers { margin-top: 48px; }
+  .tour-grid { grid-template-columns: repeat(2, 1fr); }
+  .why-section { grid-template-columns: 1fr; }
+  .why-image-panel { min-height: 550px; }
+  .why-copy-panel { max-width: 700px; padding: 90px 28px; width: min(100% - 56px, 700px); }
+  .destination-layout { grid-template-columns: .8fr 1.2fr; min-height: 690px; }
+  .destination-copy { padding: 85px 0 80px 12%; }
+  .destination-list { display: block; margin-top: 45px; }
+  .destination-list a:nth-child(odd), .destination-list a:nth-child(even) { margin-left: 0; margin-right: 0; }
+  .reviews-layout { gap: 35px; grid-template-columns: 1fr; }
+  .review-count { font-size: 55px; }
+  .review-controls { margin-top: 35px; position: static; }
+  .footer-top { grid-template-columns: 1fr; gap: 36px; }
+  .weather-map-frame { height: 440px; }
+  .tour-hero-top-bar { top: 96px; }
+  .tour-hero-tall { min-height: 620px; }
+  .tour-hero-content { padding-bottom: 50px; }
+  .tour-hero-full .tour-hero-content { padding-bottom: 64px; }
+  .tour-detail-body { padding-top: 48px; padding-bottom: 90px; }
+}
+
+@media (max-width: 600px) {
+  .page-width { width: calc(100% - 40px); }
+  .section-space { padding-block: 72px; }
+  h1 { font-size: clamp(48px, 15vw, 73px); }
+  h2 { font-size: clamp(40px, 13vw, 58px); }
+  .site-header { height: 80px; padding-inline: 20px; }
+  .site-header-scrolled { height: 68px; }
+  .mobile-nav { padding: 28px 20px 35px; top: 68px; }
+  .brand-symbol { font-size: 24px; }
+  .brand-name { font-size: 9px; }
+  .brand-logo-placeholder { font-size: 9px; height: 36px; padding: 0 12px; }
+  .brand-logo-image { height: 36px; }
+  .header-actions { gap: 8px; }
+  .preferences-controls { gap: 5px; }
+  .preferences-button { height: 30px; width: 30px; }
+  .preferences-button svg { height: 14px; width: 14px; }
+  .preferences-font-button { font-size: 10px; padding: 0 7px; }
+  .preferences-language-select { font-size: 11px; height: 30px; max-width: 62px; padding: 0 6px; }
+  .hero-section { min-height: 720px; padding-bottom: 84px; }
+  .hero-copy { font-size: 16px; max-width: 350px; }
+  .hero-actions { align-items: flex-start; flex-direction: column; gap: 24px; }
+  .mission-image-wrap { height: 430px; }
+  .mission-numbers { gap: 16px; justify-content: space-between; }
+  .mission-numbers strong { font-size: 29px; }
+  .mission-numbers span { font-size: 9px; max-width: 75px; }
+  .section-heading-row { align-items: flex-start; flex-direction: column; gap: 24px; }
+  .filter-bar { margin-top: 45px; }
+  .tour-grid { gap: 45px 14px; grid-template-columns: 1fr; }
+  .tour-image-wrap { aspect-ratio: 1 / .86; }
+  .tour-arrow { opacity: 1; transform: none; }
+  .desktop-only-link { display: none; }
+  .mobile-more-link { display: inline-flex; margin-top: 46px; }
+  .why-image-panel { min-height: 430px; }
+  .why-copy-panel { padding: 72px 20px; width: calc(100% - 40px); }
+  .destination-layout { display: block; min-height: 0; }
+  .destination-image-wrap { height: 420px; }
+  .destination-copy { padding: 72px 0 78px; }
+  .destination-list { margin-top: 40px; }
+  .calendar-row { gap: 10px; grid-template-columns: 68px 1fr 14px; min-height: 93px; }
+  .calendar-place { display: none; }
+  .calendar-tour { font-size: 17px; }
+  .contact-section { gap: 45px; }
+  .footer-top { gap: 36px; grid-template-columns: 1fr 1fr; padding-bottom: 55px; }
+  .footer-top p { grid-column: 1 / -1; grid-row: 2; }
+  .footer-links { grid-column: 2; grid-row: 1; }
+  .footer-bottom { align-items: flex-start; flex-wrap: wrap; gap: 14px; }
+  .footer-bottom span:nth-child(2) { display: none; }
+  .footer-bottom div { width: 100%; }
+  .weather-map-frame { height: 380px; }
+  .weather-meta-bar { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .tour-hero-top-bar { top: 86px; }
+  .tour-hero-back { font-size: 11px; padding: 6px 14px; }
+  .tour-hero-tall { min-height: 520px; }
+  .tour-hero-content { padding-bottom: 36px; }
+  .tour-hero-full .tour-hero-content { padding-bottom: 56px; }
+  .tour-hero-scroll-hint { bottom: 16px; font-size: 10px; }
+  .tour-detail-body { padding-top: 36px; padding-bottom: 70px; }
+}

@@ -94,6 +94,16 @@ export const api = {
       request<{ user: AuthUser }>('/auth/me', {
         method: 'GET',
       }),
+    forgotPassword: (email: string) =>
+      request<void>('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+    resetPassword: (token: string, password: string) =>
+      request<void>('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, password }),
+      }),
   },
 
   overview: {

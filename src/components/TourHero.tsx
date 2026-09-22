@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import HeroSlideshow, { type HeroSlide } from "./HeroSlideshow";
+import { useSiteData } from "../context/SiteDataContext";
 
 export interface TourHeroProps {
   slides: HeroSlide[];
@@ -39,6 +40,8 @@ function ChevronDownIcon() {
 }
 
 export function TourHero({ slides, title, eyebrow, variant }: TourHeroProps) {
+  const { getContent } = useSiteData();
+
   const handleScrollDown = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const target = document.getElementById("tour-content");
@@ -77,7 +80,7 @@ export function TourHero({ slides, title, eyebrow, variant }: TourHeroProps) {
           onClick={handleScrollDown}
           aria-label="Descubre más sobre este tour"
         >
-          <span>Descubre más</span>
+          <span>{getContent("tour_hero_scroll_hint", "Descubre más")}</span>
           <ChevronDownIcon />
         </a>
       )}

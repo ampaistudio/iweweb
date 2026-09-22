@@ -1,20 +1,29 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useToast } from '../ui/ToastContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { api } from '../../api/client';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState('');
 
   const { login } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    api.content
+      .list()
+      .then((res) => setLogoUrl(res.content.logo_url || ''))
+      .catch(() => setLogoUrl(''));
+  }, []);
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
@@ -52,9 +61,17 @@ export const LoginPage: React.FC = () => {
       <div className="relative w-full max-w-md bg-surface border border-border rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-soft border border-accent/30 text-accent-text font-bold text-2xl mb-4 font-mono shadow-inner">
-            iWE
-          </div>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="iWE Isard Wildland Experience"
+              className="h-14 mx-auto mb-4 object-contain"
+            />
+          ) : (
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-soft border border-accent/30 text-accent-text font-bold text-2xl mb-4 font-mono shadow-inner">
+              iWE
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-primary tracking-tight">Studio Editorial</h1>
           <p className="text-sm text-muted mt-1">Panel de administración y contenidos</p>
         </div>
@@ -100,10 +117,21 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
+        <div className="mt-5 text-center">
+          <Link to="/forgot-password" className="text-sm text-accent-text hover:underline">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+
         <div className="mt-8 pt-6 border-t border-border/80 text-center">
-          <p className="text-xs text-muted">
-            Acceso exclusivo para administradores (Christian y Charly).
-          </p>
+          <a
+            href="https://www.nodoai.co"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-muted hover:text-accent-text transition-colors"
+          >
+            Powered by NODO Ai Agency
+          </a>
         </div>
       </div>
     </div>

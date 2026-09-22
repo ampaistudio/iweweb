@@ -18,11 +18,19 @@ class SitemapController {
         $this->config = $config;
     }
 
+    private function getBaseUrl(): string {
+        $url = $this->config['app']['site_url'] ?? '';
+        if (empty($url) || !is_string($url)) {
+            throw new \RuntimeException('site_url config missing');
+        }
+        return rtrim($url, '/');
+    }
+
     /**
      * Outputs dynamic XML sitemap.
      */
     public function render(): void {
-        $baseUrl = 'https://i-wildland.com';
+        $baseUrl = $this->getBaseUrl();
         $nowDate = date('Y-m-d');
 
         // Fetch published activities

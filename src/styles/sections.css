@@ -1,0 +1,105 @@
+/* Why H+I */
+.why-section { background: var(--forest); color: white; display: grid; grid-template-columns: 1fr 1fr; min-height: 720px; }
+.why-image-panel { min-height: 640px; overflow: hidden; position: relative; }
+.why-image-panel img { height: 100%; object-fit: cover; object-position: center; transition: transform .7s cubic-bezier(.2,.7,.2,1); width: 100%; }
+.why-image-panel:hover img { transform: scale(1.04); }
+.why-image-panel::after { background: linear-gradient(0deg, rgba(0,0,0,.4), transparent 45%); content: ""; inset: 0; position: absolute; }
+.why-image-note { align-items: flex-start; bottom: 34px; display: flex; font-size: 0.6875rem; gap: 22px; left: 48px; letter-spacing: .08em; line-height: 1.45; position: absolute; text-transform: uppercase; z-index: 1; }
+.why-image-note span:first-child { color: var(--lime); font-family: "Space Grotesk", sans-serif; font-size: 1.5625rem; letter-spacing: -.05em; }
+.why-copy-panel { align-self: center; max-width: 530px; padding: 85px 10% 85px 13%; }
+.why-copy-panel .eyebrow { color: var(--lime); }
+.why-copy-panel h2 { color: white; }
+.why-copy-panel p:not(.eyebrow) { color: rgba(255,255,255,.7); font-size: 1rem; line-height: 1.6; max-width: 450px; }
+.why-copy-panel .button { margin-top: 22px; }
+
+/* Calendar */
+.calendar-section { align-items: center; display: grid; gap: 12%; grid-template-columns: .8fr 1.2fr; }
+.calendar-intro h2 { margin-bottom: 26px; }
+.calendar-intro > p:not(.eyebrow) { color: var(--text-muted); font-size: 1rem; line-height: 1.6; max-width: 390px; }
+.calendar-intro .button { margin-top: 18px; }
+.calendar-list { border-top: 1px solid var(--line); }
+.calendar-row { align-items: center; border-bottom: 1px solid var(--line); display: grid; gap: 18px; grid-template-columns: 94px 1fr 110px 16px; min-height: 90px; transition: padding .25s ease, background .25s ease; }
+.calendar-row:hover { background: var(--sand); padding-inline: 16px; }
+.calendar-row svg { height: 15px; width: 15px; }
+.calendar-month, .calendar-place { color: var(--text-muted); font-size: 0.625rem; letter-spacing: .1em; text-transform: uppercase; }
+.calendar-tour { font-family: "Space Grotesk", sans-serif; font-size: 1.1875rem; letter-spacing: -.03em; }
+
+/* Destinations */
+.destinations-section { background: var(--forest); color: white; padding-top: 0; padding-bottom: 0; }
+.destination-layout { display: grid; grid-template-columns: .78fr 1.22fr; min-height: 780px; }
+.destination-image-wrap { margin-left: -1px; overflow: hidden; }
+.destination-image-wrap img { height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.2,.7,.2,1); width: 100%; }
+.destination-copy { padding: 122px 0 110px 14%; }
+.destination-copy .eyebrow { color: var(--lime); }
+.destination-copy h2 { color: white; }
+.destination-list { display: grid; grid-template-columns: 1fr 1fr; margin-top: 62px; max-width: 610px; }
+.destination-list a { align-items: center; border-top: 1px solid rgba(255,255,255,.22); display: flex; font-family: "Space Grotesk", sans-serif; font-size: 1.0625rem; gap: 18px; padding: 15px 0; transition: color .2s ease, padding .2s ease; }
+.destination-list a:nth-child(odd) { margin-right: 35px; }
+.destination-list a:nth-child(even) { margin-left: 35px; }
+.destination-list a:hover { color: var(--lime); padding-left: 6px; }
+.destination-list a span { color: rgba(255,255,255,.45); font-family: "DM Sans", sans-serif; font-size: 0.5625rem; letter-spacing: .08em; }
+.destination-list a svg { height: 13px; margin-left: auto; opacity: .45; width: 13px; }
+
+/* Reviews */
+.reviews-section { background: var(--lime); }
+.reviews-layout { display: grid; gap: 14%; grid-template-columns: 1fr 2.5fr; }
+.review-count { display: block; font-family: "Space Grotesk", sans-serif; font-size: clamp(3rem, 5vw, 4.625rem); letter-spacing: -.1em; line-height: 1; }
+.review-count small { color: rgba(29,39,34,.5); font-family: "DM Sans", sans-serif; font-size: 0.875rem; letter-spacing: .03em; margin-left: 8px; }
+.review-source-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.review-source-tab { align-items: center; background: rgba(29, 39, 34, .08); border: 1px solid rgba(29, 39, 34, .2); border-radius: 999px; color: #1d2722; cursor: pointer; display: inline-flex; font-family: "Space Grotesk", sans-serif; font-size: 0.6875rem; font-weight: 600; gap: 6px; letter-spacing: .04em; padding: 6px 14px; transition: background .2s ease, border-color .2s ease; }
+.review-source-tab:hover { background: rgba(29, 39, 34, .16); }
+.review-source-tab.active { background: #1d2722; border-color: #1d2722; color: #f2f4ee; }
+.review-content { position: relative; }
+.review-stars { color: #1d2722; font-size: 0.8125rem; letter-spacing: 2px; margin-bottom: 14px; }
+blockquote { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.75rem, 3.5vw, 3.3125rem); letter-spacing: -.06em; line-height: 1.04; margin: 0; max-width: 930px; }
+.review-byline { display: flex; flex-direction: column; font-size: 0.6875rem; gap: 5px; letter-spacing: .1em; margin-top: 36px; text-transform: uppercase; }
+.review-byline span { color: rgba(29,39,34,.62); }
+.review-source-badge { align-items: center; border-radius: 3px; display: inline-flex; font-size: 0.625rem; font-weight: 700; gap: 6px; letter-spacing: .08em; margin-top: 6px; opacity: .85; text-transform: uppercase; }
+.review-controls { bottom: 0; display: flex; gap: 8px; position: absolute; right: 0; }
+.review-controls button { align-items: center; background: transparent; border: 1px solid rgba(29,39,34,.4); cursor: pointer; display: flex; height: 42px; justify-content: center; transition: background .2s ease; width: 42px; }
+.review-controls button:hover { background: rgba(255,255,255,.35); }
+
+/* Weather / Windy Map Section */
+.weather-section { background: var(--surface); }
+.weather-header { margin-bottom: 36px; max-width: 720px; }
+.weather-header h2 { margin-bottom: 12px; }
+.weather-header p:not(.eyebrow) { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
+.weather-map-wrap { background: var(--sand); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; position: relative; width: 100%; }
+.weather-map-frame { border: 0; display: block; height: 520px; width: 100%; }
+.weather-meta-bar { align-items: center; background: var(--sand); border-top: 1px solid var(--line); display: flex; font-size: 0.6875rem; justify-content: space-between; letter-spacing: .08em; padding: 14px 24px; text-transform: uppercase; }
+.weather-meta-bar span { color: var(--text-muted); }
+.weather-meta-badge { align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; color: var(--text-primary); display: inline-flex; font-size: 0.625rem; font-weight: 600; gap: 6px; padding: 4px 12px; }
+.weather-meta-badge::before { background: #22c55e; border-radius: 50%; content: ""; display: inline-block; height: 6px; width: 6px; }
+
+/* Contact and footer */
+.contact-section { align-items: end; display: grid; gap: 15%; grid-template-columns: 1fr 1fr; }
+.contact-section h2 { margin-bottom: 0; }
+.contact-copy > p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; max-width: 410px; }
+.newsletter-form { border-bottom: 1px solid var(--ink); display: flex; margin: 32px 0 22px; max-width: 460px; }
+.newsletter-form input { background: transparent; border: 0; color: var(--ink); flex: 1; font-size: 1.0625rem; outline: 0; padding: 14px 0; }
+.newsletter-form input::placeholder { color: var(--text-muted); }
+.newsletter-form button { align-items: center; background: transparent; border: 0; cursor: pointer; display: flex; justify-content: center; padding: 0 2px 0 15px; }
+.newsletter-form button:hover { color: var(--forest); }
+.newsletter-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+.newsletter-error-message { color: #dc2626; font-size: 0.875rem; margin-top: -12px; margin-bottom: 16px; }
+.success-message { color: var(--forest); font-size: 1.0625rem; font-weight: 600; margin: 32px 0 22px; }
+.site-footer { background: var(--ink-surface); color: var(--ink-surface-text); padding: 65px 0 24px; }
+.footer-top { align-items: start; display: grid; gap: 40px; grid-template-columns: 1.4fr 0.9fr 1.3fr; padding-bottom: 60px; }
+.footer-brand { align-self: start; }
+.footer-logo-image { max-height: 48px; width: auto; object-fit: contain; }
+.footer-brand-desc { color: rgba(255,255,255,.65); font-size: 0.875rem; line-height: 1.55; margin-top: 14px; max-width: 360px; }
+.footer-contact-details { color: rgba(255,255,255,.45); display: flex; flex-direction: column; font-size: 0.8125rem; gap: 4px; margin-top: 14px; }
+.footer-heading { color: white; font-family: "Space Grotesk", sans-serif; font-size: 0.875rem; font-weight: 700; letter-spacing: .08em; margin-bottom: 16px; text-transform: uppercase; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { color: rgba(255,255,255,.72); font-size: 0.8125rem; letter-spacing: .04em; transition: color .2s ease; }
+.footer-links a:hover, .footer-bottom a:hover { color: var(--lime); }
+.footer-social-desc { color: rgba(255,255,255,.65); font-size: 0.8125rem; line-height: 1.45; margin-bottom: 16px; }
+.footer-social-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.footer-social-badge { align-items: center; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.85); display: inline-flex; font-size: 0.75rem; font-weight: 600; gap: 8px; letter-spacing: .02em; padding: 6px 14px; transition: all .2s ease; text-decoration: none; }
+.footer-social-badge:hover { background: var(--lime); border-color: var(--lime); color: var(--ink); transform: translateY(-2px); }
+.footer-social-badge .social-svg { height: 16px; width: 16px; flex-shrink: 0; }
+.footer-bottom { align-items: center; border-top: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.45); display: flex; font-size: 0.6875rem; justify-content: space-between; letter-spacing: .06em; padding-top: 20px; text-transform: uppercase; flex-wrap: wrap; gap: 12px; }
+.footer-bottom a { transition: color .2s ease; }
+.footer-credit { border-top: 1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.3); display: block; font-size: 0.5625rem; letter-spacing: .1em; margin-top: 30px; padding-top: 20px; text-align: center; text-transform: uppercase; width: 100%; }
+.footer-credit a { color: inherit; }
+.sr-only { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0,0,0,0); }
