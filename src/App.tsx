@@ -259,7 +259,6 @@ function App() {
               ))}
             </select>
           </div>
-          <a className="header-contact" href="/#contact">Contacto <ArrowIcon /></a>
           <button
             className="menu-toggle"
             type="button"

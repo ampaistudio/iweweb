@@ -3,7 +3,6 @@
   .site-header { padding-inline: 28px; }
   .desktop-nav { display: none; }
   .menu-toggle { display: block; }
-  .header-contact { display: none; }
   .header-actions { gap: 14px; }
   .preferences-controls { gap: 6px; }
   .preferences-button, .preferences-language-select { height: 32px; }

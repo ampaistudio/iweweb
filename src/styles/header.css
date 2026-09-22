@@ -35,8 +35,8 @@
 .brand-logo-image { max-height: 120px; width: auto; object-fit: contain; transition: height .2s ease, max-height .2s ease; }
 
 .desktop-nav { align-items: center; display: flex; gap: clamp(1rem, 1.8vw, 2rem); margin-left: auto; margin-right: clamp(1rem, 1.8vw, 2rem); }
-.desktop-nav > a, .header-contact { font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; opacity: .9; transition: opacity .2s ease; white-space: nowrap; }
-.desktop-nav > a:hover, .header-contact:hover { opacity: .6; }
+.desktop-nav > a { font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; opacity: .9; transition: opacity .2s ease; white-space: nowrap; }
+.desktop-nav > a:hover { opacity: .6; }
 
 .preferences-controls { align-items: center; display: flex; gap: 8px; flex-shrink: 0; }
 .preferences-button { align-items: center; background: transparent; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; color: inherit; cursor: pointer; display: flex; height: 34px; justify-content: center; transition: background .2s ease, border-color .2s ease; width: 34px; }
@@ -45,8 +45,6 @@
 .preferences-font-button { font-family: "Space Grotesk", sans-serif; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0; width: auto; padding: 0 10px; }
 .preferences-language-select { background: transparent; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; color: inherit; cursor: pointer; font-family: "Space Grotesk", sans-serif; font-size: 0.75rem; height: 34px; padding: 0 10px; }
 .preferences-language-select option { background: var(--surface); color: var(--text-primary); }
-.header-contact { align-items: center; display: inline-flex; gap: 10px; font-size: 0.9375rem; font-weight: 600; white-space: nowrap; }
-.header-contact svg { height: 13px; width: 13px; }
 .header-actions { align-items: center; display: flex; gap: 18px; flex-shrink: 0; }
 .menu-toggle { background: transparent; border: 0; cursor: pointer; display: none; height: 34px; padding: 8px 0 8px 8px; width: 35px; }
 .menu-toggle span { background: currentColor; display: block; height: 1px; margin: 5px 0; width: 25px; }
