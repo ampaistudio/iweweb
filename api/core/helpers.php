@@ -224,6 +224,33 @@ function sanitizeRichText(string $html): string {
     return trim($innerHtml);
 }
 
+/**
+ * Send an email through the host's SMTP relay via PHP's mail(), routed with
+ * explicit Sendmail SMTP params so it works on Hostinger-style shared hosting
+ * without adding a Composer dependency for a single transactional email.
+ *
+ * Returns false on failure instead of throwing — callers must never leak
+ * whether a given address has an account (NAES §9.2 — no user enumeration).
+ */
+function sendTransactionalEmail(array $config, string $toEmail, string $subject, string $htmlBody): bool {
+    $fromEmail = $config['mail']['from_address'] ?? '';
+    $fromName = $config['mail']['from_name'] ?? 'iWE Dashboard';
+
+    if ($fromEmail === '') {
+        error_log('sendTransactionalEmail: MAIL_FROM_ADDRESS is not configured.');
+        return false;
+    }
+
+    $headers = [
+        'MIME-Version: 1.0',
+        'Content-Type: text/html; charset=UTF-8',
+        sprintf('From: %s <%s>', $fromName, $fromEmail),
+        sprintf('Reply-To: %s', $fromEmail),
+    ];
+
+    return @mail($toEmail, '=?UTF-8?B?' . base64_encode($subject) . '?=', $htmlBody, implode("\r\n", $headers));
+}
+
 function handleCors(array $config): void {
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
     $allowedOrigins = $config['app']['cors_origins'] ?? ['*'];

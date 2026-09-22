@@ -34,6 +34,12 @@ $defaultConfig = [
         'cookie_secure'   => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
         'cookie_samesite' => 'Lax',
     ],
+    'mail' => [
+        // Hostinger's shared-hosting mail() relay is used instead of external SMTP
+        // credentials; the box only needs a From address it's allowed to send as.
+        'from_address' => getenv('MAIL_FROM_ADDRESS') ?: '',
+        'from_name'    => getenv('MAIL_FROM_NAME') ?: 'iWE Dashboard',
+    ],
     'media' => [
         'upload_dir'      => __DIR__ . '/../uploads',
         'public_path'     => '/api/uploads',

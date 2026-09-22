@@ -170,6 +170,10 @@ try {
             $authController->logout();
         } elseif ($action === 'me' && $method === 'GET') {
             $authController->me();
+        } elseif ($action === 'forgot-password' && $method === 'POST') {
+            $authController->forgotPassword();
+        } elseif ($action === 'reset-password' && $method === 'POST') {
+            $authController->resetPassword();
         } else {
             jsonError('Acción de autenticación no válida.', 404);
         }
