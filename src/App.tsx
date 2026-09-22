@@ -116,6 +116,19 @@ function SocialIcon({ name }: { name: string }) {
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (key: string) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
   const location = useLocation();
   const { theme, toggleTheme, fontScale, cycleFontScale, language, setLanguage } = usePreferences();
   const { navSections, getContent } = useSiteData();
@@ -164,22 +177,34 @@ function App() {
                 <div className="nav-dropdown-menu">
                   {section.items.map((item, idx) => {
                     if (isNavGroup(item)) {
+                      const groupKey = `${section.label}:${item.label}`;
+                      const isOpen = openGroups.has(groupKey);
                       return (
                         <div key={item.label || idx} className="nav-dropdown-group">
-                          <span className="nav-dropdown-subheading">{item.label}</span>
-                          <div className="nav-dropdown-nested">
-                            {item.items.map((leaf) =>
-                              leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
-                                <Link to={leaf.href} key={leaf.id || leaf.href}>
-                                  {leaf.title}
-                                </Link>
-                              ) : (
-                                <a href={leaf.href} key={leaf.id || leaf.href}>
-                                  {leaf.title}
-                                </a>
-                              )
-                            )}
-                          </div>
+                          <button
+                            type="button"
+                            className="nav-dropdown-subheading"
+                            aria-expanded={isOpen}
+                            onClick={() => toggleGroup(groupKey)}
+                          >
+                            {item.label}
+                            <ArrowIcon direction={isOpen ? "left" : "right"} />
+                          </button>
+                          {isOpen && (
+                            <div className="nav-dropdown-nested">
+                              {item.items.map((leaf) =>
+                                leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
+                                  <Link to={leaf.href} key={leaf.id || leaf.href}>
+                                    {leaf.title}
+                                  </Link>
+                                ) : (
+                                  <a href={leaf.href} key={leaf.id || leaf.href}>
+                                    {leaf.title}
+                                  </a>
+                                )
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     }
@@ -264,30 +289,42 @@ function App() {
                   <div className="mobile-nav-subitems">
                     {section.items.map((item, idx) => {
                       if (isNavGroup(item)) {
+                        const groupKey = `${section.label}:${item.label}`;
+                        const isOpen = openGroups.has(groupKey);
                         return (
                           <div key={item.label || idx} className="mobile-nav-nested-group">
-                            <span className="mobile-nav-subheading">{item.label}</span>
-                            <div className="mobile-nav-nested">
-                              {item.items.map((leaf) =>
-                                leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
-                                  <Link
-                                    to={leaf.href}
-                                    key={leaf.id || leaf.href}
-                                    onClick={() => setMenuOpen(false)}
-                                  >
-                                    {leaf.title}
-                                  </Link>
-                                ) : (
-                                  <a
-                                    href={leaf.href}
-                                    key={leaf.id || leaf.href}
-                                    onClick={() => setMenuOpen(false)}
-                                  >
-                                    {leaf.title}
-                                  </a>
-                                )
-                              )}
-                            </div>
+                            <button
+                              type="button"
+                              className="mobile-nav-subheading"
+                              aria-expanded={isOpen}
+                              onClick={() => toggleGroup(groupKey)}
+                            >
+                              {item.label}
+                              <ArrowIcon direction={isOpen ? "left" : "right"} />
+                            </button>
+                            {isOpen && (
+                              <div className="mobile-nav-nested">
+                                {item.items.map((leaf) =>
+                                  leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
+                                    <Link
+                                      to={leaf.href}
+                                      key={leaf.id || leaf.href}
+                                      onClick={() => setMenuOpen(false)}
+                                    >
+                                      {leaf.title}
+                                    </Link>
+                                  ) : (
+                                    <a
+                                      href={leaf.href}
+                                      key={leaf.id || leaf.href}
+                                      onClick={() => setMenuOpen(false)}
+                                    >
+                                      {leaf.title}
+                                    </a>
+                                  )
+                                )}
+                              </div>
+                            )}
                           </div>
                         );
                       }
