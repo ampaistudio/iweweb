@@ -148,23 +148,28 @@ class HealthDependencyChecker {
             $cleanInstalled = preg_replace('/[^\d\.]/', '', explode('-', $installed)[0]);
             $cleanLatest = preg_replace('/[^\d\.]/', '', explode('-', $latest)[0]);
 
-            $instParts = array_map('intval', explode('.', $cleanInstalled));
-            $latParts = array_map('intval', explode('.', $cleanLatest));
-
-            $instMajor = $instParts[0] ?? 0;
-            $instMinor = $instParts[1] ?? 0;
-            $latMajor = $latParts[0] ?? 0;
-            $latMinor = $latParts[1] ?? 0;
-
-            if ($latMajor > $instMajor) {
-                $severity = 'red';
-                $statusText = "Actualización mayor disponible ({$latest})";
-            } elseif ($latMinor > $instMinor) {
-                $severity = 'yellow';
-                $statusText = "Actualización menor disponible ({$latest})";
-            } else {
+            if (version_compare($cleanLatest, $cleanInstalled, '<=')) {
                 $severity = 'green';
                 $statusText = 'Al día';
+            } else {
+                $instParts = array_map('intval', explode('.', $cleanInstalled));
+                $latParts = array_map('intval', explode('.', $cleanLatest));
+
+                $instMajor = $instParts[0] ?? 0;
+                $instMinor = $instParts[1] ?? 0;
+                $latMajor = $latParts[0] ?? 0;
+                $latMinor = $latParts[1] ?? 0;
+
+                if ($latMajor !== $instMajor) {
+                    $severity = 'red';
+                    $statusText = "Actualización mayor disponible ({$latest})";
+                } elseif ($latMinor !== $instMinor) {
+                    $severity = 'yellow';
+                    $statusText = "Actualización menor disponible ({$latest})";
+                } else {
+                    $severity = 'yellow';
+                    $statusText = "Actualización de parche disponible ({$latest})";
+                }
             }
         }
 
