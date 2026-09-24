@@ -49,7 +49,7 @@ export const CoverImagePickerModal: React.FC<CoverImagePickerModalProps> = ({
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[540px] overflow-y-auto p-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[min(68dvh,760px)] overflow-y-auto overflow-x-hidden p-2">
             {photoImages.map((img) => {
               const isSelected = selectedImageUrl === img.image_url;
               return (
@@ -59,7 +59,7 @@ export const CoverImagePickerModal: React.FC<CoverImagePickerModalProps> = ({
                     onSelectImage(img);
                     onClose();
                   }}
-                  className={`group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border-2 transition-all bg-surface shadow-sm hover:shadow-md ${
+                  className={`group relative aspect-[3/2] min-w-0 rounded-2xl overflow-hidden cursor-pointer border-2 transition-all bg-surface shadow-sm hover:shadow-md ${
                     isSelected
                       ? 'border-accent ring-4 ring-accent/30 scale-[0.99]'
                       : 'border-border hover:border-accent/60'

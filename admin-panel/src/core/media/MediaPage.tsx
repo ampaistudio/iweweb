@@ -102,14 +102,14 @@ export const MediaPage: React.FC = () => {
             <p className="text-xs text-faint mt-1">Usa la caja de arriba para subir la primera imagen.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {items.map((item) => (
               <div
                 key={item.id}
                 className="group bg-surface rounded-2xl border border-border overflow-hidden flex flex-col justify-between hover:border-border-strong transition-all shadow-md"
               >
                 {/* Image preview */}
-                <div className="relative aspect-[4/3] bg-surface-elevated overflow-hidden">
+                <div className="relative aspect-[3/2] bg-surface-elevated overflow-hidden">
                   <img
                     src={item.url}
                     alt={item.original_name}
