@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { type Activity } from './types';
@@ -22,9 +22,17 @@ export const ActivityListPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
 
   const toast = useToast();
   const navigate = useNavigate();
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    categoryScrollRef.current?.scrollBy({
+      left: direction === 'left' ? -280 : 280,
+      behavior: 'smooth',
+    });
+  };
 
   const loadActivities = async () => {
     try {
@@ -181,39 +189,64 @@ export const ActivityListPage: React.FC = () => {
       <Card>
         <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
           {/* Activity Types Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
               type="button"
-              onClick={() => setSelectedType('all')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[36px] ${
-                selectedType === 'all'
-                  ? 'bg-accent text-accent-text shadow-md'
-                  : 'bg-bg text-muted hover:text-primary border border-border'
-              }`}
+              onClick={() => scrollCategories('left')}
+              aria-label="Ver categorías anteriores"
+              title="Categorías anteriores"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-bg text-primary transition-colors hover:border-accent hover:text-accent"
             >
-              Todas ({activities.length})
+              ←
             </button>
-            {availableCategories.map((type) => {
-              const count = activities.filter((a) => a.type === type).length;
-              return (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setSelectedType(type)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[36px] ${
-                    selectedType === type
-                      ? 'bg-accent text-accent-text shadow-md'
-                      : 'bg-bg text-muted hover:text-primary border border-border'
-                  }`}
-                >
-                  {type} ({count})
-                </button>
-              );
-            })}
+
+            <div
+              ref={categoryScrollRef}
+              className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto scroll-smooth pb-2 md:pb-1"
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedType('all')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[36px] shrink-0 ${
+                  selectedType === 'all'
+                    ? 'bg-accent text-accent-text shadow-md'
+                    : 'bg-bg text-muted hover:text-primary border border-border'
+                }`}
+              >
+                Todas ({activities.length})
+              </button>
+              {availableCategories.map((type) => {
+                const count = activities.filter((a) => a.type === type).length;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setSelectedType(type)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[36px] shrink-0 ${
+                      selectedType === type
+                        ? 'bg-accent text-accent-text shadow-md'
+                        : 'bg-bg text-muted hover:text-primary border border-border'
+                    }`}
+                  >
+                    {type} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollCategories('right')}
+              aria-label="Ver categorías siguientes"
+              title="Categorías siguientes"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-bg text-primary transition-colors hover:border-accent hover:text-accent"
+            >
+              →
+            </button>
           </div>
 
           {/* Search box */}
-          <div className="w-full md:w-72">
+          <div className="w-full md:w-72 shrink-0">
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
