@@ -54,22 +54,17 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
         title={editingPackage ? `Editar Paquete: ${editingPackage.title}` : 'Crear Paquete Multidía'}
         description="Configura el título, duración, descripción, precio y programación de visibilidad."
         maxWidth="5xl"
-        footer={(
-          <div className="flex items-center justify-end gap-3">
-            <Button type="button" variant="secondary" size="md" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              form="package-editor-form"
-              variant="primary"
-              size="lg"
-              isLoading={isSaving}
-              className="min-w-56 shadow-xl"
-            >
-              💾 Guardar paquete
-            </Button>
-          </div>
+        headerAction={(
+          <Button
+            type="submit"
+            form="package-editor-form"
+            variant="primary"
+            size="lg"
+            isLoading={isSaving}
+            className="min-w-56 shadow-xl"
+          >
+            💾 Guardar paquete
+          </Button>
         )}
       >
         <form id="package-editor-form" onSubmit={onSubmit} className="space-y-6">

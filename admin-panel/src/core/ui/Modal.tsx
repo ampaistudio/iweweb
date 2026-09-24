@@ -5,6 +5,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   description?: string;
+  headerAction?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl' | '6xl';
@@ -15,6 +16,7 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   description,
+  headerAction,
   children,
   footer,
   maxWidth = 'lg',
@@ -54,11 +56,12 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border shrink-0">
+        <div className="flex items-center gap-4 px-6 pt-6 pb-4 border-b border-border shrink-0">
           <div>
             {title && <h3 className="text-lg font-bold tracking-tight text-primary">{title}</h3>}
             {description && <p className="text-xs text-muted mt-1">{description}</p>}
           </div>
+          {headerAction && <div className="ml-auto shrink-0">{headerAction}</div>}
           <button
             type="button"
             onClick={onClose}
