@@ -103,7 +103,7 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
           )}
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+          <div className="sticky bottom-[-20px] z-20 -mx-6 -mb-5 flex items-center justify-end gap-3 border-t border-border bg-surface/95 px-6 pb-5 pt-4 backdrop-blur-md">
             <Button
               type="button"
               variant="secondary"
@@ -115,8 +115,9 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
             <Button
               type="submit"
               variant="primary"
-              size="md"
+              size="lg"
               isLoading={isSaving}
+              className="min-w-56 shadow-xl"
             >
               💾 Guardar paquete
             </Button>
