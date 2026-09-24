@@ -54,7 +54,7 @@ class MetaGraphService {
             $cleanDesc = mb_substr($cleanDesc, 0, 347) . '...';
         }
 
-        $siteUrl = rtrim($this->config['app']['site_url'] ?? 'https://i-wildland.com', '/');
+        $siteUrl = rtrim($this->config['app']['site_url'] ?? '', '/');
         $message = "🏔️ {$title}\n\n{$cleanDesc}\n\n👉 Descubre todos los detalles y reserva tu plaza: {$siteUrl}/tour/" . urlencode($activityId);
 
         if ($toFacebook) {

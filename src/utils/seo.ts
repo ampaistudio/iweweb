@@ -6,16 +6,11 @@ export interface SeoConfig {
   type?: string;
 }
 
-const DEFAULT_TITLE = "iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra";
-const DEFAULT_DESCRIPTION =
-  "Descubre experiencias únicas en Andorra y los Pirineos con guías expertos: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.";
-const DEFAULT_IMAGE = "https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg";
-
 export function updateSeo(config: SeoConfig = {}) {
-  const title = config.title ? `${config.title}` : DEFAULT_TITLE;
-  const description = config.description ? sanitizeDescription(config.description) : DEFAULT_DESCRIPTION;
-  const image = config.image || DEFAULT_IMAGE;
-  const url = config.url || (typeof window !== "undefined" ? window.location.href : "https://i-wildland.com");
+  const title = config.title || "";
+  const description = config.description ? sanitizeDescription(config.description) : "";
+  const image = config.image || "";
+  const url = config.url || (typeof window !== "undefined" ? window.location.href : "");
   const type = config.type || "website";
 
   // Document Title
@@ -31,7 +26,7 @@ export function updateSeo(config: SeoConfig = {}) {
     setMetaTag("property", "og:image", image);
     setMetaTag("property", "og:url", url);
     setMetaTag("property", "og:type", type);
-    setMetaTag("property", "og:site_name", "iWE — Isard Wildland Experience");
+    setMetaTag("property", "og:site_name", title);
 
     // Twitter Card
     setMetaTag("name", "twitter:card", "summary_large_image");
@@ -73,4 +68,3 @@ export function setJsonLd(schema: object | null) {
   }
   script.textContent = JSON.stringify(schema);
 }
-

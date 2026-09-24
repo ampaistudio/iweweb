@@ -21,10 +21,3 @@ export const parseDirectReviews = (raw?: string): DirectReviewItem[] => {
     return [];
   }
 };
-
-export const DEFAULT_KEYS: Record<string, string> = {
-  site_url: 'https://i-wildland.com',
-  weather_map_lat: '42.5459743',
-  weather_map_lon: '1.5140217',
-};
-

@@ -80,7 +80,7 @@ export function TourHero({ slides, title, eyebrow, variant }: TourHeroProps) {
           onClick={handleScrollDown}
           aria-label="Descubre más sobre este tour"
         >
-          <span>{getContent("tour_hero_scroll_hint", "Descubre más")}</span>
+          <span>{getContent("tour_hero_scroll_hint")}</span>
           <ChevronDownIcon />
         </a>
       )}

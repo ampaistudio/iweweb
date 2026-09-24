@@ -8,18 +8,19 @@ $defaultConfig = [
     'app' => [
         'name'        => 'iWE Dashboard API',
         'env'         => getenv('APP_ENV') ?: 'production',
-        'site_url'    => getenv('APP_SITE_URL') ?: 'https://i-wildland.com',
+        'site_url'    => getenv('APP_SITE_URL') ?: '',
         'base_url'    => getenv('APP_BASE_URL') ?: '/api',
         'panel_slug'  => getenv('APP_PANEL_SLUG') ?: null,
         'panel_dir'   => 'admin-panel',
-        'cors_origins'=> [
-            'https://i-wildland.com',
+        'cors_origins'=> array_values(array_filter([
+            getenv('APP_SITE_URL') ?: null,
             'http://localhost:5173',
+            'http://localhost:5174',
             'http://localhost:3000',
-        ],
+        ])),
     ],
     'seo' => [
-        'default_og_image' => getenv('SEO_DEFAULT_OG_IMAGE') ?: 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg',
+        'default_og_image' => getenv('SEO_DEFAULT_OG_IMAGE') ?: '',
     ],
     'db' => [
         'host'     => getenv('DB_HOST') ?: '127.0.0.1',
@@ -125,6 +126,11 @@ if (file_exists($localConfigFile)) {
     }
 } else {
     $config = $defaultConfig;
+}
+
+// NAES §8.4 / SEC-02: Require site_url / APP_SITE_URL to be explicitly configured
+if (empty($config['app']['site_url'])) {
+    throw new \RuntimeException('Configuration error: site_url / APP_SITE_URL is not configured.');
 }
 
 // NAES §8.4 / SEC-02: Explicit failure if critical database credentials are not configured

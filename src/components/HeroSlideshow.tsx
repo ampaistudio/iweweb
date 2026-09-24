@@ -84,7 +84,6 @@ function HeroSlideshow({ slides }: { slides: HeroSlide[] }) {
               src={slide.src}
               alt={slide.alt}
               loading={index === 0 ? "eager" : "lazy"}
-              // @ts-expect-error React 18 HTMLImageElement attribute
               fetchPriority={index === 0 ? "high" : "low"}
               decoding="async"
             />

@@ -43,14 +43,14 @@ export function HomeContactSection() {
     }
   };
 
-  const contactEyebrow = getContent("contact_eyebrow", "Mantente inspirado");
-  const contactTitleLine1 = getContent("contact_title_line1", "Más montaña.");
-  const contactTitleLine2 = getContent("contact_title_line2", "Menos rutina.");
-  const contactCopy = getContent("contact_copy", "Recibe novedades, disponibilidad de actividades y un poco de inspiración para tu próxima aventura. Sin ruido. Solo lo bueno.");
-  const newsletterSuccessMessage = getContent("newsletter_success_message", "Ya formas parte de la lista. Nos vemos en la montaña.");
-  const newsletterEmailLabel = getContent("newsletter_email_label", "Tu correo electrónico");
-  const contactWhatsappLink = getContent("contact_whatsapp_link", "O escríbenos directamente");
-  const contactPhone = getContent("contact_phone", "+376 653 769");
+  const contactEyebrow = getContent("contact_eyebrow");
+  const contactTitleLine1 = getContent("contact_title_line1");
+  const contactTitleLine2 = getContent("contact_title_line2");
+  const contactCopy = getContent("contact_copy");
+  const newsletterSuccessMessage = getContent("newsletter_success_message");
+  const newsletterEmailLabel = getContent("newsletter_email_label");
+  const contactWhatsappLink = getContent("contact_whatsapp_link");
+  const contactPhone = getContent("contact_phone");
 
   return (
     <section id="contact" className="contact-section section-space page-width">

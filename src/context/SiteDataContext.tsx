@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { activities as staticActivities, type Activity, type ActivityType } from '../data/activities';
+import type { Activity, ActivityType } from '../data/activities';
 import { publicApi } from '../api/client';
 import type { RawApiActivity, SiteContentMap, MenuItem } from '../api/types';
 import type { HeroSlide } from '../components/HeroSlideshow';
@@ -29,177 +29,12 @@ export function isNavGroup(item: NavItemOrGroup): item is NavGroup {
   return 'items' in item;
 }
 
-export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
-  {
-    type: 'image',
-    src: 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg',
-    alt: 'Guía de montaña de iWE en los Pirineos de Andorra',
-  },
-  {
-    type: 'image',
-    src: 'https://privateyachtexpeditions.com/wp-content/uploads/2024/01/IMG-20210729-WA0058-605x605.jpg',
-    alt: 'E-Bike Enduro en Forn de Canillo',
-  },
-  {
-    type: 'image',
-    src: 'https://i-wildland.com/wp-content/uploads/2020/05/IMG_20180724_171459-800x533.jpg',
-    alt: 'Excursión 4x4 en la ruta de los contrabandistas hacia Tor',
-  },
-];
-
-export const DEFAULT_SITE_CONTENT: SiteContentMap = {
-  business_name: 'Isard Wildland Experience',
-  hero_tagline: 'Fabricamos experiencias.',
-  mission_eyebrow: 'Nuestra empresa',
-  mission_title: 'Líderes en turismo de experiencias en Andorra y los Pirineos.',
-  mission_text:
-    'Descubre un mundo de experiencias únicas con un solo operador turístico. Esquí, snowboard, raquetas de nieve, tours culturales y todo lo que te puedas imaginar para vivir la montaña, guiado por expertos locales como Charly Paredes.',
-  mission_image: 'https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg',
-  team_eyebrow: 'Nuestro equipo',
-  team_title: 'Fundada en 2018. Guiada por expertos locales.',
-  team_bio:
-    'iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés. Cada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto.',
-  team_image: 'https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg',
-  contact_phone: '+376 653 769',
-  contact_email: 'info@i-wildland.com',
-  contact_address: 'AD100 Canillo, Principat d\'Andorra',
-  social_instagram: 'https://www.instagram.com/isardwildland/',
-  social_facebook: 'https://www.facebook.com/isardwildland/',
-  social_tripadvisor: 'https://www.tripadvisor.com/',
-  social_whatsapp: '',
-  social_youtube: '',
-  social_tiktok: '',
-  social_strava: '',
-  social_linkedin: '',
-  social_twitter: '',
-  seo_meta_title: 'iWE | Isard Wildland Experience — Turismo Activo y Aventura en Andorra',
-  seo_meta_description: 'Descubre experiencias únicas en Andorra y los Pirineos con guías locales certificados: BTT, E-Bike Enduro, Vía Ferrata, 4x4, Senderismo, Esquí Tour y Raquetas de Nieve.',
-  seo_keywords: 'Andorra, iWE, BTT Andorra, E-Bike Enduro, Vía Ferrata, 4x4 Andorra, Senderismo Pirineos, Esquí Tour, Charly Paredes, Turismo Activo',
-  seo_og_image: 'https://i-wildland.com/wp-content/uploads/2020/06/G43A2769-2-scaled.jpg',
-  tours_section_published: 'true',
-  reviews_google_published: 'true',
-  reviews_tripadvisor_published: 'true',
-  reviews_direct_published: 'true',
-  reviews_direct_items: '[]',
-  tours_eyebrow: 'Tours en Andorra',
-  tours_title_line1: 'Vacaciones',
-  tours_title_line2: 'completas con iWE.',
-  tours_copy:
-    'Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.',
-  tours_cta_text: 'Consultar disponibilidad',
-  weather_map_lat: '42.5459743',
-  weather_map_lon: '1.5140217',
-
-  // TourDetail keys
-  tour_detail_location: 'Ubicación',
-  tour_detail_level: 'Nivel',
-  tour_detail_duration: 'Duración',
-  tour_detail_price: 'Precio',
-  tour_detail_consult_price: 'Consultar precio',
-  tour_detail_distance: 'Distancia',
-  tour_detail_elevation: 'Desnivel',
-  tour_detail_min_age: 'Edad mínima',
-  tour_detail_itinerary: 'Itinerario',
-  tour_detail_highlights: 'Qué incluye / Puntos destacados',
-  tour_detail_reserve_cta: 'Reservar esta experiencia',
-  tour_detail_related_title: 'También te puede interesar',
-
-  // NewsList keys
-  news_list_back_home: 'Volver al inicio',
-  news_list_eyebrow: 'Actualidad & Rutas',
-  news_list_title: 'Novedades de la montaña',
-  news_list_copy:
-    'Descubre las últimas noticias, estados de senderos, consejos técnicos y relatos de nuestras expediciones en Andorra y los Pirineos.',
-  news_list_loading: 'Cargando novedades...',
-  news_list_contact_cta: 'Contactar con nosotros',
-  news_list_empty_title: 'Próximamente nuevas publicaciones',
-  news_list_empty_copy:
-    'Estamos preparando nuevas historias y reportes de temporada. ¡Vuelve a visitarnos pronto!',
-  news_list_explore_cta: 'Explorar actividades',
-
-  // NewsDetail keys
-  news_detail_loading: 'Cargando publicación...',
-  news_detail_back_link: 'Volver a novedades',
-  news_detail_not_found_title: 'Publicación no encontrada',
-  news_detail_not_found_copy: 'La noticia que buscas no existe o ha sido despublicada.',
-  news_detail_see_all: 'Ver todas las novedades',
-  news_detail_eyebrow: 'Novedades iWE',
-  news_detail_social_title: 'Ver también en redes',
-  news_detail_social_instagram: '📷 Ver en Instagram',
-  news_detail_social_facebook: '📘 Ver en Facebook',
-  news_detail_cta_eyebrow: '¿Te inspiró esta experiencia?',
-  news_detail_cta_title: 'Planifica tu aventura con nosotros',
-  news_detail_cta_button: 'Contactar a un guía',
-
-  // Footer keys
-  footer_brand_desc: 'Turismo activo y experiencias de montaña en Andorra y los Pirineos.',
-  footer_nav_heading: 'Navegación',
-  footer_social_heading: 'Síguenos',
-  footer_social_desc: 'Conéctate con nuestra comunidad en la montaña:',
-
-  // TourHero keys
-  tour_hero_scroll_hint: 'Descubre más',
-
-  // TourShareWidget keys
-  tour_share_title: 'Compartir experiencia',
-
-  // Team section note keys
-  team_image_note_line1: 'Conocimiento local.',
-  team_image_note_line2: 'Experiencia real.',
-};
-
-export const FALLBACK_NAV_SECTIONS: NavSection[] = [
-  {
-    label: 'Nuestra empresa',
-    anchor: '/#mission',
-    items: [
-      { title: 'Nuestra empresa', id: 'mission', href: '/#mission' },
-      { title: 'Nuestro equipo', id: 'team', href: '/#team' },
-    ],
-  },
-  {
-    label: 'Bike',
-    anchor: '/#bike',
-    items: staticActivities
-      .filter((activity) => activity.type === 'BTT')
-      .map((activity) => ({ title: activity.title, id: activity.id, href: `/tour/${activity.id}` })),
-  },
-  {
-    label: 'Vía Ferrata',
-    anchor: '/#via-ferrata',
-    items: staticActivities
-      .filter((activity) => activity.type === 'Vía Ferrata')
-      .map((activity) => ({ title: activity.title, id: activity.id, href: `/tour/${activity.id}` })),
-  },
-  {
-    label: '4×4',
-    anchor: '/#4x4',
-    items: staticActivities
-      .filter((activity) => activity.type === '4x4')
-      .map((activity) => ({ title: activity.title, id: activity.id, href: `/tour/${activity.id}` })),
-  },
-  {
-    label: 'Senderismo',
-    anchor: '/#senderismo',
-    items: staticActivities
-      .filter((activity) => activity.type === 'Senderismo')
-      .map((activity) => ({ title: activity.title, id: activity.id, href: `/tour/${activity.id}` })),
-  },
-  {
-    label: 'Esquí-Snow',
-    anchor: '/#esqui-snow',
-    items: staticActivities
-      .filter((activity) => activity.type === 'Esquí-Snow')
-      .map((activity) => ({ title: activity.title, id: activity.id, href: `/tour/${activity.id}` })),
-  },
-];
-
 function resolveHref(linkType: string, targetValue: string): string {
   if (linkType === 'activity') {
     return `/tour/${targetValue}`;
   }
   if (linkType === 'package') {
-    return '/#holiday';
+    return '/#tours';
   }
   return targetValue;
 }
@@ -213,14 +48,14 @@ function buildNavItems(children?: MenuItem[]): NavItemOrGroup[] {
         label: child.label,
         items: child.children.map((grandchild) => ({
           title: grandchild.label,
-          id: grandchild.target_value,
+          id: String(grandchild.id),
           href: resolveHref(grandchild.link_type, grandchild.target_value),
         })),
       };
     }
     return {
       title: child.label,
-      id: child.target_value,
+      id: String(child.id),
       href: resolveHref(child.link_type, child.target_value),
     };
   });
@@ -233,8 +68,6 @@ function transformMenuTree(menuTree: MenuItem[]): NavSection[] {
     items: buildNavItems(rootNode.children),
   }));
 }
-
-
 
 function normalizeRawActivity(raw: RawApiActivity): Activity {
   const imageUrl = raw.image || raw.image_url || '';
@@ -255,7 +88,7 @@ function normalizeRawActivity(raw: RawApiActivity): Activity {
     type: raw.type as ActivityType,
     level: raw.level,
     duration: raw.duration,
-    image: resolveMediaUrl(imageUrl, staticActivities.find((a) => a.id === raw.id)?.image || ''),
+    image: resolveMediaUrl(imageUrl),
     alt: altText,
     price: raw.price || undefined,
     description: raw.description,
@@ -266,6 +99,7 @@ function normalizeRawActivity(raw: RawApiActivity): Activity {
 
 interface SiteDataContextValue {
   activities: Activity[];
+  categories: string[];
   content: SiteContentMap;
   heroSlides: HeroSlide[];
   navSections: NavSection[];
@@ -275,17 +109,18 @@ interface SiteDataContextValue {
   isHeroSlidesFallback: boolean;
   isMenuFallback: boolean;
   getActivity: (id: string) => Activity | undefined;
-  getContent: (key: string, fallback?: string) => string;
+  getContent: (key: string) => string;
 }
 
 const SiteDataContext = createContext<SiteDataContextValue | undefined>(undefined);
 
 export function SiteDataProvider({ children }: { children: ReactNode }) {
   const { language } = usePreferences();
-  const [activities, setActivities] = useState<Activity[]>(staticActivities);
-  const [content, setContent] = useState<SiteContentMap>(DEFAULT_SITE_CONTENT);
-  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(DEFAULT_HERO_SLIDES);
-  const [navSections, setNavSections] = useState<NavSection[]>(FALLBACK_NAV_SECTIONS);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [content, setContent] = useState<SiteContentMap>({});
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [navSections, setNavSections] = useState<NavSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [isActivitiesFallback, setIsActivitiesFallback] = useState(false);
   const [isContentFallback, setIsContentFallback] = useState(false);
@@ -296,6 +131,16 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     async function loadData() {
+      // 0. Fetch activity categories dynamically from DB
+      try {
+        const rawTypes = await publicApi.activityTypes.list();
+        if (isMounted && Array.isArray(rawTypes) && rawTypes.length > 0) {
+          setCategories(rawTypes.map((t) => t.name));
+        }
+      } catch {
+        // Transparent empty fallback
+      }
+
       // 1. Fetch activities with resilient fallback passing selected language
       try {
         const rawActivities = await publicApi.activities.list({ locale: language });
@@ -306,8 +151,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         if (isMounted) {
-          // Transparent fallback to static activities
-          setActivities(staticActivities);
+          setActivities([]);
           setIsActivitiesFallback(true);
         }
       }
@@ -316,16 +160,12 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
       try {
         const contentRes = await publicApi.content.get(language);
         if (isMounted && contentRes?.content) {
-          setContent({
-            ...DEFAULT_SITE_CONTENT,
-            ...contentRes.content,
-          });
+          setContent(contentRes.content);
           setIsContentFallback(false);
         }
       } catch {
         if (isMounted) {
-          // Transparent fallback to default content
-          setContent(DEFAULT_SITE_CONTENT);
+          setContent({});
           setIsContentFallback(true);
         }
       }
@@ -356,7 +196,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         if (isMounted) {
-          setHeroSlides(DEFAULT_HERO_SLIDES);
+          setHeroSlides([]);
           setIsHeroSlidesFallback(true);
         }
       }
@@ -371,7 +211,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         if (isMounted) {
-          setNavSections(FALLBACK_NAV_SECTIONS);
+          setNavSections([]);
           setIsMenuFallback(true);
         }
       } finally {
@@ -389,17 +229,16 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   const getActivity = (id: string): Activity | undefined => {
-    return activities.find((item) => item.id === id) || staticActivities.find((item) => item.id === id);
+    return activities.find((item) => item.id === id);
   };
 
-  const getContent = (key: string, fallback: string = ''): string => {
-    return content[key] || DEFAULT_SITE_CONTENT[key] || fallback;
-  };
+  const getContent = (key: string): string => content[key] ?? '';
 
   return (
     <SiteDataContext.Provider
       value={{
         activities,
+        categories,
         content,
         heroSlides,
         navSections,

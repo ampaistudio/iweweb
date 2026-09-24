@@ -51,6 +51,7 @@
 .filter-active::after { transform: scaleX(1); }
 .tour-grid { display: grid; gap: 54px 26px; grid-template-columns: repeat(3, 1fr); }
 .tour-item { display: block; }
+.holiday-preview { margin-top: 38px; max-width: 420px; }
 .tour-image-wrap { aspect-ratio: 1 / 1.04; overflow: hidden; position: relative; }
 .tour-image-wrap img { height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1); width: 100%; }
 .tour-image-link:hover img, .tour-item:hover img { transform: scale(1.06); }

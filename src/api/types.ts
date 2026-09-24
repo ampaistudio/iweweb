@@ -184,5 +184,14 @@ export interface Package {
   updated_at?: string;
 }
 
+export interface ActivityTypeItem {
+  id: number;
+  name: string;
+  display_order: number;
+  activities_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 
 

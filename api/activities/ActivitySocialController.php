@@ -68,7 +68,7 @@ class ActivitySocialController {
             return $imageUrl;
         }
 
-        $siteUrl = rtrim($this->config['app']['site_url'] ?? 'https://i-wildland.com', '/');
+        $siteUrl = rtrim($this->config['app']['site_url'] ?? '', '/');
 
         if (str_starts_with($imageUrl, '/api/uploads/')) {
             $filename = basename($imageUrl);

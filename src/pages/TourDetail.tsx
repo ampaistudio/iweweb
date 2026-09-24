@@ -153,10 +153,10 @@ function TourDetail() {
         type: "article",
       });
 
-      const siteUrl = getContent("site_url", "https://i-wildland.com").replace(/\/$/, "");
-      const businessName = getContent("business_name", "");
-      const contactPhone = getContent("contact_phone", "+376 653 769");
-      const contactAddress = getContent("contact_address", "AD100 Canillo, Principat d'Andorra");
+      const siteUrl = getContent("site_url").replace(/\/$/, "");
+      const businessName = getContent("business_name");
+      const contactPhone = getContent("contact_phone");
+      const contactAddress = getContent("contact_address");
 
       const schema = {
         "@context": "https://schema.org",
@@ -235,7 +235,7 @@ function TourDetail() {
     .filter((item) => item.type === activity.type && item.id !== activity.id)
     .slice(0, 3);
 
-  const contactPhone = getContent("contact_phone", "+376 653 769");
+  const contactPhone = getContent("contact_phone");
   const whatsappUrl = buildWhatsAppUrl(
     contactPhone,
     `Hola! Quiero reservar una experiencia con iWE: ${activity.title}`
@@ -271,7 +271,7 @@ function TourDetail() {
               <div className="tour-spec-item">
                 <span className="tour-spec-icon-wrap"><LocationIcon /></span>
                 <div>
-                  <span className="tour-spec-label">{getContent("tour_detail_location", "Ubicación")}</span>
+                  <span className="tour-spec-label">{getContent("tour_detail_location")}</span>
                   <span className="tour-spec-value">{activity.region}, {activity.country}</span>
                 </div>
               </div>
@@ -279,7 +279,7 @@ function TourDetail() {
               <div className="tour-spec-item">
                 <span className="tour-spec-icon-wrap"><LevelIcon /></span>
                 <div>
-                  <span className="tour-spec-label">{getContent("tour_detail_level", "Nivel")}</span>
+                  <span className="tour-spec-label">{getContent("tour_detail_level")}</span>
                   <span className="tour-spec-value">{activity.level}</span>
                 </div>
               </div>
@@ -287,7 +287,7 @@ function TourDetail() {
               <div className="tour-spec-item">
                 <span className="tour-spec-icon-wrap"><DurationIcon /></span>
                 <div>
-                  <span className="tour-spec-label">{getContent("tour_detail_duration", "Duración")}</span>
+                  <span className="tour-spec-label">{getContent("tour_detail_duration")}</span>
                   <span className="tour-spec-value">{activity.duration}</span>
                 </div>
               </div>
@@ -295,8 +295,8 @@ function TourDetail() {
               <div className="tour-spec-item">
                 <span className="tour-spec-icon-wrap"><PriceIcon /></span>
                 <div>
-                  <span className="tour-spec-label">{getContent("tour_detail_price", "Precio")}</span>
-                  <span className="tour-spec-value">{activity.price ? activity.price : getContent("tour_detail_consult_price", "Consultar precio")}</span>
+                  <span className="tour-spec-label">{getContent("tour_detail_price")}</span>
+                  <span className="tour-spec-value">{activity.price ? activity.price : getContent("tour_detail_consult_price")}</span>
                 </div>
               </div>
 
@@ -304,7 +304,7 @@ function TourDetail() {
                 <div className="tour-spec-item">
                   <span className="tour-spec-icon-wrap"><RouteIcon /></span>
                   <div>
-                    <span className="tour-spec-label">{getContent("tour_detail_distance", "Distancia")}</span>
+                    <span className="tour-spec-label">{getContent("tour_detail_distance")}</span>
                     <span className="tour-spec-value">{activity.technicalSpecs.distanceKm}</span>
                   </div>
                 </div>
@@ -314,7 +314,7 @@ function TourDetail() {
                 <div className="tour-spec-item">
                   <span className="tour-spec-icon-wrap"><RouteIcon /></span>
                   <div>
-                    <span className="tour-spec-label">{getContent("tour_detail_elevation", "Desnivel")}</span>
+                    <span className="tour-spec-label">{getContent("tour_detail_elevation")}</span>
                     <span className="tour-spec-value">
                       {[activity.technicalSpecs?.elevationGain, activity.technicalSpecs?.elevationLoss]
                         .filter(Boolean)
@@ -328,7 +328,7 @@ function TourDetail() {
                 <div className="tour-spec-item">
                   <span className="tour-spec-icon-wrap"><LevelIcon /></span>
                   <div>
-                    <span className="tour-spec-label">{getContent("tour_detail_min_age", "Edad mínima")}</span>
+                    <span className="tour-spec-label">{getContent("tour_detail_min_age")}</span>
                     <span className="tour-spec-value">{activity.technicalSpecs.minAge}</span>
                   </div>
                 </div>
@@ -344,7 +344,7 @@ function TourDetail() {
             {/* Itinerary */}
             {activity.itinerary && activity.itinerary.length > 0 && (
               <div className="tour-itinerary-section">
-                <p className="tour-section-subtitle">{getContent("tour_detail_itinerary", "Itinerario")}</p>
+                <p className="tour-section-subtitle">{getContent("tour_detail_itinerary")}</p>
                 <ol className="tour-itinerary-list">
                   {activity.itinerary.map((point, idx) => (
                     <li key={idx}>{point}</li>
@@ -356,7 +356,7 @@ function TourDetail() {
             {/* Highlights 2-column cards grid */}
             {activity.highlights && activity.highlights.length > 0 && (
               <div className="tour-highlights-section">
-                <p className="tour-section-subtitle">{getContent("tour_detail_highlights", "Qué incluye / Puntos destacados")}</p>
+                <p className="tour-section-subtitle">{getContent("tour_detail_highlights")}</p>
                 <div className="tour-highlights-grid">
                   {activity.highlights.map((highlight, idx) => (
                     <div className="tour-highlight-card" key={idx}>
@@ -383,7 +383,7 @@ function TourDetail() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {getContent("tour_detail_reserve_cta", "Reservar esta experiencia")} <ArrowIcon />
+                {getContent("tour_detail_reserve_cta")} <ArrowIcon />
               </a>
             </div>
           </div>
@@ -392,7 +392,7 @@ function TourDetail() {
         {/* Related Tours Section */}
         {related.length > 0 && (
           <div className="tour-detail-related">
-            <p className="eyebrow">{getContent("tour_detail_related_title", "También te puede interesar")}</p>
+            <p className="eyebrow">{getContent("tour_detail_related_title")}</p>
             <div className="tour-grid">
               {related.map((item) => (
                 <Link className="tour-item" to={`/tour/${item.id}`} key={item.id}>

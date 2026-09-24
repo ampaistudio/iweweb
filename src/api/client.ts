@@ -8,6 +8,7 @@ import type {
   TripAdvisorReviewsResponse,
   MenuItem,
   Package,
+  ActivityTypeItem,
 } from './types';
 
 
@@ -135,6 +136,10 @@ export const publicApi = {
     },
     get: (id: string, locale?: string) =>
       request<Package>(`/packages/${encodeURIComponent(id)}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`),
+  },
+
+  activityTypes: {
+    list: () => request<ActivityTypeItem[]>('/activity-types'),
   },
 
   newsletter: {

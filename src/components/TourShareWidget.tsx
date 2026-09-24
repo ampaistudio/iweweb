@@ -44,7 +44,7 @@ export function TourShareWidget({ title, type, region }: TourShareWidgetProps) {
   return (
     <div className="tour-share-box">
       <div className="tour-share-header">
-        <span className="tour-share-title">{getContent("tour_share_title", "Compartir experiencia")}</span>
+        <span className="tour-share-title">{getContent("tour_share_title")}</span>
         {copiedStatus && (
           <span className="tour-share-toast">
             {copiedStatus === "instagram"

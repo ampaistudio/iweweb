@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import { DEFAULT_ACTIVITY_TYPES, type Activity } from './types';
+import { type Activity } from './types';
 import { CategoryManagerModal } from './CategoryManagerModal';
 import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
@@ -13,7 +13,7 @@ import { ConfirmDialog } from '../core/ui/ConfirmDialog';
 
 export const ActivityListPage: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_ACTIVITY_TYPES);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');

@@ -69,22 +69,20 @@ export default function NewsList() {
     <main className="news-page page-width section-space">
       <div className="news-header">
         <Link className="text-link dark-link news-back-link" to="/">
-          <ArrowIcon direction="left" /> {getContent("news_list_back_home", "Volver al inicio")}
+          <ArrowIcon direction="left" /> {getContent("news_list_back_home")}
         </Link>
-        <p className="eyebrow">{getContent("news_list_eyebrow", "Actualidad & Rutas")}</p>
-        <h1>{getContent("news_list_title", "Novedades de la montaña")}</h1>
+        <p className="eyebrow">{getContent("news_list_eyebrow")}</p>
+        <h1>{getContent("news_list_title")}</h1>
         <p className="large-copy">
           {getContent(
-            "news_list_copy",
-            "Descubre las últimas noticias, estados de senderos, consejos técnicos y relatos de nuestras expediciones en Andorra y los Pirineos."
-          )}
+            "news_list_copy")}
         </p>
       </div>
 
       {loading && (
         <div className="news-loading-state">
           <div className="news-spinner" />
-          <p>{getContent("news_list_loading", "Cargando novedades...")}</p>
+          <p>{getContent("news_list_loading")}</p>
         </div>
       )}
 
@@ -92,22 +90,20 @@ export default function NewsList() {
         <div className="news-empty-state">
           <p className="news-state-message">{error}</p>
           <a href="/#contact" className="button button-dark">
-            {getContent("news_list_contact_cta", "Contactar con nosotros")} <ArrowIcon />
+            {getContent("news_list_contact_cta")} <ArrowIcon />
           </a>
         </div>
       )}
 
       {!loading && !error && posts.length === 0 && (
         <div className="news-empty-state">
-          <h3>{getContent("news_list_empty_title", "Próximamente nuevas publicaciones")}</h3>
+          <h3>{getContent("news_list_empty_title")}</h3>
           <p className="news-state-message">
             {getContent(
-              "news_list_empty_copy",
-              "Estamos preparando nuevas historias y reportes de temporada. ¡Vuelve a visitarnos pronto!"
-            )}
+              "news_list_empty_copy")}
           </p>
           <Link to="/" className="button button-dark">
-            {getContent("news_list_explore_cta", "Explorar actividades")} <ArrowIcon />
+            {getContent("news_list_explore_cta")} <ArrowIcon />
           </Link>
         </div>
       )}

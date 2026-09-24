@@ -16,8 +16,6 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   );
 }
 
-const DEFAULT_DIRECT_REVIEWS_JSON = '[]';
-
 export function HomeReviewsSection() {
   const [platformReviews, setPlatformReviews] = useState<UnifiedReview[]>([]);
   const [isGoogleMock, setIsGoogleMock] = useState(true);
@@ -26,11 +24,11 @@ export function HomeReviewsSection() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const { getContent } = useSiteData();
 
-  const reviewsGooglePublished = getContent("reviews_google_published", "true") !== "false" && getContent("reviews_google_published", "true") !== "0";
-  const reviewsTripadvisorPublished = getContent("reviews_tripadvisor_published", "true") !== "false" && getContent("reviews_tripadvisor_published", "true") !== "0";
-  const reviewsDirectPublished = getContent("reviews_direct_published", "true") !== "false" && getContent("reviews_direct_published", "true") !== "0";
+  const reviewsGooglePublished = getContent("reviews_google_published") !== "false" && getContent("reviews_google_published") !== "0";
+  const reviewsTripadvisorPublished = getContent("reviews_tripadvisor_published") !== "false" && getContent("reviews_tripadvisor_published") !== "0";
+  const reviewsDirectPublished = getContent("reviews_direct_published") !== "false" && getContent("reviews_direct_published") !== "0";
 
-  const directReviewsItemsRaw = getContent("reviews_direct_items", DEFAULT_DIRECT_REVIEWS_JSON);
+  const directReviewsItemsRaw = getContent("reviews_direct_items");
   const directReviews: UnifiedReview[] = useMemo(() => {
     try {
       const parsed = JSON.parse(directReviewsItemsRaw);
@@ -162,11 +160,11 @@ export function HomeReviewsSection() {
     setReviewIndex((current) => (current + direction + filteredReviews.length) % filteredReviews.length);
   };
 
-  const reviewsEyebrow = getContent("reviews_eyebrow", "Opiniones de clientes");
-  const reviewsTabAll = getContent("reviews_tab_all", "Todas");
-  const reviewsTabGoogle = getContent("reviews_tab_google", "Google ★ 4.9");
-  const reviewsTabTripadvisor = getContent("reviews_tab_tripadvisor", "TripAdvisor ★ 5.0");
-  const reviewsTabDirect = getContent("reviews_tab_direct", "iWE");
+  const reviewsEyebrow = getContent("reviews_eyebrow");
+  const reviewsTabAll = getContent("reviews_tab_all");
+  const reviewsTabGoogle = getContent("reviews_tab_google");
+  const reviewsTabTripadvisor = getContent("reviews_tab_tripadvisor");
+  const reviewsTabDirect = getContent("reviews_tab_direct");
 
   if (!(isGoogleVisible || isTripadvisorVisible || isDirectVisible) || visibleAllReviews.length === 0) {
     return null;
@@ -249,4 +247,3 @@ export function HomeReviewsSection() {
     </section>
   );
 }
-

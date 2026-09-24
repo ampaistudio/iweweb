@@ -143,10 +143,10 @@ function App() {
   const headerVariantClass = isDarkHero ? "site-header-hero" : "site-header-default";
 
   const fontScaleLabel = { normal: "A", large: "A+", xlarge: "A++" }[fontScale];
-  const contactAddress = getContent("contact_address", "Av. de Sant Antoni, 12, AD400 La Massana, Andorra");
-  const contactPhone = getContent("contact_phone", "+376 653 769");
-  const logoUrl = getContent("logo_url", "");
-  const logoHeight = getContent("logo_height", "44");
+  const contactAddress = getContent("contact_address");
+  const contactPhone = getContent("contact_phone");
+  const logoUrl = getContent("logo_url");
+  const logoHeight = getContent("logo_height");
   const logoHeightNum = parseInt(logoHeight, 10) || 44;
   const currentLogoHeight = scrolled ? Math.min(logoHeightNum, 52) : logoHeightNum;
   const logoStyle = { height: `${currentLogoHeight}px`, maxHeight: scrolled ? "52px" : "120px" };
@@ -364,7 +364,7 @@ function App() {
               {logoUrl ? (
                 <img
                   src={logoUrl}
-                  alt={getContent("business_name", "")}
+                  alt={getContent("business_name")}
                   className="footer-logo-image"
                 />
               ) : (
@@ -376,9 +376,7 @@ function App() {
             </Link>
             <p className="footer-brand-desc">
               {getContent(
-                "footer_brand_desc",
-                "Turismo activo y experiencias de montaña en Andorra y los Pirineos."
-              )}
+                "footer_brand_desc")}
             </p>
             <div className="footer-contact-details">
               <span>{contactAddress}</span>
@@ -387,7 +385,7 @@ function App() {
           </div>
 
           <div className="footer-col footer-col-links">
-            <h4 className="footer-heading">{getContent("footer_nav_heading", "Navegación")}</h4>
+            <h4 className="footer-heading">{getContent("footer_nav_heading")}</h4>
             <div className="footer-links">
               <a href="/#bike">Bike</a>
               <a href="/#tours">Tours en Andorra</a>
@@ -399,13 +397,13 @@ function App() {
           </div>
 
           <div className="footer-col footer-col-social">
-            <h4 className="footer-heading">{getContent("footer_social_heading", "Síguenos")}</h4>
+            <h4 className="footer-heading">{getContent("footer_social_heading")}</h4>
             <p className="footer-social-desc">
-              {getContent("footer_social_desc", "Conéctate con nuestra comunidad en la montaña:")}
+              {getContent("footer_social_desc")}
             </p>
             <div className="footer-social-grid">
               {(() => {
-                const jsonStr = getContent("social_links_json", "");
+                const jsonStr = getContent("social_links_json");
                 let items: { label: string; url: string; icon?: string }[] = [];
                 if (jsonStr) {
                   try {
@@ -423,15 +421,15 @@ function App() {
                 }
                 if (items.length === 0) {
                   items = [
-                    { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },
-                    { label: "Facebook", url: getContent("social_facebook", "https://www.facebook.com/isardwildland/") },
-                    { label: "TripAdvisor", url: getContent("social_tripadvisor", "https://www.tripadvisor.com/") },
-                    { label: "WhatsApp", url: getContent("social_whatsapp", "") },
-                    { label: "YouTube", url: getContent("social_youtube", "") },
-                    { label: "TikTok", url: getContent("social_tiktok", "") },
-                    { label: "Strava", url: getContent("social_strava", "") },
-                    { label: "LinkedIn", url: getContent("social_linkedin", "") },
-                    { label: "X / Twitter", url: getContent("social_twitter", "") },
+                    { label: "Instagram", url: getContent("social_instagram") },
+                    { label: "Facebook", url: getContent("social_facebook") },
+                    { label: "TripAdvisor", url: getContent("social_tripadvisor") },
+                    { label: "WhatsApp", url: getContent("social_whatsapp") },
+                    { label: "YouTube", url: getContent("social_youtube") },
+                    { label: "TikTok", url: getContent("social_tiktok") },
+                    { label: "Strava", url: getContent("social_strava") },
+                    { label: "LinkedIn", url: getContent("social_linkedin") },
+                    { label: "X / Twitter", url: getContent("social_twitter") },
                   ];
                 }
                 return items
@@ -462,7 +460,7 @@ function App() {
         </div>
 
         <div className="page-width footer-bottom">
-          <span>© 2026 iWE — {getContent("business_name", "")}</span>
+          <span>© 2026 iWE — {getContent("business_name")}</span>
           <span>{contactAddress} · Tel: {contactPhone}</span>
         </div>
         <div className="page-width footer-credit">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
-import { DEFAULT_ACTIVITY_TYPES, type Activity, type ActivityType, type ActivitySocialLink } from './types';
+import { type Activity, type ActivityType, type ActivitySocialLink } from './types';
 import type { MediaItem, DashboardLocale } from '../api/types';
 import { useToast } from '../core/ui/ToastContext';
 import type { LocaleActivityData } from './ActivityTranslationsSection';
@@ -28,7 +28,7 @@ export function useActivityEditorState() {
   const [title, setTitle] = useState('');
   const [slugId, setSlugId] = useState('');
   const [type, setType] = useState<ActivityType>('BTT');
-  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_ACTIVITY_TYPES);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [region, setRegion] = useState('');
   const [country, setCountry] = useState('Andorra');

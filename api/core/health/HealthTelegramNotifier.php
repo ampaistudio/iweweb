@@ -125,7 +125,7 @@ class HealthTelegramNotifier {
         }
 
         $lines[] = "";
-        $siteUrl = rtrim($this->config['app']['site_url'] ?? 'https://i-wildland.com', '/');
+        $siteUrl = rtrim($this->config['app']['site_url'] ?? '', '/');
         $panelSlug = trim((string)($this->config['app']['panel_slug'] ?? ''), '/');
         $dashboardUrl = $siteUrl . ($panelSlug !== '' ? '/' . $panelSlug : '') . '/settings/site-health';
         $lines[] = "[Abrir Dashboard]({$dashboardUrl})";

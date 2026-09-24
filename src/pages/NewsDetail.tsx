@@ -76,7 +76,7 @@ export default function NewsDetail() {
       <main className="news-detail-page page-width section-space">
         <div className="news-loading-state">
           <div className="news-spinner" />
-          <p>{getContent("news_detail_loading", "Cargando publicación...")}</p>
+          <p>{getContent("news_detail_loading")}</p>
         </div>
       </main>
     );
@@ -86,18 +86,16 @@ export default function NewsDetail() {
     return (
       <main className="news-detail-page page-width section-space">
         <Link className="text-link dark-link news-back-link" to="/novedades">
-          <ArrowIcon direction="left" /> {getContent("news_detail_back_link", "Volver a novedades")}
+          <ArrowIcon direction="left" /> {getContent("news_detail_back_link")}
         </Link>
         <div className="news-empty-state">
-          <h2>{getContent("news_detail_not_found_title", "Publicación no encontrada")}</h2>
+          <h2>{getContent("news_detail_not_found_title")}</h2>
           <p className="news-state-message">
             {getContent(
-              "news_detail_not_found_copy",
-              "La noticia que buscas no existe o ha sido despublicada."
-            )}
+              "news_detail_not_found_copy")}
           </p>
           <Link to="/novedades" className="button button-dark">
-            {getContent("news_detail_see_all", "Ver todas las novedades")} <ArrowIcon />
+            {getContent("news_detail_see_all")} <ArrowIcon />
           </Link>
         </div>
       </main>
@@ -111,12 +109,12 @@ export default function NewsDetail() {
   return (
     <main className="news-detail-page page-width section-space">
       <Link className="text-link dark-link news-back-link" to="/novedades">
-        <ArrowIcon direction="left" /> {getContent("news_detail_back_link", "Volver a novedades")}
+        <ArrowIcon direction="left" /> {getContent("news_detail_back_link")}
       </Link>
 
       <article className="news-article">
         <header className="news-article-header">
-          <p className="eyebrow">{getContent("news_detail_eyebrow", "Novedades iWE")}</p>
+          <p className="eyebrow">{getContent("news_detail_eyebrow")}</p>
           <h1>{post.title}</h1>
           <div className="news-article-meta">
             {dateStr && <span className="news-meta-date">{dateStr}</span>}
@@ -140,7 +138,7 @@ export default function NewsDetail() {
 
         {post.social_links && post.social_links.length > 0 && (
           <div className="news-social-links">
-            <p className="eyebrow">{getContent("news_detail_social_title", "Ver también en redes")}</p>
+            <p className="eyebrow">{getContent("news_detail_social_title")}</p>
             <div className="news-social-badges">
               {post.social_links
                 .filter((link) => link.external_permalink)
@@ -153,8 +151,8 @@ export default function NewsDetail() {
                     className="news-social-pill"
                   >
                     {link.platform === 'instagram'
-                      ? getContent("news_detail_social_instagram", "📷 Ver en Instagram")
-                      : getContent("news_detail_social_facebook", "📘 Ver en Facebook")}
+                      ? getContent("news_detail_social_instagram")
+                      : getContent("news_detail_social_facebook")}
                     <ArrowIcon />
                   </a>
                 ))}
@@ -164,11 +162,11 @@ export default function NewsDetail() {
 
         <div className="news-article-cta">
           <div>
-            <p className="eyebrow">{getContent("news_detail_cta_eyebrow", "¿Te inspiró esta experiencia?")}</p>
-            <h2>{getContent("news_detail_cta_title", "Planifica tu aventura con nosotros")}</h2>
+            <p className="eyebrow">{getContent("news_detail_cta_eyebrow")}</p>
+            <h2>{getContent("news_detail_cta_title")}</h2>
           </div>
           <a href="/#contact" className="button button-dark">
-            {getContent("news_detail_cta_button", "Contactar a un guía")} <ArrowIcon />
+            {getContent("news_detail_cta_button")} <ArrowIcon />
           </a>
         </div>
       </article>

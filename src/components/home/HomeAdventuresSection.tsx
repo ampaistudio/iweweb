@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { type Activity, type ActivityType } from "../../data/activities";
+import { type Activity } from "../../data/activities";
 import { useSiteData } from "../../context/SiteDataContext";
+import { resolveMediaUrl } from "../../utils/media";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -15,7 +16,19 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   );
 }
 
-function ActivityGrid({ type, activities }: { type: ActivityType; activities: Activity[] }) {
+function getCategoryAnchor(categoryName: string): string {
+  const slug = categoryName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return slug === 'btt' ? 'bike' : slug;
+}
+
+function getCategoryContentPrefix(categoryName: string): string {
+  const slug = categoryName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return `activities_${slug}`;
+}
+
+function ActivityGrid({ type, activities }: { type: string; activities: Activity[] }) {
   const filtered = activities.filter((activity) => activity.type === type);
 
   if (filtered.length === 0) {
@@ -42,81 +55,48 @@ function ActivityGrid({ type, activities }: { type: ActivityType; activities: Ac
 }
 
 export function HomeAdventuresSection() {
-  const { activities, getContent } = useSiteData();
+  const { activities, categories, getContent } = useSiteData();
 
-  const activitiesBikeEyebrow = getContent("activities_bike_eyebrow", "Enduro, E-Bike, BTT y remontes");
-  const activitiesBikeTitle = getContent("activities_bike_title", "Bike");
-  const activitiesViaFerrataEyebrow = getContent("activities_via_ferrata_eyebrow", "Iniciación y avanzado");
-  const activitiesViaFerrataTitle = getContent("activities_via_ferrata_title", "Vía Ferrata");
-  const activities4x4Eyebrow = getContent("activities_4x4_eyebrow", "Lagos Off-Road, Tor y Pic Negre");
-  const activities4x4Title = getContent("activities_4x4_title", "4×4");
-  const activitiesSenderismoEyebrow = getContent("activities_senderismo_eyebrow", "Medio día y día completo");
-  const activitiesSenderismoTitle = getContent("activities_senderismo_title", "Senderismo");
-  const activitiesEsquiEyebrow = getContent("activities_esqui_eyebrow", "Raquetas y esquí tour");
-  const activitiesEsquiTitle = getContent("activities_esqui_title", "Esquí-Snow");
+  const categoryList = categories.length > 0
+    ? categories
+    : Array.from(new Set(activities.map((a) => a.type)));
 
   return (
     <>
-      <section id="bike" className="adventures-section section-space">
-        <div className="page-width">
-          <div className="section-heading-row">
-            <div>
-              <p className="eyebrow">{activitiesBikeEyebrow}</p>
-              <h2>{activitiesBikeTitle}</h2>
-            </div>
-          </div>
-          <ActivityGrid type="BTT" activities={activities} />
-        </div>
-      </section>
+      {categoryList.map((categoryName) => {
+        const anchor = getCategoryAnchor(categoryName);
+        const prefix = getCategoryContentPrefix(categoryName);
+        const eyebrow = getContent(`${prefix}_eyebrow`);
+        const title = getContent(`${prefix}_title`) || categoryName;
+        const image = getContent(`${prefix}_image`);
+        const hasActivities = activities.some((a) => a.type === categoryName);
 
-      <section id="via-ferrata" className="adventures-section section-space">
-        <div className="page-width">
-          <div className="section-heading-row">
-            <div>
-              <p className="eyebrow">{activitiesViaFerrataEyebrow}</p>
-              <h2>{activitiesViaFerrataTitle}</h2>
-            </div>
-          </div>
-          <ActivityGrid type="Vía Ferrata" activities={activities} />
-        </div>
-      </section>
+        const isHoliday = anchor === 'andorra-holiday-snow';
+        if (!hasActivities && !image) return null;
 
-      <section id="4x4" className="adventures-section section-space">
-        <div className="page-width">
-          <div className="section-heading-row">
-            <div>
-              <p className="eyebrow">{activities4x4Eyebrow}</p>
-              <h2>{activities4x4Title}</h2>
+        return (
+          <section id={anchor} key={categoryName} className="adventures-section section-space">
+            {isHoliday && <span id="holiday" />}
+            <div className="page-width">
+              <div className="section-heading-row">
+                <div>
+                  {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+                  <h2>{title}</h2>
+                </div>
+              </div>
+              <ActivityGrid type={categoryName} activities={activities} />
+              {!hasActivities && image && (
+                <a className="tour-item holiday-preview" href="#contact">
+                  <div className="tour-image-wrap">
+                    <img src={resolveMediaUrl(image)} alt={categoryName} loading="lazy" decoding="async" />
+                    <span className="tour-arrow"><ArrowIcon /></span>
+                  </div>
+                </a>
+              )}
             </div>
-          </div>
-          <ActivityGrid type="4x4" activities={activities} />
-        </div>
-      </section>
-
-      <section id="senderismo" className="adventures-section section-space">
-        <div className="page-width">
-          <div className="section-heading-row">
-            <div>
-              <p className="eyebrow">{activitiesSenderismoEyebrow}</p>
-              <h2>{activitiesSenderismoTitle}</h2>
-            </div>
-          </div>
-          <ActivityGrid type="Senderismo" activities={activities} />
-        </div>
-      </section>
-
-      <section id="esqui-snow" className="adventures-section section-space">
-        <div className="page-width">
-          <div className="section-heading-row">
-            <div>
-              <p className="eyebrow">{activitiesEsquiEyebrow}</p>
-              <h2>{activitiesEsquiTitle}</h2>
-            </div>
-          </div>
-          <ActivityGrid type="Esquí-Snow" activities={activities} />
-        </div>
-      </section>
+          </section>
+        );
+      })}
     </>
   );
 }
-

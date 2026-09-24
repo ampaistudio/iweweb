@@ -17,12 +17,12 @@ export interface SocialNetworkItem {
 }
 
 export const DEFAULT_SOCIAL_NETWORKS: SocialNetworkItem[] = [
-  { id: 'instagram', name: 'Instagram', url: 'https://www.instagram.com/isardwildland/', icon: '📷', is_auto_publish: true, active: true },
-  { id: 'facebook', name: 'Facebook', url: 'https://www.facebook.com/isardwildland/', icon: '📘', is_auto_publish: true, active: true },
-  { id: 'tripadvisor', name: 'TripAdvisor', url: 'https://www.tripadvisor.com/', icon: '🦉', is_auto_publish: false, active: true },
-  { id: 'whatsapp', name: 'WhatsApp', url: 'https://wa.me/376653769', icon: '💬', is_auto_publish: false, active: true },
-  { id: 'youtube', name: 'YouTube', url: 'https://www.youtube.com/@isardwildland', icon: '▶️', is_auto_publish: false, active: true },
-  { id: 'tiktok', name: 'TikTok', url: 'https://www.tiktok.com/@isardwildland', icon: '🎵', is_auto_publish: false, active: true },
+  { id: 'instagram', name: 'Instagram', url: '', icon: '📷', is_auto_publish: true, active: true },
+  { id: 'facebook', name: 'Facebook', url: '', icon: '📘', is_auto_publish: true, active: true },
+  { id: 'tripadvisor', name: 'TripAdvisor', url: '', icon: '🦉', is_auto_publish: false, active: true },
+  { id: 'whatsapp', name: 'WhatsApp', url: '', icon: '💬', is_auto_publish: false, active: true },
+  { id: 'youtube', name: 'YouTube', url: '', icon: '▶️', is_auto_publish: false, active: true },
+  { id: 'tiktok', name: 'TikTok', url: '', icon: '🎵', is_auto_publish: false, active: true },
   { id: 'strava', name: 'Strava', url: '', icon: '🚴', is_auto_publish: false, active: true },
   { id: 'linkedin', name: 'LinkedIn', url: '', icon: '💼', is_auto_publish: false, active: true },
   { id: 'twitter', name: 'X / Twitter', url: '', icon: '✖️', is_auto_publish: false, active: true },
@@ -65,7 +65,7 @@ export const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({
     }
 
     if (parsed.length === 0) {
-      // Build from legacy form keys if available, otherwise DEFAULT_SOCIAL_NETWORKS
+      // Build network metadata from the configured legacy content keys.
       parsed = DEFAULT_SOCIAL_NETWORKS.map((item) => {
         const legacyKey = `social_${item.id.replace('twitter', 'twitter')}`;
         return {

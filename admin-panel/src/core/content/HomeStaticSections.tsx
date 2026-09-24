@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../api/client';
+import type { ActivityTypeItem } from '../../api/types';
 import { Card } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
@@ -14,6 +16,21 @@ export const HomeStaticSections: React.FC<HomeStaticSectionsProps> = ({
   form,
   onChange,
 }) => {
+  const [categories, setCategories] = useState<ActivityTypeItem[]>([]);
+  const [categoryError, setCategoryError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    api.activityTypes.list()
+      .then((items) => { if (active) setCategories(items); })
+      .catch(() => { if (active) setCategoryError(true); });
+    return () => { active = false; };
+  }, []);
+
+  const categoryPrefix = (name: string) =>
+    `activities_${name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')}`;
+
   return (
     <Card
       title="Encabezados de Actividades, Calendario, Clima y Reseñas"
@@ -24,57 +41,32 @@ export const HomeStaticSections: React.FC<HomeStaticSectionsProps> = ({
           <label className="block text-sm font-medium text-secondary mb-2">
             Secciones de actividades (cintillo + título)
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              value={form.activities_bike_eyebrow || ''}
-              onChange={(e) => onChange('activities_bike_eyebrow', e.target.value)}
-              placeholder="Enduro, E-Bike, BTT y remontes"
-            />
-            <Input
-              value={form.activities_bike_title || ''}
-              onChange={(e) => onChange('activities_bike_title', e.target.value)}
-              placeholder="Bike"
-            />
-            <Input
-              value={form.activities_via_ferrata_eyebrow || ''}
-              onChange={(e) => onChange('activities_via_ferrata_eyebrow', e.target.value)}
-              placeholder="Iniciación y avanzado"
-            />
-            <Input
-              value={form.activities_via_ferrata_title || ''}
-              onChange={(e) => onChange('activities_via_ferrata_title', e.target.value)}
-              placeholder="Vía Ferrata"
-            />
-            <Input
-              value={form.activities_4x4_eyebrow || ''}
-              onChange={(e) => onChange('activities_4x4_eyebrow', e.target.value)}
-              placeholder="Lagos Off-Road, Tor y Pic Negre"
-            />
-            <Input
-              value={form.activities_4x4_title || ''}
-              onChange={(e) => onChange('activities_4x4_title', e.target.value)}
-              placeholder="4×4"
-            />
-            <Input
-              value={form.activities_senderismo_eyebrow || ''}
-              onChange={(e) => onChange('activities_senderismo_eyebrow', e.target.value)}
-              placeholder="Medio día y día completo"
-            />
-            <Input
-              value={form.activities_senderismo_title || ''}
-              onChange={(e) => onChange('activities_senderismo_title', e.target.value)}
-              placeholder="Senderismo"
-            />
-            <Input
-              value={form.activities_esqui_eyebrow || ''}
-              onChange={(e) => onChange('activities_esqui_eyebrow', e.target.value)}
-              placeholder="Raquetas y esquí tour"
-            />
-            <Input
-              value={form.activities_esqui_title || ''}
-              onChange={(e) => onChange('activities_esqui_title', e.target.value)}
-              placeholder="Esquí-Snow"
-            />
+          {categoryError && <p className="text-sm text-red-600">No se pudieron cargar las categorías.</p>}
+          <div className="space-y-5">
+            {categories.map((category) => {
+              const prefix = categoryPrefix(category.name);
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" key={category.id}>
+                  <Input
+                    label={`${category.name}: cintillo`}
+                    value={form[`${prefix}_eyebrow`] || ''}
+                    onChange={(e) => onChange(`${prefix}_eyebrow`, e.target.value)}
+                  />
+                  <Input
+                    label={`${category.name}: título`}
+                    value={form[`${prefix}_title`] || ''}
+                    onChange={(e) => onChange(`${prefix}_title`, e.target.value)}
+                    placeholder={category.name}
+                  />
+                  <Input
+                    label={`${category.name}: imagen de sección (URL)`}
+                    value={form[`${prefix}_image`] || ''}
+                    onChange={(e) => onChange(`${prefix}_image`, e.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -255,4 +247,3 @@ export const HomeStaticSections: React.FC<HomeStaticSectionsProps> = ({
     </Card>
   );
 };
-

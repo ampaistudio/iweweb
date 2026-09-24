@@ -17,15 +17,10 @@ class ActivityController {
     private PDO $pdo;
     private array $config;
 
-    public const ALLOWED_TYPES = [
-        'BTT',
-        '4x4',
-        'Vía Ferrata',
-        'Senderismo',
-        'Esquí-Snow',
-        'Rafting',
-        'Heliflight'
-    ];
+    public function getAllowedTypes(): array {
+        $stmt = $this->pdo->query('SELECT name FROM activity_types ORDER BY display_order ASC');
+        return $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+    }
 
     public const SUPPORTED_LOCALES = ['es', 'ca', 'en', 'fr'];
 
@@ -234,7 +229,7 @@ class ActivityController {
         requireAuth($this->pdo);
         $body = getRequestBody();
 
-        $errors = ActivityValidationService::validate($body, self::ALLOWED_TYPES);
+        $errors = ActivityValidationService::validate($body, $this->getAllowedTypes());
         if (!empty($errors)) {
             jsonError('Datos de actividad inválidos.', 422, $errors);
         }
@@ -329,7 +324,7 @@ class ActivityController {
         }
 
         $body = getRequestBody();
-        $errors = ActivityValidationService::validate($body, self::ALLOWED_TYPES);
+        $errors = ActivityValidationService::validate($body, $this->getAllowedTypes());
         if (!empty($errors)) {
             jsonError('Datos de actividad inválidos.', 422, $errors);
         }

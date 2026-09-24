@@ -1,7 +1,9 @@
-import { useEffect } from "react";
-import { packages } from "../data/activities";
+import { useEffect, useState } from "react";
 import HeroSlideshow from "../components/HeroSlideshow";
 import { useSiteData } from "../context/SiteDataContext";
+import { usePreferences } from "../context/PreferencesContext";
+import { publicApi } from "../api/client";
+import type { Package } from "../api/types";
 import { updateSeo } from "../utils/seo";
 import { buildWhatsAppUrl } from "../utils/whatsapp";
 import { HomeAdventuresSection } from "../components/home/HomeAdventuresSection";
@@ -24,11 +26,31 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
 
 function Home() {
   const { heroSlides, getContent } = useSiteData();
+  const { language } = usePreferences();
+  const [packages, setPackages] = useState<Package[]>([]);
 
   useEffect(() => {
-    const title = getContent("seo_meta_title", "");
-    const description = getContent("seo_meta_description", getContent("mission_text") || "Descubre experiencias únicas en Andorra y los Pirineos con guías expertos.");
-    const image = getContent("seo_og_image", "");
+    let isMounted = true;
+    async function fetchPackages() {
+      try {
+        const pkgs = await publicApi.packages.list({ locale: language });
+        if (isMounted && Array.isArray(pkgs)) {
+          setPackages(pkgs);
+        }
+      } catch {
+        // Transparent empty fallback
+      }
+    }
+    fetchPackages();
+    return () => {
+      isMounted = false;
+    };
+  }, [language]);
+
+  useEffect(() => {
+    const title = getContent("seo_meta_title");
+    const description = getContent("seo_meta_description");
+    const image = getContent("seo_og_image");
     updateSeo({
       title,
       description,
@@ -36,52 +58,48 @@ function Home() {
     });
   }, [getContent]);
 
-  const heroEyebrow = getContent("hero_eyebrow", "Elige tu experiencia con nosotros");
-  const heroTitleLine1 = getContent("hero_title_line1", "Todas las experiencias.");
-  const heroTitleLine2 = getContent("hero_title_line2", "Un solo operador.");
-  const heroCopy = getContent("hero_copy", "");
-  const heroTagline = getContent("hero_tagline", "Fabricamos experiencias.");
-  const missionEyebrow = getContent("mission_eyebrow", "Nuestra empresa");
-  const missionTitle = getContent("mission_title", "");
+  const heroEyebrow = getContent("hero_eyebrow");
+  const heroTitleLine1 = getContent("hero_title_line1");
+  const heroTitleLine2 = getContent("hero_title_line2");
+  const heroCopy = getContent("hero_copy");
+  const heroTagline = getContent("hero_tagline");
+  const missionEyebrow = getContent("mission_eyebrow");
+  const missionTitle = getContent("mission_title");
   const missionText = getContent(
-    "mission_text",
-    "Descubre un mundo de experiencias únicas con un solo operador turístico. Esquí, snowboard, raquetas de nieve, tours culturales y todo lo que te puedas imaginar para vivir la montaña, guiado por expertos locales como Charly Paredes."
-  );
-  const missionImage = getContent("mission_image", "https://i-wildland.com/wp-content/uploads/2020/04/roc-del-quer-2.jpg");
-  const teamEyebrow = getContent("team_eyebrow", "Nuestro equipo");
-  const teamTitle = getContent("team_title", "Fundada en 2018. Guiada por expertos locales.");
+    "mission_text");
+  const missionImage = getContent("mission_image");
+  const teamEyebrow = getContent("team_eyebrow");
+  const teamTitle = getContent("team_title");
   const teamBio = getContent(
-    "team_bio",
-    "iWE nació en 2018 de la mano de Charly Paredes, guía de montaña nivel 2 (EFPEM Andorra), instructor de esquí certificado por AADIDES/ISIA y miembro de UIMLA y AGAMA. Formado entre Ushuaia y Andorra, habla catalán, español, francés e inglés.\n\nCada ruta está pensada para adaptarse a tu nivel físico y técnico, sea que viajes en familia, en pareja o con amigos. Tú pones la curiosidad. Nosotros nos ocupamos del resto."
-  );
-  const teamImage = getContent("team_image", "https://i-wildland.com/wp-content/uploads/2022/07/FSF-49-1024x683-iWE.jpg");
-  const teamImageNoteLine1 = getContent("team_image_note_line1", "Conocimiento local.");
-  const teamImageNoteLine2 = getContent("team_image_note_line2", "Experiencia real.");
-  const toursPublished = getContent("tours_section_published", "true") !== "false" && getContent("tours_section_published", "true") !== "0";
-  const toursEyebrow = getContent("tours_eyebrow", "Tours en Andorra");
-  const toursTitleLine1 = getContent("tours_title_line1", "Vacaciones");
-  const toursTitleLine2 = getContent("tours_title_line2", "completas con iWE.");
-  const toursCopy = getContent("tours_copy", "Combina alojamiento, guías y actividades en un solo paquete. Ideal para grupos, familias y viajes de aventura sin preocuparte por la logística.");
-  const toursCtaText = getContent("tours_cta_text", "Consultar disponibilidad");
+    "team_bio");
+  const teamImage = getContent("team_image");
+  const teamImageNoteLine1 = getContent("team_image_note_line1");
+  const teamImageNoteLine2 = getContent("team_image_note_line2");
+  const toursPublished = getContent("tours_section_published") !== "false" && getContent("tours_section_published") !== "0";
+  const toursEyebrow = getContent("tours_eyebrow");
+  const toursTitleLine1 = getContent("tours_title_line1");
+  const toursTitleLine2 = getContent("tours_title_line2");
+  const toursCopy = getContent("tours_copy");
+  const toursCtaText = getContent("tours_cta_text");
 
-  const heroCtaActivities = getContent("hero_cta_activities", "Ver actividades");
-  const heroCtaReserve = getContent("hero_cta_reserve", "Reservar ahora");
-  const contactPhone = getContent("contact_phone", "+376 653 769");
+  const heroCtaActivities = getContent("hero_cta_activities");
+  const heroCtaReserve = getContent("hero_cta_reserve");
+  const contactPhone = getContent("contact_phone");
   const heroWhatsappUrl = buildWhatsAppUrl(contactPhone, "Hola! Quiero reservar una experiencia con iWE");
-  const heroScrollHint = getContent("hero_scroll_hint", "Descubre más");
-  const missionTeamLink = getContent("mission_team_link", "Nuestro equipo");
-  const missionStat1Value = getContent("mission_stat1_value", "2018");
-  const missionStat1Label = getContent("mission_stat1_label", "año de fundación");
-  const missionStat2Value = getContent("mission_stat2_value", "15+");
-  const missionStat2Label = getContent("mission_stat2_label", "tipos de actividades");
-  const missionStat3Value = getContent("mission_stat3_value", "2");
-  const missionStat3Label = getContent("mission_stat3_label", "regiones: Andorra y Pirineos");
-  const teamContactLink = getContent("team_contact_link", "Cómo trabajamos");
+  const heroScrollHint = getContent("hero_scroll_hint");
+  const missionTeamLink = getContent("mission_team_link");
+  const missionStat1Value = getContent("mission_stat1_value");
+  const missionStat1Label = getContent("mission_stat1_label");
+  const missionStat2Value = getContent("mission_stat2_value");
+  const missionStat2Label = getContent("mission_stat2_label");
+  const missionStat3Value = getContent("mission_stat3_value");
+  const missionStat3Label = getContent("mission_stat3_label");
+  const teamContactLink = getContent("team_contact_link");
 
-  const calendarHolidayLabel = getContent("calendar_holiday_label", "Holiday");
-  const calendarEventsLabel = getContent("calendar_events_label", "Eventos");
-  const calendarEventsName = getContent("calendar_events_name", "Team Building & Eventos Deportivos");
-  const calendarEventsPlace = getContent("calendar_events_place", "Andorra");
+  const calendarHolidayLabel = getContent("calendar_holiday_label");
+  const calendarEventsLabel = getContent("calendar_events_label");
+  const calendarEventsName = getContent("calendar_events_name");
+  const calendarEventsPlace = getContent("calendar_events_place");
 
   return (
     <main id="top">
@@ -110,7 +128,7 @@ function Home() {
       <section id="mission" className="mission-section page-width section-space">
         <div className="mission-image-wrap reveal-up">
           <img
-            src={missionImage}
+            src={missionImage || undefined}
             alt="Roc del Quer, Andorra"
             loading="lazy"
             decoding="async"
@@ -133,7 +151,7 @@ function Home() {
       <section id="team" className="why-section">
         <div className="why-image-panel">
           <img
-            src={teamImage}
+            src={teamImage || undefined}
             alt="Equipo de iWE guiando una experiencia de montaña"
             loading="lazy"
             decoding="async"
@@ -162,9 +180,9 @@ function Home() {
           </div>
           <div className="calendar-list">
             {packages.map((pkg) => (
-              <div className="calendar-row" key={`${pkg.name}-${pkg.duration}`}>
+              <div className="calendar-row" key={pkg.id}>
                 <span className="calendar-month">{calendarHolidayLabel}</span>
-                <span className="calendar-tour">{pkg.name}</span>
+                <span className="calendar-tour">{pkg.title}</span>
                 <span className="calendar-place">{pkg.duration}</span>
                 <ArrowIcon />
               </div>

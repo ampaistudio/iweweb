@@ -1,17 +1,5 @@
 export type ActivityType = string;
 
-export const DEFAULT_ACTIVITY_TYPES: string[] = [
-  'BTT',
-  '4x4',
-  'Vía Ferrata',
-  'Senderismo',
-  'Esquí-Snow',
-  'Rafting',
-  'Heliflight',
-];
-
-export const ACTIVITY_TYPES = DEFAULT_ACTIVITY_TYPES;
-
 export interface LocaleActivityTranslation {
   title?: string;
   description?: string;

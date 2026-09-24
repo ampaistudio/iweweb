@@ -222,14 +222,14 @@ export const ToursAndContactSection: React.FC<ToursAndContactSectionProps> = ({
                   label="Teléfono de contacto (WhatsApp)"
                   value={form.contact_phone || ''}
                   onChange={(e) => onChange('contact_phone', e.target.value)}
-                  placeholder="+376 653 769"
+                  placeholder="+00 000 000"
                 />
                 <Input
                   label="Correo electrónico"
                   type="email"
                   value={form.contact_email || ''}
                   onChange={(e) => onChange('contact_email', e.target.value)}
-                  placeholder="info@i-wildland.com"
+                  placeholder="info@empresa.com"
                 />
                 <div className="sm:col-span-2">
                   <Input
@@ -271,4 +271,3 @@ export const ToursAndContactSection: React.FC<ToursAndContactSectionProps> = ({
     </>
   );
 };
-

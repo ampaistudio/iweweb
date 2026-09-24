@@ -28,12 +28,12 @@ export const SocialCardPreview: React.FC<SocialCardPreviewProps> = ({
             </div>
           )}
           <div className="p-2.5 space-y-1">
-            <span className="text-[10px] text-muted uppercase tracking-wider">i-wildland.com</span>
+            <span className="text-[10px] text-muted uppercase tracking-wider">Dominio configurado</span>
             <p className="text-xs font-bold text-primary line-clamp-1">
-              {metaTitle || 'iWE | Isard Wildland Experience'}
+              {metaTitle || 'Título sin configurar'}
             </p>
             <p className="text-[11px] text-secondary line-clamp-2 leading-tight">
-              {metaDescription || 'Descubre experiencias únicas en Andorra y los Pirineos...'}
+              {metaDescription || 'Descripción sin configurar'}
             </p>
           </div>
         </div>
@@ -41,4 +41,3 @@ export const SocialCardPreview: React.FC<SocialCardPreviewProps> = ({
     </div>
   );
 };
-
