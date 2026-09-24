@@ -8,7 +8,7 @@ import TourHero from '../components/TourHero';
 import { TourShareWidget } from '../components/TourShareWidget';
 import type { HeroSlide } from '../components/HeroSlideshow';
 import { resolveMediaUrl } from '../utils/media';
-import { buildWhatsAppUrl } from '../utils/whatsapp';
+import { buildReservationWhatsAppUrl } from '../utils/whatsapp';
 import { updateSeo, setJsonLd } from '../utils/seo';
 
 export default function PackageDetail() {
@@ -59,7 +59,7 @@ export default function PackageDetail() {
   const price = pkg.price_amount === null || pkg.price_amount === undefined
     ? getContent('tour_detail_consult_price')
     : `${pkg.price_amount} ${pkg.price_currency || 'EUR'}${pkg.price_unit ? ` · ${pkg.price_unit}` : ''}`;
-  const bookingUrl = buildWhatsAppUrl(getContent('contact_phone'), `Hola! Quiero reservar el paquete ${pkg.title}`);
+  const bookingUrl = buildReservationWhatsAppUrl(getContent('contact_phone'), pkg.title);
 
   return (
     <main className="tour-detail-page">

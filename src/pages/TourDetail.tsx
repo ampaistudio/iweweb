@@ -5,7 +5,7 @@ import { usePreferences } from "../context/PreferencesContext";
 import { publicApi } from "../api/client";
 import type { RawApiActivity, ActivityImage } from "../api/types";
 import { resolveMediaUrl } from "../utils/media";
-import { buildWhatsAppUrl } from "../utils/whatsapp";
+import { buildReservationWhatsAppUrl } from "../utils/whatsapp";
 import TourHero from "../components/TourHero";
 import type { HeroSlide } from "../components/HeroSlideshow";
 import { updateSeo, setJsonLd } from "../utils/seo";
@@ -236,10 +236,7 @@ function TourDetail() {
     .slice(0, 3);
 
   const contactPhone = getContent("contact_phone");
-  const whatsappUrl = buildWhatsAppUrl(
-    contactPhone,
-    `Hola! Quiero reservar una experiencia con iWE: ${activity.title}`
-  );
+  const whatsappUrl = buildReservationWhatsAppUrl(contactPhone, activity.title);
 
   return (
     <main className="tour-detail-page">
@@ -422,4 +419,3 @@ function TourDetail() {
 }
 
 export default TourDetail;
-
