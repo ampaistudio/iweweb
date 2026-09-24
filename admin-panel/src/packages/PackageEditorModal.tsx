@@ -54,8 +54,25 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
         title={editingPackage ? `Editar Paquete: ${editingPackage.title}` : 'Crear Paquete Multidía'}
         description="Configura el título, duración, descripción, precio y programación de visibilidad."
         maxWidth="5xl"
+        footer={(
+          <div className="flex items-center justify-end gap-3">
+            <Button type="button" variant="secondary" size="md" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              form="package-editor-form"
+              variant="primary"
+              size="lg"
+              isLoading={isSaving}
+              className="min-w-56 shadow-xl"
+            >
+              💾 Guardar paquete
+            </Button>
+          </div>
+        )}
       >
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form id="package-editor-form" onSubmit={onSubmit} className="space-y-6">
           {/* Language Selector Bar */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -102,26 +119,6 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
             />
           )}
 
-          {/* Modal Actions */}
-          <div className="sticky bottom-[-20px] z-20 -mx-6 -mb-5 flex items-center justify-end gap-3 border-t border-border bg-surface/95 px-6 pb-5 pt-4 backdrop-blur-md">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={onClose}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              isLoading={isSaving}
-              className="min-w-56 shadow-xl"
-            >
-              💾 Guardar paquete
-            </Button>
-          </div>
         </form>
       </Modal>
 

@@ -6,6 +6,7 @@ export interface ModalProps {
   title?: string;
   description?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl' | '6xl';
 }
 
@@ -15,6 +16,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   description,
   children,
+  footer,
   maxWidth = 'lg',
 }) => {
   useEffect(() => {
@@ -66,7 +68,12 @@ export const Modal: React.FC<ModalProps> = ({
             ✕
           </button>
         </div>
-        <div className="overflow-y-auto overscroll-contain px-6 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">{children}</div>
+        {footer && (
+          <div className="shrink-0 border-t border-border bg-surface px-6 py-4">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
