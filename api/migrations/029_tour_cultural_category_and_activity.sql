@@ -5,8 +5,8 @@ SET NAMES utf8mb4;
 START TRANSACTION;
 
 INSERT INTO activity_types (name, display_order)
-SELECT 'Tour Cultural', COALESCE(MAX(display_order), 0) + 1
-FROM activity_types
+SELECT 'Tour Cultural', (SELECT COALESCE(MAX(display_order), 0) + 1 FROM activity_types)
+FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM activity_types WHERE LOWER(name) = LOWER('Tour Cultural')
 );
