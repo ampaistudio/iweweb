@@ -98,8 +98,18 @@
 
 @layer base {
   :root {
+    --font-scale: 1;
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     --font-mono: 'Space Grotesk', monospace;
+  }
+
+  :root[data-font-scale="small"] { --font-scale: 0.875; }
+  :root[data-font-scale="normal"] { --font-scale: 1; }
+  :root[data-font-scale="large"] { --font-scale: 1.15; }
+
+  html {
+    font-size: calc(16px * var(--font-scale));
+    transition: font-size 0.15s ease-in-out;
   }
 
   body {

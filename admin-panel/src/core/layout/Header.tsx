@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../ui/ToastContext';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme, type FontScale } from '../theme/ThemeContext';
 import { Button } from '../ui/Button';
 
 export interface HeaderProps {
@@ -11,7 +11,7 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title }) => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, fontScale, setFontScale } = useTheme();
   const toast = useToast();
 
   const handleLogout = async () => {
@@ -37,7 +37,20 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title }) => {
         {title && <h1 className="text-lg font-bold text-primary tracking-tight">{title}</h1>}
       </div>
 
-      <div className="flex items-center gap-2.5 sm:gap-4">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Font Scale Selector */}
+        <select
+          value={fontScale}
+          onChange={(e) => setFontScale(e.target.value as FontScale)}
+          className="px-2.5 py-1.5 rounded-xl bg-surface-elevated border border-border text-secondary hover:text-primary min-h-[40px] text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+          aria-label="Tamaño de letra del panel"
+          title="Tamaño de letra del panel (Pequeño / Normal / Grande)"
+        >
+          <option value="small">A- Pequeño</option>
+          <option value="normal">A Normal</option>
+          <option value="large">A+ Grande</option>
+        </select>
+
         {/* Theme Toggle Button */}
         <button
           type="button"

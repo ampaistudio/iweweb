@@ -11,6 +11,10 @@
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
+    # Force /api/activities (and /api/activities/) through index.php even though
+    # the physical api/activities/ directory exists on disk
+    RewriteRule ^activities/?$ index.php [QSA,L]
+
     # Route all other /api/* calls through index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

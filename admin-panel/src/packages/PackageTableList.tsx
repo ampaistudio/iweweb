@@ -4,6 +4,8 @@ import { Card } from '../core/ui/Card';
 import { Button } from '../core/ui/Button';
 import { Badge } from '../core/ui/Badge';
 
+import { formatPrice } from '../utils/formatters';
+
 export interface PackageTableListProps {
   packages: PackageItem[];
   filteredPackages: PackageItem[];
@@ -114,7 +116,7 @@ export const PackageTableList: React.FC<PackageTableListProps> = ({
                       </span>
                       {pkg.price_amount !== null && (
                         <span className="font-semibold text-accent-text">
-                          💶 €{pkg.price_amount.toFixed(2)} {pkg.price_unit ? `(${pkg.price_unit})` : ''}
+                          💶 {formatPrice(pkg.price_amount, pkg.price_unit)}
                         </span>
                       )}
                       {pkg.publish_at && (

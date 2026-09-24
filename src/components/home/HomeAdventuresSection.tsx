@@ -27,7 +27,7 @@ function ActivityGrid({ type, activities }: { type: ActivityType; activities: Ac
       {filtered.map((activity) => (
         <Link className="tour-item" id={activity.id} to={`/tour/${activity.id}`} key={activity.id}>
           <div className="tour-image-wrap">
-            <img src={activity.image} alt={activity.alt} />
+            <img src={activity.image} alt={activity.alt} loading="lazy" decoding="async" />
             <span className="tour-arrow"><ArrowIcon /></span>
           </div>
           <div className="tour-details">

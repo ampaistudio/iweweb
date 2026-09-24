@@ -112,6 +112,8 @@ function Home() {
           <img
             src={missionImage}
             alt="Roc del Quer, Andorra"
+            loading="lazy"
+            decoding="async"
           />
           <span className="image-caption">{heroTagline}</span>
         </div>
@@ -133,6 +135,8 @@ function Home() {
           <img
             src={teamImage}
             alt="Equipo de iWE guiando una experiencia de montaña"
+            loading="lazy"
+            decoding="async"
           />
           <div className="why-image-note"><span>01</span><span>{teamImageNoteLine1}<br />{teamImageNoteLine2}</span></div>
         </div>

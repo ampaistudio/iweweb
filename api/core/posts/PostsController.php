@@ -38,7 +38,7 @@ class PostsController {
                        COALESCE(NULLIF(t.title, ""), p.title) AS title, 
                        p.slug, 
                        COALESCE(NULLIF(t.body, ""), p.body) AS body, 
-                       p.cover_media_id, p.status, p.origin, 
+                       p.cover_media_id, p.status, p.origin, p.reference_channels, 
                        p.created_by, p.published_at, p.created_at, p.updated_at,
                        u.display_name AS author_name,
                        m.filename AS cover_filename
@@ -49,7 +49,7 @@ class PostsController {
             ';
         } else {
             $sql = '
-                SELECT p.id, p.title, p.slug, p.body, p.cover_media_id, p.status, p.origin, 
+                SELECT p.id, p.title, p.slug, p.body, p.cover_media_id, p.status, p.origin, p.reference_channels, 
                        p.created_by, p.published_at, p.created_at, p.updated_at,
                        u.display_name AS author_name,
                        m.filename AS cover_filename
@@ -90,6 +90,7 @@ class PostsController {
         $formatted = array_map(function ($post) use ($publicBase, $socialLinksByPost) {
             $post['cover_image_url'] = $post['cover_filename'] ? $publicBase . '/' . $post['cover_filename'] : null;
             $post['social_links'] = $socialLinksByPost[$post['id']] ?? [];
+            $post['reference_channels'] = !empty($post['reference_channels']) ? json_decode((string)$post['reference_channels'], true) : null;
             return $post;
         }, $posts);
 
@@ -111,7 +112,7 @@ class PostsController {
         $column = $isNumeric ? 'p.id' : 'p.slug';
 
         $sql = "
-            SELECT p.id, p.title, p.slug, p.body, p.cover_media_id, p.status, p.origin, 
+            SELECT p.id, p.title, p.slug, p.body, p.cover_media_id, p.status, p.origin, p.reference_channels, 
                    p.created_by, p.published_at, p.created_at, p.updated_at,
                    u.display_name AS author_name,
                    m.filename AS cover_filename
@@ -136,6 +137,7 @@ class PostsController {
 
         $publicBase = rtrim($this->config['media']['public_path'] ?? '/api/uploads', '/');
         $post['cover_image_url'] = $post['cover_filename'] ? $publicBase . '/' . $post['cover_filename'] : null;
+        $post['reference_channels'] = !empty($post['reference_channels']) ? json_decode((string)$post['reference_channels'], true) : null;
 
         // Fetch social links
         $stmtLinks = $this->pdo->prepare('
@@ -198,6 +200,8 @@ class PostsController {
             jsonError('El contenido del post es obligatorio.', 422);
         }
 
+        $refChannelsJson = $this->sanitizeReferenceChannels($body['reference_channels'] ?? null);
+
         // Generate clean unique slug
         $baseSlug = !empty($body['slug']) ? slugify($body['slug']) : slugify($title);
         $slug = $this->generateUniqueSlug($baseSlug);
@@ -207,18 +211,19 @@ class PostsController {
         $this->pdo->beginTransaction();
         try {
             $stmt = $this->pdo->prepare('
-                INSERT INTO posts (title, slug, body, cover_media_id, status, origin, created_by, published_at, created_at)
-                VALUES (:title, :slug, :body, :cover_media_id, :status, "web", :created_by, :published_at, NOW())
+                INSERT INTO posts (title, slug, body, cover_media_id, status, origin, reference_channels, created_by, published_at, created_at)
+                VALUES (:title, :slug, :body, :cover_media_id, :status, "web", :reference_channels, :created_by, :published_at, NOW())
             ');
 
             $stmt->execute([
-                'title'          => $title,
-                'slug'           => $slug,
-                'body'           => $postBody,
-                'cover_media_id' => $coverMediaId,
-                'status'         => $status,
-                'created_by'     => $user['id'],
-                'published_at'   => $publishedAt,
+                'title'              => $title,
+                'slug'               => $slug,
+                'body'               => $postBody,
+                'cover_media_id'     => $coverMediaId,
+                'status'             => $status,
+                'reference_channels' => $refChannelsJson,
+                'created_by'         => $user['id'],
+                'published_at'       => $publishedAt,
             ]);
 
             $postId = (int)$this->pdo->lastInsertId();
@@ -307,6 +312,11 @@ class PostsController {
             if ($postBody !== null) {
                 $sql .= ', body = :body';
                 $params['body'] = $postBody;
+            }
+
+            if (array_key_exists('reference_channels', $body)) {
+                $sql .= ', reference_channels = :reference_channels';
+                $params['reference_channels'] = $this->sanitizeReferenceChannels($body['reference_channels']);
             }
 
             if ($publishedAt !== null) {
@@ -447,5 +457,30 @@ class PostsController {
 
         $baseUrl = rtrim($this->config['app']['base_url'] ?? '', '/');
         return $baseUrl . '/uploads/' . $filename;
+    }
+
+    private function sanitizeReferenceChannels(mixed $input): ?string {
+        if ($input === null) {
+            return null;
+        }
+        if (is_string($input)) {
+            $decoded = json_decode($input, true);
+            if (is_array($decoded)) {
+                $input = $decoded;
+            }
+        }
+        if (is_array($input)) {
+            $sanitized = [];
+            foreach ($input as $item) {
+                if (is_string($item) || is_numeric($item)) {
+                    $clean = trim((string)$item);
+                    if ($clean !== '') {
+                        $sanitized[] = $clean;
+                    }
+                }
+            }
+            return !empty($sanitized) ? json_encode(array_values(array_unique($sanitized)), JSON_UNESCAPED_UNICODE) : null;
+        }
+        return null;
     }
 }

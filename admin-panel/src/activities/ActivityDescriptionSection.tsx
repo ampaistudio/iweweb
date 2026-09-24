@@ -68,11 +68,12 @@ export const ActivityDescriptionSection: React.FC<ActivityDescriptionSectionProp
             </label>
             <Button
               type="button"
-              variant="secondary"
+              variant="primary"
               size="sm"
               onClick={onAddHighlight}
+              leftIcon="➕"
             >
-              + Agregar punto
+              Agregar punto
             </Button>
           </div>
 
@@ -87,14 +88,16 @@ export const ActivityDescriptionSection: React.FC<ActivityDescriptionSectionProp
                   className="flex-1 bg-input border border-border focus:border-accent focus:ring-accent/20 rounded-xl px-3.5 py-2 text-sm text-primary placeholder-faint focus:outline-none focus:ring-2"
                 />
                 {highlights.length > 1 && (
-                  <button
+                  <Button
                     type="button"
+                    variant="danger"
+                    size="sm"
                     onClick={() => onRemoveHighlight(index)}
-                    className="p-2 text-muted hover:text-danger rounded-xl hover:bg-surface-hover transition-colors"
-                    title="Eliminar punto"
+                    leftIcon="🗑️"
+                    title="Eliminar punto destacado"
                   >
-                    ✕
-                  </button>
+                    Eliminar
+                  </Button>
                 )}
               </div>
             ))}

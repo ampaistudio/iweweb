@@ -123,7 +123,7 @@ export default function NewsList() {
               <article className="news-card" key={post.id}>
                 <Link to={`/novedades/${post.slug || post.id}`} className="news-card-image-wrap">
                   {imageUrl ? (
-                    <img src={imageUrl} alt={post.title} loading="lazy" />
+                    <img src={imageUrl} alt={post.title} loading="lazy" decoding="async" />
                   ) : (
                     <div className="news-card-placeholder">
                       <span className="brand-symbol">i<span>WE</span></span>

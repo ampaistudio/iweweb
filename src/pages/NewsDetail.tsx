@@ -128,7 +128,7 @@ export default function NewsDetail() {
 
         {imageUrl && (
           <div className="news-article-cover">
-            <img src={imageUrl} alt={post.title} />
+            <img src={imageUrl} alt={post.title} loading="lazy" decoding="async" />
           </div>
         )}
 

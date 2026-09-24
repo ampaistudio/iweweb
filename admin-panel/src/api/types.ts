@@ -153,6 +153,7 @@ export interface Post {
   cover_filename?: string | null;
   cover_image_url?: string | null;
   social_links?: PostSocialLink[];
+  reference_channels?: string[] | null;
   translations?: PostTranslations;
 }
 

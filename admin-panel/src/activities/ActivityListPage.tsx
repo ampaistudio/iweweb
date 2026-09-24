@@ -7,6 +7,7 @@ import { useToast } from '../core/ui/ToastContext';
 import { Card } from '../core/ui/Card';
 import { Button } from '../core/ui/Button';
 import { Badge } from '../core/ui/Badge';
+import { formatPrice } from '../utils/formatters';
 import { Input } from '../core/ui/Input';
 import { ConfirmDialog } from '../core/ui/ConfirmDialog';
 
@@ -282,7 +283,11 @@ export const ActivityListPage: React.FC = () => {
                         <span>📍 {act.region}, {act.country}</span>
                         <span>⏱️ {act.duration}</span>
                         <span>⚡ {act.level}</span>
-                        {act.price && <span className="font-semibold text-accent-text">💶 {act.price}</span>}
+                        {act.price && (
+                          <span className="font-semibold text-accent-text">
+                            💶 {formatPrice(act.price)}
+                          </span>
+                        )}
                       </div>
 
                       <p className="text-xs text-muted line-clamp-2 max-w-3xl leading-relaxed">

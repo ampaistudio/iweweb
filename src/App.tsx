@@ -404,31 +404,59 @@ function App() {
               {getContent("footer_social_desc", "Conéctate con nuestra comunidad en la montaña:")}
             </p>
             <div className="footer-social-grid">
-              {[
-                { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },
-                { label: "Facebook", url: getContent("social_facebook", "https://www.facebook.com/isardwildland/") },
-                { label: "TripAdvisor", url: getContent("social_tripadvisor", "https://www.tripadvisor.com/") },
-                { label: "WhatsApp", url: getContent("social_whatsapp", "") },
-                { label: "YouTube", url: getContent("social_youtube", "") },
-                { label: "TikTok", url: getContent("social_tiktok", "") },
-                { label: "Strava", url: getContent("social_strava", "") },
-                { label: "LinkedIn", url: getContent("social_linkedin", "") },
-                { label: "X / Twitter", url: getContent("social_twitter", "") },
-              ]
-                .filter((item) => item.url && item.url.trim() !== "")
-                .map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="footer-social-badge"
-                    aria-label={`Seguir en ${item.label}`}
-                  >
-                    <SocialIcon name={item.label.includes("Twitter") || item.label.includes("X") ? "x" : item.label} />
-                    <span>{item.label}</span>
-                  </a>
-                ))}
+              {(() => {
+                const jsonStr = getContent("social_links_json", "");
+                let items: { label: string; url: string; icon?: string }[] = [];
+                if (jsonStr) {
+                  try {
+                    const parsed = JSON.parse(jsonStr);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                      items = parsed.map((net: { name: string; url: string; icon?: string }) => ({
+                        label: net.name,
+                        url: net.url,
+                        icon: net.icon,
+                      }));
+                    }
+                  } catch {
+                    // Fallback to legacy
+                  }
+                }
+                if (items.length === 0) {
+                  items = [
+                    { label: "Instagram", url: getContent("social_instagram", "https://www.instagram.com/isardwildland/") },
+                    { label: "Facebook", url: getContent("social_facebook", "https://www.facebook.com/isardwildland/") },
+                    { label: "TripAdvisor", url: getContent("social_tripadvisor", "https://www.tripadvisor.com/") },
+                    { label: "WhatsApp", url: getContent("social_whatsapp", "") },
+                    { label: "YouTube", url: getContent("social_youtube", "") },
+                    { label: "TikTok", url: getContent("social_tiktok", "") },
+                    { label: "Strava", url: getContent("social_strava", "") },
+                    { label: "LinkedIn", url: getContent("social_linkedin", "") },
+                    { label: "X / Twitter", url: getContent("social_twitter", "") },
+                  ];
+                }
+                return items
+                  .filter((item) => item.url && item.url.trim() !== "")
+                  .map((item) => {
+                    const isIconUrl = item.icon?.startsWith("http://") || item.icon?.startsWith("https://") || item.icon?.startsWith("/");
+                    return (
+                      <a
+                        key={item.label}
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="footer-social-badge"
+                        aria-label={`Seguir en ${item.label}`}
+                      >
+                        {isIconUrl ? (
+                          <img src={item.icon} alt={item.label} className="w-4 h-4 object-contain inline-block mr-1" />
+                        ) : (
+                          <SocialIcon name={item.icon || (item.label.includes("Twitter") || item.label.includes("X") ? "x" : item.label)} />
+                        )}
+                        <span>{item.label}</span>
+                      </a>
+                    );
+                  });
+              })()}
             </div>
           </div>
         </div>

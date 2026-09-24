@@ -8,10 +8,13 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Toggle } from '../ui/Toggle';
+import { Badge } from '../ui/Badge';
 import { ImagePickerModal } from '../media/ImagePickerModal';
 import { SocialStatusBadge } from './SocialStatusBadge';
 import { LanguageTabs } from '../ui/LanguageSelector';
 import { AiTranslateButton } from '../ui/AiTranslateButton';
+import { DEFAULT_SOCIAL_NETWORKS, type SocialNetworkItem } from '../content/SocialLinksSection';
+import { PostReferenceChannelsSection } from './PostReferenceChannelsSection';
 
 type NonEsLocale = 'ca' | 'en' | 'fr';
 
@@ -65,20 +68,15 @@ export const PostEditorPage: React.FC = () => {
           setCoverImageUrl(post.cover_image_url || null);
           setIsPublished(post.status === 'published');
 
+          if (Array.isArray(post.reference_channels)) {
+            setSelectedRefChannels(post.reference_channels);
+          }
+
           if (post.translations) {
             setTranslations({
-              ca: {
-                title: post.translations.ca?.title || '',
-                body: post.translations.ca?.body || '',
-              },
-              en: {
-                title: post.translations.en?.title || '',
-                body: post.translations.en?.body || '',
-              },
-              fr: {
-                title: post.translations.fr?.title || '',
-                body: post.translations.fr?.body || '',
-              },
+              ca: { title: post.translations.ca?.title || '', body: post.translations.ca?.body || '' },
+              en: { title: post.translations.en?.title || '', body: post.translations.en?.body || '' },
+              fr: { title: post.translations.fr?.title || '', body: post.translations.fr?.body || '' },
             });
           }
         } catch (err: unknown) {
@@ -92,6 +90,62 @@ export const PostEditorPage: React.FC = () => {
       loadPost();
     }
   }, [id, isEdit, navigate, toast]);
+
+  // Social networks for reference channels
+  const [socialNetworks, setSocialNetworks] = useState<SocialNetworkItem[]>([]);
+  const [selectedRefChannels, setSelectedRefChannels] = useState<string[]>([]);
+  const [isContentLoading, setIsContentLoading] = useState(false);
+
+  useEffect(() => {
+    const loadSocialNetworks = async () => {
+      try {
+        setIsContentLoading(true);
+        const res = await api.content.list();
+        const content = res?.base || res?.content || {};
+        const jsonStr = content.social_links_json;
+        let parsed: SocialNetworkItem[] = [];
+
+        if (jsonStr) {
+          try {
+            const json = JSON.parse(jsonStr);
+            if (Array.isArray(json) && json.length > 0) {
+              parsed = json;
+            }
+          } catch {
+            // Fallback to legacy
+          }
+        }
+
+        if (parsed.length === 0) {
+          parsed = DEFAULT_SOCIAL_NETWORKS.map((item) => {
+            const legacyKey = `social_${item.id}`;
+            return {
+              ...item,
+              url: content[legacyKey] !== undefined ? content[legacyKey] : item.url,
+            };
+          });
+        }
+
+        // Filter out auto-publish networks (Facebook & Instagram)
+        const refChannels = parsed.filter(
+          (net) => net.id !== 'facebook' && net.id !== 'instagram' && !net.is_auto_publish
+        );
+
+        setSocialNetworks(refChannels);
+
+        // If creating a new post (not edit), default select all active ref channels with valid URL
+        if (!isEdit && selectedRefChannels.length === 0) {
+          setSelectedRefChannels(refChannels.filter((net) => net.url && net.url.trim() !== '').map((net) => net.id));
+        }
+      } catch (err: unknown) {
+        console.error('Error al cargar redes sociales para difusión:', err);
+      } finally {
+        setIsContentLoading(false);
+      }
+    };
+
+    loadSocialNetworks();
+  }, [id, isEdit]);
 
   const handleSelectImage = (item: MediaItem) => {
     setCoverMediaId(item.id);
@@ -138,6 +192,7 @@ export const PostEditorPage: React.FC = () => {
         status: (isPublished ? 'published' : 'draft') as 'draft' | 'published',
         publish_to_facebook: publishFb,
         publish_to_instagram: publishIg,
+        reference_channels: selectedRefChannels,
         translations,
       };
 
@@ -372,7 +427,10 @@ export const PostEditorPage: React.FC = () => {
                     className="w-4 h-4 rounded text-accent focus:ring-accent bg-surface border-border-strong"
                   />
                   <div>
-                    <span className="text-sm font-medium text-primary block">📘 Publicar en la Página de Facebook</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-primary block">📘 Publicar en la Página de Facebook</span>
+                      <Badge variant="success" size="sm">Auto-Publicación Directa</Badge>
+                    </div>
                     <span className="text-xs text-muted">Publicará el texto y la foto en el feed oficial de Facebook.</span>
                   </div>
                 </label>
@@ -385,11 +443,28 @@ export const PostEditorPage: React.FC = () => {
                     className="w-4 h-4 rounded text-accent focus:ring-accent bg-surface border-border-strong"
                   />
                   <div>
-                    <span className="text-sm font-medium text-primary block">📸 Publicar en Instagram Business</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-primary block">📸 Publicar en Instagram Business</span>
+                      <Badge variant="success" size="sm">Auto-Publicación Directa</Badge>
+                    </div>
                     <span className="text-xs text-muted">Requiere una foto de portada seleccionada.</span>
                   </div>
                 </label>
               </div>
+
+              {/* Dynamic Reference Broadcast Channels Section */}
+              <PostReferenceChannelsSection
+                socialNetworks={socialNetworks}
+                selectedRefChannels={selectedRefChannels}
+                isContentLoading={isContentLoading}
+                onToggleChannel={(netId, checked) => {
+                  if (checked) {
+                    setSelectedRefChannels((prev) => [...prev, netId]);
+                  } else {
+                    setSelectedRefChannels((prev) => prev.filter((item) => item !== netId));
+                  }
+                }}
+              />
 
               {existingPost?.social_links && existingPost.social_links.length > 0 && (
                 <div className="pt-3">

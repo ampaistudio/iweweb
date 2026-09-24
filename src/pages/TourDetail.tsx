@@ -397,7 +397,7 @@ function TourDetail() {
               {related.map((item) => (
                 <Link className="tour-item" to={`/tour/${item.id}`} key={item.id}>
                   <div className="tour-image-wrap">
-                    <img src={item.image} alt={item.alt} />
+                    <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
                     <span className="tour-arrow"><ArrowIcon /></span>
                   </div>
                   <div className="tour-details">

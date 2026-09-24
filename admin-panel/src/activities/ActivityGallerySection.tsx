@@ -33,7 +33,7 @@ export const ActivityGallerySection: React.FC<ActivityGallerySectionProps> = ({
           <div className="flex items-center gap-2">
             <Button
               type="button"
-              variant="secondary"
+              variant="primary"
               size="sm"
               onClick={onOpenGalleryPicker}
               isLoading={isGalleryLoading}

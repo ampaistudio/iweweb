@@ -152,10 +152,10 @@ export const ActivityBasicInfoSection: React.FC<ActivityBasicInfoSectionProps> =
           />
 
           <Input
-            label="Precio (opcional)"
+            label="Precio (€, opcional)"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            placeholder="€85 por persona"
+            placeholder="85 € por persona"
             helperText="Dejar vacío si no aplica precio fijo."
           />
         </div>

@@ -39,11 +39,12 @@ export const DirectReviewsManager: React.FC<DirectReviewsManagerProps> = ({
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant="primary"
           size="sm"
           onClick={handleAddReview}
+          leftIcon="➕"
         >
-          + Agregar reseña
+          Agregar reseña
         </Button>
       </div>
 
@@ -57,10 +58,11 @@ export const DirectReviewsManager: React.FC<DirectReviewsManagerProps> = ({
                 <span className="text-xs font-semibold text-primary">Reseña #{idx + 1}</span>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="danger"
                   size="sm"
                   onClick={() => handleRemoveReview(idx)}
-                  className="text-danger-text hover:text-danger text-xs h-7 px-2"
+                  leftIcon="🗑️"
+                  title="Eliminar esta reseña"
                 >
                   Eliminar
                 </Button>
@@ -103,4 +105,3 @@ export const DirectReviewsManager: React.FC<DirectReviewsManagerProps> = ({
     </div>
   );
 };
-
