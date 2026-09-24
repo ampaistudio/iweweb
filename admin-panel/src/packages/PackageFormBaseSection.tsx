@@ -25,21 +25,22 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
   onOpenPicker,
 }) => {
   return (
-    <>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="space-y-6">
       {/* 1. Base Info */}
       <div className="space-y-4">
         <Select
-          label="Mostrar bajo el botón del menú"
+          label="Botón del menú donde aparecerá"
           value={formData.menu_parent_id === null ? '' : String(formData.menu_parent_id)}
           onChange={(e) => setFormData((prev) => ({
             ...prev,
             menu_parent_id: e.target.value ? Number(e.target.value) : null,
           }))}
           options={[
-            { value: '', label: 'Sin grupo (no aparece en la web)' },
+            { value: '', label: 'Elegí un botón del menú' },
             ...menuGroups.map((group) => ({ value: String(group.id), label: group.label })),
           ]}
-          helperText="El paquete y el botón tienen interruptores independientes. Podés crear otros botones en Menú de Navegación."
+          helperText="Ejemplo: Andorra Holiday & Snow. El paquete y el botón mantienen interruptores independientes."
         />
         <Input
           label="Título del Paquete (Español)"
@@ -174,6 +175,10 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
         required
       />
 
+      </div>
+
+      <div className="space-y-6">
+
       <div className="space-y-4 p-4 bg-bg rounded-2xl border border-border">
         <h3 className="text-sm font-semibold text-primary">Contenido de la ficha pública</h3>
         <Input
@@ -248,6 +253,7 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
           </div>
         </div>
       </div>
-    </>
+      </div>
+    </div>
   );
 };

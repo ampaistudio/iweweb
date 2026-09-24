@@ -53,7 +53,7 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
         onClose={onClose}
         title={editingPackage ? `Editar Paquete: ${editingPackage.title}` : 'Crear Paquete Multidía'}
         description="Configura el título, duración, descripción, precio y programación de visibilidad."
-        maxWidth="2xl"
+        maxWidth="5xl"
       >
         <form onSubmit={onSubmit} className="space-y-6">
           {/* Language Selector Bar */}

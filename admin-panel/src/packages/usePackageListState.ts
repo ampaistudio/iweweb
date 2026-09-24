@@ -189,6 +189,10 @@ export function usePackageListState() {
       toast.error('La descripción del paquete es obligatoria.');
       return;
     }
+    if (formData.published && formData.menu_parent_id === null) {
+      toast.error('Elegí el botón del menú donde debe aparecer el paquete.');
+      return;
+    }
 
     const cleanId = formData.id.trim().toLowerCase();
     if (!editingPackage && !cleanId) {
