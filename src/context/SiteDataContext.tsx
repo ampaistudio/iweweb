@@ -61,8 +61,9 @@ function buildNavItems(children?: MenuItem[]): NavItemOrGroup[] {
   });
 }
 
-function transformMenuTree(menuTree: MenuItem[]): NavSection[] {
-  return menuTree.map((rootNode) => ({
+function transformMenuTree(menuTree: MenuItem[], siteContent: SiteContentMap): NavSection[] {
+  const toursHidden = ['false', '0'].includes(siteContent.tours_section_published);
+  return menuTree.filter((rootNode) => !(toursHidden && rootNode.target_value === '/#tours')).map((rootNode) => ({
     label: rootNode.label,
     anchor: rootNode.target_value,
     items: buildNavItems(rootNode.children),
@@ -157,9 +158,11 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
       }
 
       // 2. Fetch institutional content with resilient fallback passing selected language
+      let loadedContent: SiteContentMap = {};
       try {
         const contentRes = await publicApi.content.get(language);
         if (isMounted && contentRes?.content) {
+          loadedContent = contentRes.content;
           setContent(contentRes.content);
           setIsContentFallback(false);
         }
@@ -205,7 +208,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
       try {
         const rawMenu = await publicApi.menu.list({ locale: language });
         if (isMounted && Array.isArray(rawMenu) && rawMenu.length > 0) {
-          const transformed = transformMenuTree(rawMenu);
+          const transformed = transformMenuTree(rawMenu, loadedContent);
           setNavSections(transformed);
           setIsMenuFallback(false);
         }
