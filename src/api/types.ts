@@ -179,6 +179,22 @@ export interface Package {
   published?: boolean | number;
   publish_at?: string | null;
   unpublish_at?: string | null;
+  menu_parent_id?: number | null;
+  menu_item_published?: boolean;
+  group_label?: string | null;
+  group_published?: boolean;
+  intro_title?: string | null;
+  intro_text?: string | null;
+  highlights?: string[];
+  itinerary?: string[];
+  media?: Array<{
+    id?: number;
+    media_type: 'image' | 'video';
+    media_url: string;
+    poster_url?: string | null;
+    alt_text?: string | null;
+    display_order?: number;
+  }>;
   is_currently_visible?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -192,6 +208,4 @@ export interface ActivityTypeItem {
   created_at?: string;
   updated_at?: string;
 }
-
-
 

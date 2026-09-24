@@ -1,17 +1,19 @@
 import React from 'react';
-import type { PackageItem, DashboardLocale, MediaItem } from '../api/types';
+import type { PackageItem, DashboardLocale, MediaItem, MenuItem } from '../api/types';
 import { Modal } from '../core/ui/Modal';
 import { Button } from '../core/ui/Button';
 import { LanguageTabs } from '../core/ui/LanguageSelector';
 import { ImagePickerModal } from '../core/media/ImagePickerModal';
 import { PackageFormBaseSection } from './PackageFormBaseSection';
 import { PackageFormTranslationsSection } from './PackageFormTranslationsSection';
+import { PackageMediaSection } from './PackageMediaSection';
 import type { PackageFormState, NonEsLocale } from './packageTypes';
 
 export interface PackageEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingPackage: PackageItem | null;
+  menuGroups: MenuItem[];
   formData: PackageFormState;
   setFormData: React.Dispatch<React.SetStateAction<PackageFormState>>;
   formLocale: DashboardLocale;
@@ -19,6 +21,8 @@ export interface PackageEditorModalProps {
   isSaving: boolean;
   pickerOpen: boolean;
   setPickerOpen: (open: boolean) => void;
+  pickerTarget: 'cover' | 'gallery';
+  setPickerTarget: (target: 'cover' | 'gallery') => void;
   onTitleChange: (val: string) => void;
   onSelectImage: (item: MediaItem) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -28,6 +32,7 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
   isOpen,
   onClose,
   editingPackage,
+  menuGroups,
   formData,
   setFormData,
   formLocale,
@@ -35,6 +40,8 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
   isSaving,
   pickerOpen,
   setPickerOpen,
+  pickerTarget,
+  setPickerTarget,
   onTitleChange,
   onSelectImage,
   onSubmit,
@@ -74,15 +81,24 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
             <PackageFormBaseSection
               formData={formData}
               editingPackage={editingPackage}
+              menuGroups={menuGroups}
               setFormData={setFormData}
               onTitleChange={onTitleChange}
-              onOpenPicker={() => setPickerOpen(true)}
+              onOpenPicker={() => { setPickerTarget('cover'); setPickerOpen(true); }}
             />
           ) : (
             <PackageFormTranslationsSection
               formData={formData}
               formLocale={formLocale as NonEsLocale}
               setFormData={setFormData}
+            />
+          )}
+
+          {formLocale === 'es' && (
+            <PackageMediaSection
+              formData={formData}
+              setFormData={setFormData}
+              onOpenPicker={() => { setPickerTarget('gallery'); setPickerOpen(true); }}
             />
           )}
 
@@ -113,9 +129,8 @@ export const PackageEditorModal: React.FC<PackageEditorModalProps> = ({
         isOpen={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelectImage={onSelectImage}
-        selectedImageUrl={formData.image_url}
+        selectedImageUrl={pickerTarget === 'cover' ? formData.image_url : undefined}
       />
     </>
   );
 };
-

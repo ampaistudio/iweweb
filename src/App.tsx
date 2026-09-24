@@ -139,7 +139,7 @@ function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isDarkHero = (location.pathname === "/" || location.pathname.startsWith("/tour/")) && !scrolled;
+  const isDarkHero = (location.pathname === "/" || location.pathname.startsWith("/tour/") || location.pathname.startsWith("/paquete/")) && !scrolled;
   const headerVariantClass = isDarkHero ? "site-header-hero" : "site-header-default";
 
   const fontScaleLabel = { normal: "A", large: "A+", xlarge: "A++" }[fontScale];

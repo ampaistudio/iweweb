@@ -5,6 +5,7 @@ import "./index.css";
 import App from "./App";
 import Home from "./pages/Home";
 import TourDetail from "./pages/TourDetail";
+import PackageDetail from "./pages/PackageDetail";
 import NewsList from "./pages/NewsList";
 import NewsDetail from "./pages/NewsDetail";
 import Privacy from "./pages/Privacy";
@@ -20,6 +21,7 @@ createRoot(document.getElementById("root")!).render(
             <Route element={<App />}>
               <Route index element={<Home />} />
               <Route path="tour/:tourId" element={<TourDetail />} />
+              <Route path="paquete/:packageId" element={<PackageDetail />} />
               <Route path="novedades" element={<NewsList />} />
               <Route path="novedades/:slug" element={<NewsDetail />} />
               <Route path="privacidad" element={<Privacy />} />

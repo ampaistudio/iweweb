@@ -105,7 +105,13 @@ export const PackageTableList: React.FC<PackageTableListProps> = ({
                         {pkg.published
                           ? pkg.is_currently_visible
                             ? 'Publicado'
-                            : 'Programado (Inactivo)'
+                            : !pkg.menu_parent_id
+                              ? 'Sin botón de menú'
+                              : !pkg.group_published
+                                ? 'Botón oculto'
+                                : !pkg.menu_item_published
+                                  ? 'Enlace oculto'
+                                : 'Programado (Inactivo)'
                           : 'Oculto'}
                       </Badge>
                     </div>
@@ -114,6 +120,7 @@ export const PackageTableList: React.FC<PackageTableListProps> = ({
                       <span className="font-mono bg-bg px-2 py-0.5 rounded border border-border/60">
                         Slug: {pkg.id}
                       </span>
+                      {pkg.group_label && <span>Menú: {pkg.group_label}</span>}
                       {pkg.price_amount !== null && (
                         <span className="font-semibold text-accent-text">
                           💶 {formatPrice(pkg.price_amount, pkg.price_unit)}
@@ -197,4 +204,3 @@ export const PackageTableList: React.FC<PackageTableListProps> = ({
     </Card>
   );
 };
-

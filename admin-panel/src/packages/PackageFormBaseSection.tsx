@@ -1,5 +1,5 @@
 import React from 'react';
-import type { PackageItem } from '../api/types';
+import type { MenuItem, PackageItem } from '../api/types';
 import { Input } from '../core/ui/Input';
 import { Textarea } from '../core/ui/Textarea';
 import { Select } from '../core/ui/Select';
@@ -10,6 +10,7 @@ import type { PackageFormState } from './packageTypes';
 export interface PackageFormBaseSectionProps {
   formData: PackageFormState;
   editingPackage: PackageItem | null;
+  menuGroups: MenuItem[];
   setFormData: React.Dispatch<React.SetStateAction<PackageFormState>>;
   onTitleChange: (val: string) => void;
   onOpenPicker: () => void;
@@ -18,6 +19,7 @@ export interface PackageFormBaseSectionProps {
 export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
   formData,
   editingPackage,
+  menuGroups,
   setFormData,
   onTitleChange,
   onOpenPicker,
@@ -26,6 +28,19 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
     <>
       {/* 1. Base Info */}
       <div className="space-y-4">
+        <Select
+          label="Mostrar bajo el botón del menú"
+          value={formData.menu_parent_id === null ? '' : String(formData.menu_parent_id)}
+          onChange={(e) => setFormData((prev) => ({
+            ...prev,
+            menu_parent_id: e.target.value ? Number(e.target.value) : null,
+          }))}
+          options={[
+            { value: '', label: 'Sin grupo (no aparece en la web)' },
+            ...menuGroups.map((group) => ({ value: String(group.id), label: group.label })),
+          ]}
+          helperText="El paquete y el botón tienen interruptores independientes. Podés crear otros botones en Menú de Navegación."
+        />
         <Input
           label="Título del Paquete (Español)"
           value={formData.title}
@@ -159,6 +174,33 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
         required
       />
 
+      <div className="space-y-4 p-4 bg-bg rounded-2xl border border-border">
+        <h3 className="text-sm font-semibold text-primary">Contenido de la ficha pública</h3>
+        <Input
+          label="Título de introducción (opcional)"
+          value={formData.intro_title}
+          onChange={(e) => setFormData((prev) => ({ ...prev, intro_title: e.target.value }))}
+        />
+        <Textarea
+          label="Introducción del viaje (opcional)"
+          rows={4}
+          value={formData.intro_text}
+          onChange={(e) => setFormData((prev) => ({ ...prev, intro_text: e.target.value }))}
+        />
+        <Textarea
+          label="Qué incluye / destacados (uno por línea)"
+          rows={4}
+          value={formData.highlights.join('\n')}
+          onChange={(e) => setFormData((prev) => ({ ...prev, highlights: e.target.value.split('\n') }))}
+        />
+        <Textarea
+          label="Itinerario (una etapa por línea)"
+          rows={4}
+          value={formData.itinerary.join('\n')}
+          onChange={(e) => setFormData((prev) => ({ ...prev, itinerary: e.target.value.split('\n') }))}
+        />
+      </div>
+
       {/* 4. Publication & Schedule */}
       <div className="p-4 bg-bg rounded-2xl border border-border space-y-4">
         <Toggle
@@ -209,4 +251,3 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
     </>
   );
 };
-

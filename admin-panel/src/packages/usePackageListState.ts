@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type {
   PackageItem,
   PackagePayload,
+  MenuItem,
   DashboardLocale,
   MediaItem,
 } from '../api/types';
@@ -14,6 +15,7 @@ import {
 
 export function usePackageListState() {
   const [packages, setPackages] = useState<PackageItem[]>([]);
+  const [menuGroups, setMenuGroups] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -24,6 +26,7 @@ export function usePackageListState() {
   const [formLocale, setFormLocale] = useState<DashboardLocale>('es');
   const [isSaving, setIsSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<'cover' | 'gallery'>('cover');
 
   // Delete state
   const [packageToDelete, setPackageToDelete] = useState<PackageItem | null>(null);
@@ -37,8 +40,12 @@ export function usePackageListState() {
   const loadPackages = async () => {
     try {
       setLoading(true);
-      const res = await api.packages.list({ includeUnpublished: true });
+      const [res, menu] = await Promise.all([
+        api.packages.list({ includeUnpublished: true }),
+        api.menu.list(true),
+      ]);
       setPackages(res || []);
+      setMenuGroups((menu || []).filter((item) => item.parent_id === null && item.link_type === 'anchor'));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cargar paquetes';
       toast.error(msg);
@@ -84,6 +91,12 @@ export function usePackageListState() {
         price_amount: full.price_amount !== null ? String(full.price_amount) : '',
         price_currency: full.price_currency || 'EUR',
         price_unit: full.price_unit || 'por persona',
+        menu_parent_id: full.menu_parent_id ?? null,
+        intro_title: full.intro_title || '',
+        intro_text: full.intro_text || '',
+        highlights: full.highlights || [],
+        itinerary: full.itinerary || [],
+        media: full.media || [],
         published: Boolean(full.published),
         publish_at: full.publish_at ? full.publish_at.substring(0, 16).replace(' ', 'T') : '',
         unpublish_at: full.unpublish_at ? full.unpublish_at.substring(0, 16).replace(' ', 'T') : '',
@@ -92,16 +105,28 @@ export function usePackageListState() {
             title: full.translations?.ca?.title || '',
             description: full.translations?.ca?.description || '',
             price_unit: full.translations?.ca?.price_unit || '',
+            intro_title: full.translations?.ca?.intro_title || '',
+            intro_text: full.translations?.ca?.intro_text || '',
+            highlights: full.translations?.ca?.highlights || [],
+            itinerary: full.translations?.ca?.itinerary || [],
           },
           en: {
             title: full.translations?.en?.title || '',
             description: full.translations?.en?.description || '',
             price_unit: full.translations?.en?.price_unit || '',
+            intro_title: full.translations?.en?.intro_title || '',
+            intro_text: full.translations?.en?.intro_text || '',
+            highlights: full.translations?.en?.highlights || [],
+            itinerary: full.translations?.en?.itinerary || [],
           },
           fr: {
             title: full.translations?.fr?.title || '',
             description: full.translations?.fr?.description || '',
             price_unit: full.translations?.fr?.price_unit || '',
+            intro_title: full.translations?.fr?.intro_title || '',
+            intro_text: full.translations?.fr?.intro_text || '',
+            highlights: full.translations?.fr?.highlights || [],
+            itinerary: full.translations?.fr?.itinerary || [],
           },
         },
       });
@@ -129,6 +154,19 @@ export function usePackageListState() {
   };
 
   const handleSelectImage = (item: MediaItem) => {
+    if (pickerTarget === 'gallery') {
+      setFormData((prev) => ({
+        ...prev,
+        media: [...prev.media, {
+          media_type: 'image',
+          media_url: item.url,
+          alt_text: item.original_name,
+          display_order: prev.media.length,
+        }],
+      }));
+      toast.success(`Foto '${item.original_name}' agregada a la galería.`);
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       image_url: item.url,
@@ -170,6 +208,12 @@ export function usePackageListState() {
         price_amount: formData.price_amount ? parseFloat(formData.price_amount) : null,
         price_currency: formData.price_currency.trim().toUpperCase() || 'EUR',
         price_unit: formData.price_unit.trim() || null,
+        menu_parent_id: formData.menu_parent_id,
+        intro_title: formData.intro_title.trim() || null,
+        intro_text: formData.intro_text.trim() || null,
+        highlights: formData.highlights.map((item) => item.trim()).filter(Boolean),
+        itinerary: formData.itinerary.map((item) => item.trim()).filter(Boolean),
+        media: formData.media,
         published: formData.published ? 1 : 0,
         publish_at: formData.publish_at ? formData.publish_at.replace('T', ' ') + ':00' : null,
         unpublish_at: formData.unpublish_at ? formData.unpublish_at.replace('T', ' ') + ':00' : null,
@@ -272,6 +316,7 @@ export function usePackageListState() {
 
   return {
     packages,
+    menuGroups,
     loading,
     searchQuery,
     setSearchQuery,
@@ -288,6 +333,8 @@ export function usePackageListState() {
     isSaving,
     pickerOpen,
     setPickerOpen,
+    pickerTarget,
+    setPickerTarget,
     packageToDelete,
     setPackageToDelete,
     isDeleting,
@@ -303,4 +350,3 @@ export function usePackageListState() {
     handleMoveOrder,
   };
 }
-

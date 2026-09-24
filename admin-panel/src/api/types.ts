@@ -234,9 +234,28 @@ export interface MenuItemPayload {
 }
 
 export interface PackageTranslations {
-  ca?: { title: string; description: string; price_unit?: string };
-  en?: { title: string; description: string; price_unit?: string };
-  fr?: { title: string; description: string; price_unit?: string };
+  ca?: PackageTranslation;
+  en?: PackageTranslation;
+  fr?: PackageTranslation;
+}
+
+export interface PackageTranslation {
+  title: string;
+  description: string;
+  price_unit?: string;
+  intro_title?: string;
+  intro_text?: string;
+  highlights?: string[];
+  itinerary?: string[];
+}
+
+export interface PackageMedia {
+  id?: number;
+  media_type: 'image' | 'video';
+  media_url: string;
+  poster_url?: string | null;
+  alt_text?: string | null;
+  display_order?: number;
 }
 
 export interface PackageItem {
@@ -253,6 +272,15 @@ export interface PackageItem {
   published: boolean | number;
   publish_at: string | null;
   unpublish_at: string | null;
+  menu_parent_id?: number | null;
+  menu_item_published?: boolean;
+  group_label?: string | null;
+  group_published?: boolean;
+  intro_title?: string | null;
+  intro_text?: string | null;
+  highlights?: string[];
+  itinerary?: string[];
+  media?: PackageMedia[];
   is_currently_visible: boolean;
   translations?: PackageTranslations;
   created_at?: string;
@@ -273,6 +301,12 @@ export interface PackagePayload {
   published?: boolean | number;
   publish_at?: string | null;
   unpublish_at?: string | null;
+  menu_parent_id?: number | null;
+  intro_title?: string | null;
+  intro_text?: string | null;
+  highlights?: string[];
+  itinerary?: string[];
+  media?: PackageMedia[];
   translations?: PackageTranslations;
 }
 
@@ -386,4 +420,3 @@ export interface ActivityTypeItem {
 }
 
 export type { ActivityImage, Activity, ActivityType } from '../activities/types';
-

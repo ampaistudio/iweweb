@@ -42,6 +42,12 @@ class MenuController {
             $where[] = 'm.published = 1';
             $where[] = '(m.publish_at IS NULL OR m.publish_at <= NOW())';
             $where[] = '(m.unpublish_at IS NULL OR m.unpublish_at > NOW())';
+            $where[] = '(m.link_type <> "package" OR EXISTS (
+                SELECT 1 FROM packages p WHERE p.id = m.target_value
+                  AND p.published = 1
+                  AND (p.publish_at IS NULL OR p.publish_at <= NOW())
+                  AND (p.unpublish_at IS NULL OR p.unpublish_at > NOW())
+            ))';
         }
 
         if ($locale !== 'es') {

@@ -8,15 +8,19 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/PackagePresentationService.php';
+
 class PackageController {
     private PDO $pdo;
     private array $config;
+    private PackagePresentationService $presentation;
 
     public const SUPPORTED_LOCALES = ['es', 'ca', 'en', 'fr'];
 
     public function __construct(PDO $pdo, array $config) {
         $this->pdo = $pdo;
         $this->config = $config;
+        $this->presentation = new PackagePresentationService($pdo);
     }
 
     /**
@@ -39,10 +43,17 @@ class PackageController {
             $where[] = 'p.published = 1';
             $where[] = '(p.publish_at IS NULL OR p.publish_at <= NOW())';
             $where[] = '(p.unpublish_at IS NULL OR p.unpublish_at > NOW())';
+            $where[] = 'pm.published = 1';
+            $where[] = '(pm.publish_at IS NULL OR pm.publish_at <= NOW())';
+            $where[] = '(pm.unpublish_at IS NULL OR pm.unpublish_at > NOW())';
+            $where[] = 'pg.published = 1';
+            $where[] = '(pg.publish_at IS NULL OR pg.publish_at <= NOW())';
+            $where[] = '(pg.unpublish_at IS NULL OR pg.unpublish_at > NOW())';
         }
 
         if ($locale !== 'es') {
             $params['locale'] = $locale;
+            $params['group_locale'] = $locale;
             $sql = '
                 SELECT 
                     p.id,
@@ -60,24 +71,55 @@ class PackageController {
                     p.unpublish_at,
                     p.created_at,
                     p.updated_at,
+                    pm.parent_id AS menu_parent_id,
+                    pm.published AS menu_item_published,
+                    COALESCE(NULLIF(gt.label, ""), pg.label) AS group_label,
+                    pg.published AS group_published,
                     (
                         p.published = 1 
                         AND (p.publish_at IS NULL OR p.publish_at <= NOW()) 
                         AND (p.unpublish_at IS NULL OR p.unpublish_at > NOW())
+                        AND pm.published = 1
+                        AND (pm.publish_at IS NULL OR pm.publish_at <= NOW())
+                        AND (pm.unpublish_at IS NULL OR pm.unpublish_at > NOW())
+                        AND pg.published = 1
+                        AND (pg.publish_at IS NULL OR pg.publish_at <= NOW())
+                        AND (pg.unpublish_at IS NULL OR pg.unpublish_at > NOW())
                     ) AS is_currently_visible
                 FROM packages p
                 LEFT JOIN package_translations t ON t.package_id = p.id AND t.locale = :locale
+                LEFT JOIN menu_items pm ON pm.id = (
+                    SELECT MIN(mi.id) FROM menu_items mi
+                    WHERE mi.link_type = "package" AND mi.target_value = p.id
+                )
+                LEFT JOIN menu_items pg ON pg.id = pm.parent_id
+                LEFT JOIN menu_item_translations gt ON gt.menu_item_id = pg.id AND gt.locale = :group_locale
             ';
         } else {
             $sql = '
                 SELECT 
                     p.*,
+                    pm.parent_id AS menu_parent_id,
+                    pm.published AS menu_item_published,
+                    pg.label AS group_label,
+                    pg.published AS group_published,
                     (
                         p.published = 1 
                         AND (p.publish_at IS NULL OR p.publish_at <= NOW()) 
                         AND (p.unpublish_at IS NULL OR p.unpublish_at > NOW())
+                        AND pm.published = 1
+                        AND (pm.publish_at IS NULL OR pm.publish_at <= NOW())
+                        AND (pm.unpublish_at IS NULL OR pm.unpublish_at > NOW())
+                        AND pg.published = 1
+                        AND (pg.publish_at IS NULL OR pg.publish_at <= NOW())
+                        AND (pg.unpublish_at IS NULL OR pg.unpublish_at > NOW())
                     ) AS is_currently_visible
                 FROM packages p
+                LEFT JOIN menu_items pm ON pm.id = (
+                    SELECT MIN(mi.id) FROM menu_items mi
+                    WHERE mi.link_type = "package" AND mi.target_value = p.id
+                )
+                LEFT JOIN menu_items pg ON pg.id = pm.parent_id
             ';
         }
 
@@ -91,7 +133,7 @@ class PackageController {
         $rows = $stmt->fetchAll();
 
         $formatted = array_map(function ($pkg) {
-            return $this->formatPackageResponse($pkg);
+            return $this->presentation->formatResponse($pkg);
         }, $rows);
 
         jsonSuccess($formatted);
@@ -103,16 +145,35 @@ class PackageController {
      */
     public function get(string $id): void {
         $user = getAuthenticatedUser($this->pdo);
+        $locale = strtolower(trim((string)($_GET['locale'] ?? 'es')));
+        if (!in_array($locale, self::SUPPORTED_LOCALES, true)) {
+            $locale = 'es';
+        }
 
         $sql = '
             SELECT 
                 p.*,
+                pm.parent_id AS menu_parent_id,
+                pm.published AS menu_item_published,
+                pg.label AS group_label,
+                pg.published AS group_published,
                 (
                     p.published = 1 
                     AND (p.publish_at IS NULL OR p.publish_at <= NOW()) 
                     AND (p.unpublish_at IS NULL OR p.unpublish_at > NOW())
+                    AND pm.published = 1
+                    AND (pm.publish_at IS NULL OR pm.publish_at <= NOW())
+                    AND (pm.unpublish_at IS NULL OR pm.unpublish_at > NOW())
+                    AND pg.published = 1
+                    AND (pg.publish_at IS NULL OR pg.publish_at <= NOW())
+                    AND (pg.unpublish_at IS NULL OR pg.unpublish_at > NOW())
                 ) AS is_currently_visible
             FROM packages p 
+            LEFT JOIN menu_items pm ON pm.id = (
+                SELECT MIN(mi.id) FROM menu_items mi
+                WHERE mi.link_type = "package" AND mi.target_value = p.id
+            )
+            LEFT JOIN menu_items pg ON pg.id = pm.parent_id
             WHERE p.id = :id 
             LIMIT 1
         ';
@@ -146,10 +207,20 @@ class PackageController {
             }
         }
 
-        $res = $this->formatPackageResponse($pkg);
-        if ($user) {
-            $res['translations'] = $translations;
+        $res = $this->presentation->formatResponse($pkg);
+        if ($locale !== 'es' && $pkg['menu_parent_id']) {
+            $groupStmt = $this->pdo->prepare('SELECT label FROM menu_item_translations WHERE menu_item_id = :id AND locale = :locale');
+            $groupStmt->execute(['id' => $pkg['menu_parent_id'], 'locale' => $locale]);
+            $groupLabel = $groupStmt->fetchColumn();
+            if (is_string($groupLabel) && trim($groupLabel) !== '') $res['group_label'] = $groupLabel;
         }
+        if (!$user && $locale !== 'es') {
+            $translated = $translations[$locale] ?? [];
+            foreach (['title', 'description', 'price_unit'] as $field) {
+                if (!empty($translated[$field])) $res[$field] = $translated[$field];
+            }
+        }
+        $res = $this->presentation->enrichResponse($id, $locale, (bool)$user, $res, $translations);
 
         jsonSuccess($res);
     }
@@ -174,6 +245,8 @@ class PackageController {
             jsonError("Ya existe un paquete con el ID '{$id}'.", 409, ['id' => 'ID duplicado']);
         }
 
+        $this->pdo->beginTransaction();
+        try {
         $stmt = $this->pdo->prepare('
             INSERT INTO packages (
                 id, title, duration, description, image_url, alt_text, 
@@ -205,6 +278,12 @@ class PackageController {
         if (isset($data['translations']) && is_array($data['translations'])) {
             $this->saveTranslations($id, $data['translations']);
         }
+        $this->presentation->save($id, $data, null);
+        $this->pdo->commit();
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
 
         jsonSuccess(['id' => $id], 'Paquete creado correctamente.', 201);
     }
@@ -216,9 +295,10 @@ class PackageController {
         requireAuth($this->pdo);
         $data = getRequestBody();
 
-        $stmtCheck = $this->pdo->prepare('SELECT id FROM packages WHERE id = :id');
+        $stmtCheck = $this->pdo->prepare('SELECT id, title FROM packages WHERE id = :id');
         $stmtCheck->execute(['id' => $id]);
-        if (!$stmtCheck->fetch()) {
+        $existingPackage = $stmtCheck->fetch();
+        if (!$existingPackage) {
             jsonError('Paquete no encontrado.', 404);
         }
 
@@ -227,6 +307,8 @@ class PackageController {
             jsonError('Datos de paquete no válidos.', 422, $errors);
         }
 
+        $this->pdo->beginTransaction();
+        try {
         $stmt = $this->pdo->prepare('
             UPDATE packages SET
                 title          = :title,
@@ -264,6 +346,12 @@ class PackageController {
         if (isset($data['translations']) && is_array($data['translations'])) {
             $this->saveTranslations($id, $data['translations']);
         }
+        $this->presentation->save($id, $data, $existingPackage['title']);
+        $this->pdo->commit();
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
 
         jsonSuccess(['id' => $id], 'Paquete actualizado correctamente.');
     }
@@ -274,6 +362,8 @@ class PackageController {
     public function delete(string $id): void {
         requireAuth($this->pdo);
 
+        $menuStmt = $this->pdo->prepare('DELETE FROM menu_items WHERE link_type = "package" AND target_value = :id');
+        $menuStmt->execute(['id' => $id]);
         $stmt = $this->pdo->prepare('DELETE FROM packages WHERE id = :id');
         $stmt->execute(['id' => $id]);
 
@@ -346,33 +436,25 @@ class PackageController {
             $errors['unpublish_at'] = "Formato de fecha 'unpublish_at' no válido.";
         }
 
+        if (array_key_exists('menu_parent_id', $data) && $data['menu_parent_id'] !== null && $data['menu_parent_id'] !== '') {
+            $parentId = filter_var($data['menu_parent_id'], FILTER_VALIDATE_INT);
+            $parentStmt = $this->pdo->prepare('SELECT id FROM menu_items WHERE id = :id AND parent_id IS NULL AND link_type = "anchor"');
+            $parentStmt->execute(['id' => $parentId ?: 0]);
+            if (!$parentStmt->fetch()) {
+                $errors['menu_parent_id'] = 'Elegí un botón principal válido del menú.';
+            }
+        }
+
+        if (isset($data['media']) && (!is_array($data['media']) || count($data['media']) > 30)) {
+            $errors['media'] = 'La galería admite hasta 30 elementos.';
+        }
+
         return $errors;
     }
 
     /**
      * Format package database row to standard API array
      */
-    private function formatPackageResponse(array $row): array {
-        return [
-            'id'                   => $row['id'],
-            'title'                => $row['title'],
-            'duration'             => $row['duration'],
-            'description'          => $row['description'],
-            'image_url'            => $row['image_url'] ?? null,
-            'alt_text'             => $row['alt_text'] ?? null,
-            'price_amount'         => $row['price_amount'] !== null ? (float)$row['price_amount'] : null,
-            'price_currency'       => $row['price_currency'] ?? 'EUR',
-            'price_unit'           => $row['price_unit'] ?? null,
-            'display_order'        => (int)$row['display_order'],
-            'published'            => (bool)$row['published'],
-            'publish_at'           => $row['publish_at'] ?? null,
-            'unpublish_at'         => $row['unpublish_at'] ?? null,
-            'is_currently_visible' => isset($row['is_currently_visible']) ? (bool)$row['is_currently_visible'] : true,
-            'created_at'           => $row['created_at'],
-            'updated_at'           => $row['updated_at'],
-        ];
-    }
-
     /**
      * Upsert package translations
      */
@@ -410,4 +492,3 @@ class PackageController {
         }
     }
 }
-

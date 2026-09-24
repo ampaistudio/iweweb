@@ -34,7 +34,7 @@ function resolveHref(linkType: string, targetValue: string): string {
     return `/tour/${targetValue}`;
   }
   if (linkType === 'package') {
-    return '/#tours';
+    return `/paquete/${encodeURIComponent(targetValue)}`;
   }
   return targetValue;
 }
@@ -63,11 +63,18 @@ function buildNavItems(children?: MenuItem[]): NavItemOrGroup[] {
 
 function transformMenuTree(menuTree: MenuItem[], siteContent: SiteContentMap): NavSection[] {
   const toursHidden = ['false', '0'].includes(siteContent.tours_section_published);
-  return menuTree.filter((rootNode) => !(toursHidden && rootNode.target_value === '/#tours')).map((rootNode) => ({
-    label: rootNode.label,
-    anchor: rootNode.target_value,
-    items: buildNavItems(rootNode.children),
-  }));
+  return menuTree.map((rootNode) => {
+    const hasPackages = rootNode.children?.length && rootNode.children.every((child) => child.link_type === 'package');
+    const fallbackAnchor = toursHidden && rootNode.target_value === '/#tours'
+      ? rootNode.children?.find((child) => child.target_value !== '/#tours')?.target_value
+      : undefined;
+
+    return {
+      label: rootNode.label,
+      anchor: hasPackages ? `/#packages-${rootNode.id}` : fallbackAnchor || rootNode.target_value,
+      items: buildNavItems(rootNode.children),
+    };
+  });
 }
 
 function normalizeRawActivity(raw: RawApiActivity): Activity {

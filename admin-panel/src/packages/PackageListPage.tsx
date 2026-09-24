@@ -10,6 +10,7 @@ import { PackageEditorModal } from './PackageEditorModal';
 export const PackageListPage: React.FC = () => {
   const {
     packages,
+    menuGroups,
     loading,
     searchQuery,
     setSearchQuery,
@@ -26,6 +27,8 @@ export const PackageListPage: React.FC = () => {
     isSaving,
     pickerOpen,
     setPickerOpen,
+    pickerTarget,
+    setPickerTarget,
     packageToDelete,
     setPackageToDelete,
     isDeleting,
@@ -108,6 +111,7 @@ export const PackageListPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         editingPackage={editingPackage}
+        menuGroups={menuGroups}
         formData={formData}
         setFormData={setFormData}
         formLocale={formLocale}
@@ -115,6 +119,8 @@ export const PackageListPage: React.FC = () => {
         isSaving={isSaving}
         pickerOpen={pickerOpen}
         setPickerOpen={setPickerOpen}
+        pickerTarget={pickerTarget}
+        setPickerTarget={setPickerTarget}
         onTitleChange={handleTitleChange}
         onSelectImage={handleSelectImage}
         onSubmit={handleSavePackage}

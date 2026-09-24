@@ -129,7 +129,54 @@ export const PackageFormTranslationsSection: React.FC<PackageFormTranslationsSec
           placeholder="per person / per persona / par personne"
         />
       </div>
+
+      <Input
+        label={`Título de introducción en ${formLocale.toUpperCase()}`}
+        value={formData.translations[formLocale]?.intro_title || ''}
+        onChange={(e) => setFormData((prev) => ({
+          ...prev,
+          translations: {
+            ...prev.translations,
+            [formLocale]: { ...prev.translations[formLocale], intro_title: e.target.value },
+          },
+        }))}
+      />
+      <Textarea
+        label={`Introducción en ${formLocale.toUpperCase()}`}
+        rows={4}
+        value={formData.translations[formLocale]?.intro_text || ''}
+        onChange={(e) => setFormData((prev) => ({
+          ...prev,
+          translations: {
+            ...prev.translations,
+            [formLocale]: { ...prev.translations[formLocale], intro_text: e.target.value },
+          },
+        }))}
+      />
+      <Textarea
+        label={`Destacados en ${formLocale.toUpperCase()} (uno por línea)`}
+        rows={4}
+        value={(formData.translations[formLocale]?.highlights || []).join('\n')}
+        onChange={(e) => setFormData((prev) => ({
+          ...prev,
+          translations: {
+            ...prev.translations,
+            [formLocale]: { ...prev.translations[formLocale], highlights: e.target.value.split('\n') },
+          },
+        }))}
+      />
+      <Textarea
+        label={`Itinerario en ${formLocale.toUpperCase()} (una etapa por línea)`}
+        rows={4}
+        value={(formData.translations[formLocale]?.itinerary || []).join('\n')}
+        onChange={(e) => setFormData((prev) => ({
+          ...prev,
+          translations: {
+            ...prev.translations,
+            [formLocale]: { ...prev.translations[formLocale], itinerary: e.target.value.split('\n') },
+          },
+        }))}
+      />
     </div>
   );
 };
-

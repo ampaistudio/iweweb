@@ -10,6 +10,8 @@ import { HomeAdventuresSection } from "../components/home/HomeAdventuresSection"
 import { HomeWeatherSection } from "../components/home/HomeWeatherSection";
 import { HomeReviewsSection } from "../components/home/HomeReviewsSection";
 import { HomeContactSection } from "../components/home/HomeContactSection";
+import { Link } from "react-router-dom";
+import { resolveMediaUrl } from "../utils/media";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -46,6 +48,13 @@ function Home() {
       isMounted = false;
     };
   }, [language]);
+
+  useEffect(() => {
+    const anchor = window.location.hash.slice(1);
+    if (anchor.startsWith('packages-') && packages.some((pkg) => `packages-${pkg.menu_parent_id}` === anchor)) {
+      document.getElementById(anchor)?.scrollIntoView();
+    }
+  }, [packages]);
 
   useEffect(() => {
     const title = getContent("seo_meta_title");
@@ -96,7 +105,11 @@ function Home() {
   const missionStat3Label = getContent("mission_stat3_label");
   const teamContactLink = getContent("team_contact_link");
 
-  const calendarHolidayLabel = getContent("calendar_holiday_label");
+  const groupedPackages = packages.reduce<Record<number, Package[]>>((groups, pkg) => {
+    if (pkg.menu_parent_id == null) return groups;
+    (groups[pkg.menu_parent_id] ??= []).push(pkg);
+    return groups;
+  }, {});
   const calendarEventsLabel = getContent("calendar_events_label");
   const calendarEventsName = getContent("calendar_events_name");
   const calendarEventsPlace = getContent("calendar_events_place");
@@ -170,6 +183,28 @@ function Home() {
 
       <HomeAdventuresSection />
 
+      {Object.entries(groupedPackages).map(([groupId, items]) => (
+        <section id={`packages-${groupId}`} className="page-width section-space" key={groupId}>
+          <p className="eyebrow">{items[0].group_label}</p>
+          <h2>{items[0].group_label}</h2>
+          <div className="tour-grid">
+            {items.map((pkg) => (
+              <Link className="tour-item" to={`/paquete/${encodeURIComponent(pkg.id)}`} key={pkg.id}>
+                <div className="tour-image-wrap">
+                  {pkg.image_url && <img src={resolveMediaUrl(pkg.image_url)} alt={pkg.alt_text || pkg.title} loading="lazy" decoding="async" />}
+                  <span className="tour-arrow"><ArrowIcon /></span>
+                </div>
+                <div className="tour-details">
+                  <div className="tour-meta"><span>{pkg.group_label}</span><span>{pkg.duration}</span></div>
+                  <h3>{pkg.title}</h3>
+                  <div className="tour-submeta"><span>{pkg.price_amount === null ? "" : `${pkg.price_amount} ${pkg.price_currency || 'EUR'}`}</span><span>{pkg.price_unit}</span></div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ))}
+
       {toursPublished && (
         <section id="tours" className="calendar-section section-space page-width">
           <div className="calendar-intro">
@@ -179,14 +214,6 @@ function Home() {
             <a className="button button-dark" href="#contact">{toursCtaText} <ArrowIcon /></a>
           </div>
           <div className="calendar-list">
-            {packages.map((pkg) => (
-              <div className="calendar-row" key={pkg.id}>
-                <span className="calendar-month">{calendarHolidayLabel}</span>
-                <span className="calendar-tour">{pkg.title}</span>
-                <span className="calendar-place">{pkg.duration}</span>
-                <ArrowIcon />
-              </div>
-            ))}
             <div className="calendar-row"><span className="calendar-month">{calendarEventsLabel}</span><span className="calendar-tour">{calendarEventsName}</span><span className="calendar-place">{calendarEventsPlace}</span><ArrowIcon /></div>
           </div>
         </section>
