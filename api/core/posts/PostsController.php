@@ -189,14 +189,14 @@ class PostsController {
         $body = getRequestBody();
 
         $title = trim($body['title'] ?? '');
-        $postBody = trim($body['body'] ?? '');
+        $postBody = sanitizeRichText((string)($body['body'] ?? ''));
         $status = in_array($body['status'] ?? '', ['draft', 'published'], true) ? $body['status'] : 'draft';
         $coverMediaId = !empty($body['cover_media_id']) ? (int)$body['cover_media_id'] : null;
 
         if (empty($title)) {
             jsonError('El título del post es obligatorio.', 422);
         }
-        if (empty($postBody)) {
+        if (richTextToPlainText($postBody) === '') {
             jsonError('El contenido del post es obligatorio.', 422);
         }
 
@@ -277,12 +277,16 @@ class PostsController {
 
         $body = getRequestBody();
         $title = trim($body['title'] ?? $existing['title']);
-        $postBody = isset($body['body']) ? trim($body['body']) : null;
+        $postBody = isset($body['body']) ? sanitizeRichText((string)$body['body']) : null;
         $status = in_array($body['status'] ?? '', ['draft', 'published'], true) ? $body['status'] : $existing['status'];
         $coverMediaId = array_key_exists('cover_media_id', $body) ? ($body['cover_media_id'] ? (int)$body['cover_media_id'] : null) : $existing['cover_media_id'];
 
         if (empty($title)) {
             jsonError('El título no puede estar vacío.', 422);
+        }
+
+        if ($postBody !== null && richTextToPlainText($postBody) === '') {
+            jsonError('El contenido no puede estar vacío.', 422);
         }
 
         $slug = $existing['slug'];
@@ -357,9 +361,9 @@ class PostsController {
             if ($status === 'published' && ($publishFb || $publishIg)) {
                 $socialResults = $this->metaService->publishPost($id, $title, $fullBodyText, $imageUrl, $publishFb, $publishIg);
             } elseif ($retryPlatform === 'facebook') {
-                $socialResults['facebook'] = $this->metaService->publishToFacebook($id, $title . "\n\n" . strip_tags($fullBodyText), $imageUrl);
+                $socialResults['facebook'] = $this->metaService->publishToFacebook($id, $title . "\n\n" . richTextToPlainText($fullBodyText), $imageUrl);
             } elseif ($retryPlatform === 'instagram') {
-                $socialResults['instagram'] = $this->metaService->publishToInstagram($id, $title . "\n\n" . strip_tags($fullBodyText), $imageUrl);
+                $socialResults['instagram'] = $this->metaService->publishToInstagram($id, $title . "\n\n" . richTextToPlainText($fullBodyText), $imageUrl);
             }
 
             jsonSuccess([
@@ -402,7 +406,7 @@ class PostsController {
             }
 
             $tTitle = trim((string)($translations[$loc]['title'] ?? ''));
-            $tBody = trim((string)($translations[$loc]['body'] ?? ''));
+            $tBody = sanitizeRichText((string)($translations[$loc]['body'] ?? ''));
 
             if ($tTitle !== '' || $tBody !== '') {
                 $stmt = $this->pdo->prepare('

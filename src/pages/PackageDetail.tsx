@@ -1,3 +1,5 @@
+import { richTextToPlainText } from '../utils/sanitize';
+import { RichText } from '../components/RichText';
 import { useEffect, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { publicApi } from '../api/client';
@@ -33,11 +35,11 @@ export default function PackageDetail() {
 
   useEffect(() => {
     if (!pkg) return;
-    updateSeo({ title: `${pkg.title} | iWE Andorra`, description: pkg.description, image: pkg.image_url || undefined, type: 'article' });
+    updateSeo({ title: `${pkg.title} | iWE Andorra`, description: richTextToPlainText(pkg.description), image: pkg.image_url || undefined, type: 'article' });
     setJsonLd({
       '@context': 'https://schema.org', '@type': 'TouristTrip', name: pkg.title,
-      description: pkg.description, image: pkg.image_url ? resolveMediaUrl(pkg.image_url) : undefined,
-      itinerary: pkg.itinerary?.length ? pkg.itinerary : undefined,
+      description: richTextToPlainText(pkg.description), image: pkg.image_url ? resolveMediaUrl(pkg.image_url) : undefined,
+      itinerary: pkg.itinerary?.length ? pkg.itinerary.map(richTextToPlainText) : undefined,
       offers: pkg.price_amount === null ? undefined : {
         '@type': 'Offer', price: pkg.price_amount, priceCurrency: pkg.price_currency || 'EUR',
         url: window.location.href,
@@ -67,16 +69,16 @@ export default function PackageDetail() {
       <div id="tour-content" className="page-width tour-detail-body">
         {(pkg.intro_title || pkg.intro_text) && <div className="tour-intro-section">
           {pkg.intro_title && <h2 className="tour-intro-title">{pkg.intro_title}</h2>}
-          {pkg.intro_text && <p className="tour-intro-text">{pkg.intro_text}</p>}
+          {pkg.intro_text && <RichText className="tour-intro-text" value={pkg.intro_text} />}
         </div>}
         <div className="tour-detail-layout"><div className="tour-detail-copy">
           <div className="tour-specs-grid">
             <div className="tour-spec-item"><div><span className="tour-spec-label">{getContent('tour_detail_duration')}</span><span className="tour-spec-value">{pkg.duration}</span></div></div>
             <div className="tour-spec-item"><div><span className="tour-spec-label">{getContent('tour_detail_price')}</span><span className="tour-spec-value">{price}</span></div></div>
           </div>
-          <div className="tour-description-wrap"><p>{pkg.description}</p></div>
-          {Boolean(pkg.itinerary?.length) && <div className="tour-itinerary-section"><p className="tour-section-subtitle">{getContent('tour_detail_itinerary')}</p><ol className="tour-itinerary-list">{pkg.itinerary!.map((step, i) => <li key={i}>{step}</li>)}</ol></div>}
-          {Boolean(pkg.highlights?.length) && <div className="tour-highlights-section"><p className="tour-section-subtitle">{getContent('tour_detail_highlights')}</p><div className="tour-highlights-grid">{pkg.highlights!.map((highlight, i) => <div className="tour-highlight-card" key={i}><span className="tour-highlight-check">✓</span><span className="tour-highlight-text">{highlight}</span></div>)}</div></div>}
+          <RichText className="tour-description-wrap" value={pkg.description} />
+          {Boolean(pkg.itinerary?.length) && <div className="tour-itinerary-section"><p className="tour-section-subtitle">{getContent('tour_detail_itinerary')}</p><ol className="tour-itinerary-list">{pkg.itinerary!.map((step, i) => <li key={i}><RichText value={step} /></li>)}</ol></div>}
+          {Boolean(pkg.highlights?.length) && <div className="tour-highlights-section"><p className="tour-section-subtitle">{getContent('tour_detail_highlights')}</p><div className="tour-highlights-grid">{pkg.highlights!.map((highlight, i) => <div className="tour-highlight-card" key={i}><span className="tour-highlight-check">✓</span><RichText className="tour-highlight-text" value={highlight} /></div>)}</div></div>}
           <TourShareWidget title={pkg.title} type={pkg.group_label || pkg.duration} region={getContent('contact_address')} />
           <div className="tour-booking-cta"><a className="button button-dark tour-booking-button" href={bookingUrl} target="_blank" rel="noopener noreferrer">{getContent('tour_detail_reserve_cta')}</a></div>
         </div></div>

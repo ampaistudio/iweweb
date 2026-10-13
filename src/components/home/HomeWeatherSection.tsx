@@ -1,3 +1,4 @@
+import { RichText } from '../RichText';
 import { useSiteData } from "../../context/SiteDataContext";
 
 export function HomeWeatherSection() {
@@ -18,7 +19,7 @@ export function HomeWeatherSection() {
         <div className="weather-header">
           <p className="eyebrow">{weatherEyebrow}</p>
           <h2>{weatherTitleLine1}<br /><em>{weatherTitleLine2}</em></h2>
-          <p>{weatherCopy}</p>
+          <RichText value={weatherCopy} />
         </div>
         <div className="weather-map-wrap">
           {weatherMapLat && weatherMapLon && <iframe

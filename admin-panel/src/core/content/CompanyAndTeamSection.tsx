@@ -3,7 +3,7 @@ import type { DashboardLocale } from '../../api/types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { AiTranslateButton } from '../ui/AiTranslateButton';
 import type { NonEsLocale, PickerTarget } from './contentTypes';
 
@@ -49,11 +49,10 @@ export const CompanyAndTeamSection: React.FC<CompanyAndTeamSectionProps> = ({
                 onChange={(e) => onChange('mission_title', e.target.value)}
                 placeholder="Líderes en turismo de experiencias en Andorra y los Pirineos."
               />
-              <Textarea
+              <RichTextEditor key={activeLocale}
                 label="Texto descriptivo"
-                rows={4}
                 value={form.mission_text || ''}
-                onChange={(e) => onChange('mission_text', e.target.value)}
+                onChange={(value) => onChange('mission_text', value)}
                 placeholder="Descubre un mundo de experiencias únicas..."
               />
               <div>
@@ -182,10 +181,9 @@ export const CompanyAndTeamSection: React.FC<CompanyAndTeamSectionProps> = ({
                       onTranslated={(val) => onTranslationChange(currentNonEs, 'mission_text', val)}
                     />
                   </div>
-                  <Textarea
-                    rows={4}
+                  <RichTextEditor key={activeLocale}
                     value={translations[currentNonEs].mission_text || ''}
-                    onChange={(e) => onTranslationChange(currentNonEs, 'mission_text', e.target.value)}
+                    onChange={(value) => onTranslationChange(currentNonEs, 'mission_text', value)}
                     placeholder={`Traducción de descripción (${activeLocale.toUpperCase()})...`}
                   />
                 </div>
@@ -215,11 +213,10 @@ export const CompanyAndTeamSection: React.FC<CompanyAndTeamSectionProps> = ({
                 onChange={(e) => onChange('team_title', e.target.value)}
                 placeholder="Fundada en 2018. Guiada por expertos locales."
               />
-              <Textarea
+              <RichTextEditor key={activeLocale}
                 label="Biografía / Presentación de Charly"
-                rows={5}
                 value={form.team_bio || ''}
-                onChange={(e) => onChange('team_bio', e.target.value)}
+                onChange={(value) => onChange('team_bio', value)}
                 placeholder="iWE nació en 2018 de la mano de Charly Paredes..."
               />
               <div>
@@ -307,10 +304,9 @@ export const CompanyAndTeamSection: React.FC<CompanyAndTeamSectionProps> = ({
                       onTranslated={(val) => onTranslationChange(currentNonEs, 'team_bio', val)}
                     />
                   </div>
-                  <Textarea
-                    rows={5}
+                  <RichTextEditor key={activeLocale}
                     value={translations[currentNonEs].team_bio || ''}
-                    onChange={(e) => onTranslationChange(currentNonEs, 'team_bio', e.target.value)}
+                    onChange={(value) => onTranslationChange(currentNonEs, 'team_bio', value)}
                     placeholder={`Traducción de biografía (${activeLocale.toUpperCase()})...`}
                   />
                 </div>

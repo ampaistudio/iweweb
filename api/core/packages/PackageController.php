@@ -263,7 +263,7 @@ class PackageController {
             'id'             => $id,
             'title'          => trim((string)$data['title']),
             'duration'       => trim((string)$data['duration']),
-            'description'    => trim((string)$data['description']),
+            'description'    => sanitizeRichText((string)$data['description']),
             'image_url'      => !empty($data['image_url']) ? trim((string)$data['image_url']) : null,
             'alt_text'       => !empty($data['alt_text']) ? trim((string)$data['alt_text']) : null,
             'price_amount'   => isset($data['price_amount']) && is_numeric($data['price_amount']) ? (float)$data['price_amount'] : null,
@@ -331,7 +331,7 @@ class PackageController {
             'id'             => $id,
             'title'          => trim((string)$data['title']),
             'duration'       => trim((string)$data['duration']),
-            'description'    => trim((string)$data['description']),
+            'description'    => sanitizeRichText((string)$data['description']),
             'image_url'      => !empty($data['image_url']) ? trim((string)$data['image_url']) : null,
             'alt_text'       => !empty($data['alt_text']) ? trim((string)$data['alt_text']) : null,
             'price_amount'   => isset($data['price_amount']) && is_numeric($data['price_amount']) ? (float)$data['price_amount'] : null,
@@ -423,7 +423,7 @@ class PackageController {
 
         $required = ['title', 'duration', 'description'];
         foreach ($required as $field) {
-            if (empty(trim((string)($data[$field] ?? '')))) {
+            if (trim($field === 'description' ? richTextToPlainText((string)($data[$field] ?? '')) : (string)($data[$field] ?? '')) === '') {
                 $errors[$field] = "El campo '{$field}' es obligatorio.";
             }
         }
@@ -463,7 +463,7 @@ class PackageController {
             if (!isset($translations[$loc])) continue;
             $t = $translations[$loc];
             $title = trim((string)($t['title'] ?? ''));
-            $desc = trim((string)($t['description'] ?? ''));
+            $desc = sanitizeRichText((string)($t['description'] ?? ''));
             $unit = trim((string)($t['price_unit'] ?? ''));
 
             if (!empty($title) || !empty($desc)) {

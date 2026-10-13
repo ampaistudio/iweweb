@@ -1,3 +1,4 @@
+import { richTextToPlainText } from './sanitize';
 export interface SeoConfig {
   title?: string;
   description?: string;
@@ -37,7 +38,7 @@ export function updateSeo(config: SeoConfig = {}) {
 }
 
 function sanitizeDescription(text: string, maxLength: number = 160): string {
-  const plain = text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  const plain = richTextToPlainText(text);
   if (plain.length <= maxLength) return plain;
   return plain.slice(0, maxLength).trim() + "...";
 }

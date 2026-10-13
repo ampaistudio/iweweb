@@ -1,7 +1,8 @@
 import React from 'react';
 import type { MenuItem, PackageItem } from '../api/types';
 import { Input } from '../core/ui/Input';
-import { Textarea } from '../core/ui/Textarea';
+import { RichTextListEditor } from '../core/ui/RichTextListEditor';
+import { RichTextEditor } from '../core/ui/RichTextEditor';
 import { Select } from '../core/ui/Select';
 import { Toggle } from '../core/ui/Toggle';
 import { Button } from '../core/ui/Button';
@@ -164,15 +165,13 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
       </div>
 
       {/* 3. Description */}
-      <Textarea
+      <RichTextEditor
         label="Descripción del Paquete (Español)"
-        rows={4}
         value={formData.description}
-        onChange={(e) =>
-          setFormData((prev) => ({ ...prev, description: e.target.value }))
+        onChange={(value) =>
+          setFormData((prev) => ({ ...prev, description: value }))
         }
         placeholder="Describe el itinerario, hoteles incluidos, actividades y traslados..."
-        required
       />
 
       </div>
@@ -186,23 +185,20 @@ export const PackageFormBaseSection: React.FC<PackageFormBaseSectionProps> = ({
           value={formData.intro_title}
           onChange={(e) => setFormData((prev) => ({ ...prev, intro_title: e.target.value }))}
         />
-        <Textarea
+        <RichTextEditor
           label="Introducción del viaje (opcional)"
-          rows={4}
           value={formData.intro_text}
-          onChange={(e) => setFormData((prev) => ({ ...prev, intro_text: e.target.value }))}
+          onChange={(value) => setFormData((prev) => ({ ...prev, intro_text: value }))}
         />
-        <Textarea
-          label="Qué incluye / destacados (uno por línea)"
-          rows={4}
-          value={formData.highlights.join('\n')}
-          onChange={(e) => setFormData((prev) => ({ ...prev, highlights: e.target.value.split('\n') }))}
+        <RichTextListEditor
+          label="Qué incluye / destacados"
+          value={formData.highlights}
+          onChange={(value) => setFormData((prev) => ({ ...prev, highlights: value }))}
         />
-        <Textarea
-          label="Itinerario (una etapa por línea)"
-          rows={4}
-          value={formData.itinerary.join('\n')}
-          onChange={(e) => setFormData((prev) => ({ ...prev, itinerary: e.target.value.split('\n') }))}
+        <RichTextListEditor
+          label="Itinerario"
+          value={formData.itinerary}
+          onChange={(value) => setFormData((prev) => ({ ...prev, itinerary: value }))}
         />
       </div>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input } from '../core/ui/Input';
-import { Textarea } from '../core/ui/Textarea';
+import { RichTextListEditor } from '../core/ui/RichTextListEditor';
+import { RichTextEditor } from '../core/ui/RichTextEditor';
 import { AiTranslateButton } from '../core/ui/AiTranslateButton';
 import type { PackageFormState, NonEsLocale } from './packageTypes';
 
@@ -87,11 +88,10 @@ export const PackageFormTranslationsSection: React.FC<PackageFormTranslationsSec
             }
           />
         </div>
-        <Textarea
-          rows={4}
+        <RichTextEditor key={formLocale}
           value={formData.translations[formLocale]?.description || ''}
-          onChange={(e) => {
-            const val = e.target.value;
+          onChange={(value) => {
+            const val = value;
             setFormData((prev) => ({
               ...prev,
               translations: {
@@ -141,39 +141,36 @@ export const PackageFormTranslationsSection: React.FC<PackageFormTranslationsSec
           },
         }))}
       />
-      <Textarea
+      <RichTextEditor key={formLocale}
         label={`Introducción en ${formLocale.toUpperCase()}`}
-        rows={4}
         value={formData.translations[formLocale]?.intro_text || ''}
-        onChange={(e) => setFormData((prev) => ({
+        onChange={(value) => setFormData((prev) => ({
           ...prev,
           translations: {
             ...prev.translations,
-            [formLocale]: { ...prev.translations[formLocale], intro_text: e.target.value },
+            [formLocale]: { ...prev.translations[formLocale], intro_text: value },
           },
         }))}
       />
-      <Textarea
-        label={`Destacados en ${formLocale.toUpperCase()} (uno por línea)`}
-        rows={4}
-        value={(formData.translations[formLocale]?.highlights || []).join('\n')}
-        onChange={(e) => setFormData((prev) => ({
+      <RichTextListEditor key={formLocale}
+        label={`Destacados en ${formLocale.toUpperCase()}`}
+        value={(formData.translations[formLocale]?.highlights || [])}
+        onChange={(value) => setFormData((prev) => ({
           ...prev,
           translations: {
             ...prev.translations,
-            [formLocale]: { ...prev.translations[formLocale], highlights: e.target.value.split('\n') },
+            [formLocale]: { ...prev.translations[formLocale], highlights: value },
           },
         }))}
       />
-      <Textarea
-        label={`Itinerario en ${formLocale.toUpperCase()} (una etapa por línea)`}
-        rows={4}
-        value={(formData.translations[formLocale]?.itinerary || []).join('\n')}
-        onChange={(e) => setFormData((prev) => ({
+      <RichTextListEditor key={formLocale}
+        label={`Itinerario en ${formLocale.toUpperCase()}`}
+        value={(formData.translations[formLocale]?.itinerary || [])}
+        onChange={(value) => setFormData((prev) => ({
           ...prev,
           translations: {
             ...prev.translations,
-            [formLocale]: { ...prev.translations[formLocale], itinerary: e.target.value.split('\n') },
+            [formLocale]: { ...prev.translations[formLocale], itinerary: value },
           },
         }))}
       />

@@ -1,3 +1,4 @@
+import { editorialPlainText } from '../core/utils/richText';
 import React from 'react';
 import type { PackageItem } from '../api/types';
 import { Card } from '../core/ui/Card';
@@ -135,7 +136,7 @@ export const PackageTableList: React.FC<PackageTableListProps> = ({
                     </div>
 
                     <p className="text-xs text-muted line-clamp-2 max-w-3xl leading-relaxed">
-                      {pkg.description}
+                      {editorialPlainText(pkg.description)}
                     </p>
                   </div>
                 </div>

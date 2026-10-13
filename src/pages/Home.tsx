@@ -1,3 +1,4 @@
+import { RichText } from '../components/RichText';
 import { useEffect, useState } from "react";
 import HeroSlideshow from "../components/HeroSlideshow";
 import { useSiteData } from "../context/SiteDataContext";
@@ -154,7 +155,7 @@ function Home() {
         <div className="hero-content page-width">
           <p className="eyebrow light-eyebrow">{heroEyebrow}</p>
           <h1>{heroTitleLine1}<br /><em>{heroTitleLine2}</em></h1>
-          <p className="hero-copy">{heroCopy}</p>
+          <RichText className="hero-copy" value={heroCopy} />
           <div className="hero-actions">
             {firstRenderable && <a className="button button-light" href={`#${heroActivitiesAnchor}`}>{heroCtaActivities} <ArrowIcon /></a>}
             <a
@@ -183,7 +184,7 @@ function Home() {
         <div className="mission-copy">
           <p className="eyebrow">{missionEyebrow}</p>
           <h2>{missionTitle}</h2>
-          <p className="large-copy">{missionText}</p>
+          <RichText className="large-copy" value={missionText} />
           <a className="text-link dark-link" href="#team">{missionTeamLink} <ArrowIcon /></a>
           <div className="mission-numbers" aria-label="iWE de un vistazo">
             <div><strong>{missionStat1Value}</strong><span>{missionStat1Label}</span></div>
@@ -206,9 +207,7 @@ function Home() {
         <div className="why-copy-panel">
           <p className="eyebrow">{teamEyebrow}</p>
           <h2>{teamTitle}</h2>
-          {teamBio.split(/\n\s*\n/).map((para, idx) => (
-            <p key={idx}>{para}</p>
-          ))}
+          <RichText value={teamBio} />
           <a className="button button-dark" href="#contact">{teamContactLink} <ArrowIcon /></a>
         </div>
       </section>
@@ -242,7 +241,7 @@ function Home() {
           <div className="calendar-intro">
             <p className="eyebrow">{toursEyebrow}</p>
             <h2>{toursTitleLine1}<br /><em>{toursTitleLine2}</em></h2>
-            <p>{toursCopy}</p>
+            <RichText value={toursCopy} />
             <a className="button button-dark" href="#contact">{toursCtaText} <ArrowIcon /></a>
           </div>
           <div className="calendar-list">

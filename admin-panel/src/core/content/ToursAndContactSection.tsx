@@ -2,7 +2,7 @@ import React from 'react';
 import type { DashboardLocale } from '../../api/types';
 import { Card } from '../ui/Card';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { AiTranslateButton } from '../ui/AiTranslateButton';
 import { SectionPublishToggle } from './SectionPublishToggle';
 import type { NonEsLocale } from './contentTypes';
@@ -64,11 +64,10 @@ export const ToursAndContactSection: React.FC<ToursAndContactSectionProps> = ({
                   placeholder="completas con iWE."
                 />
               </div>
-              <Textarea
+              <RichTextEditor key={activeLocale}
                 label="Texto descriptivo"
-                rows={3}
                 value={form.tours_copy || ''}
-                onChange={(e) => onChange('tours_copy', e.target.value)}
+                onChange={(value) => onChange('tours_copy', value)}
                 placeholder="Combina alojamiento, guías y actividades en un solo paquete..."
               />
               <Input
@@ -150,10 +149,9 @@ export const ToursAndContactSection: React.FC<ToursAndContactSectionProps> = ({
                       onTranslated={(val) => onTranslationChange(currentNonEs, 'tours_copy', val)}
                     />
                   </div>
-                  <Textarea
-                    rows={3}
+                  <RichTextEditor key={activeLocale}
                     value={translations[currentNonEs].tours_copy || ''}
-                    onChange={(e) => onTranslationChange(currentNonEs, 'tours_copy', e.target.value)}
+                    onChange={(value) => onTranslationChange(currentNonEs, 'tours_copy', value)}
                     placeholder={`Traducción de descripción (${activeLocale.toUpperCase()})...`}
                   />
                 </div>
@@ -210,11 +208,10 @@ export const ToursAndContactSection: React.FC<ToursAndContactSectionProps> = ({
                   placeholder="Menos rutina."
                 />
               </div>
-              <Textarea
+              <RichTextEditor key={activeLocale}
                 label="Texto de suscripción / contacto"
-                rows={3}
                 value={form.contact_copy || ''}
-                onChange={(e) => onChange('contact_copy', e.target.value)}
+                onChange={(value) => onChange('contact_copy', value)}
                 placeholder="Recibe novedades, disponibilidad de actividades..."
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -256,10 +253,9 @@ export const ToursAndContactSection: React.FC<ToursAndContactSectionProps> = ({
                       onTranslated={(val) => onTranslationChange(currentNonEs, 'contact_copy', val)}
                     />
                   </div>
-                  <Textarea
-                    rows={3}
+                  <RichTextEditor key={activeLocale}
                     value={translations[currentNonEs].contact_copy || ''}
-                    onChange={(e) => onTranslationChange(currentNonEs, 'contact_copy', e.target.value)}
+                    onChange={(value) => onTranslationChange(currentNonEs, 'contact_copy', value)}
                     placeholder={`Traducción de texto de contacto (${activeLocale.toUpperCase()})...`}
                   />
                 </div>

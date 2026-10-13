@@ -1,3 +1,4 @@
+import { RichText } from '../RichText';
 import { useState, useEffect, useMemo } from "react";
 import { useSiteData } from "../../context/SiteDataContext";
 import { publicApi } from "../../api/client";
@@ -232,7 +233,7 @@ export function HomeReviewsSection({ onVisibilityChange }: HomeReviewsSectionPro
           <div className="review-stars" aria-label="Calificación 5 estrellas">
             {"★".repeat(currentReview.rating || 5)}
           </div>
-          <blockquote>{currentReview.quote}</blockquote>
+          <blockquote><RichText value={currentReview.quote} /></blockquote>
           <div className="review-byline">
             <strong>{currentReview.name}</strong>
             <span>

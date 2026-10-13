@@ -175,7 +175,7 @@ function sanitizeRichText(string $html): string {
         return '';
     }
 
-    $allowedTags = ['p', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'br'];
+    $allowedTags = ['p', 'h2', 'h3', 'strong', 'b', 'em', 'i', 'u', 's', 'ul', 'ol', 'li', 'br'];
 
     $doc = new DOMDocument();
     $previousLibxmlErrors = libxml_use_internal_errors(true);
@@ -239,6 +239,13 @@ function sanitizeRichText(string $html): string {
     }
 
     return trim($innerHtml);
+}
+
+/** Convert formatted editorial content to readable text for social captions. */
+function richTextToPlainText(string $html): string {
+    $safe = sanitizeRichText($html);
+    $spaced = preg_replace('/<br\s*\/?\s*>|<\/(?:p|h2|h3|li)>/i', "\n", $safe);
+    return trim(html_entity_decode(strip_tags($spaced), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 }
 
 /**

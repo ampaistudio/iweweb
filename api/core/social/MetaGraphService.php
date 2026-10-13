@@ -30,7 +30,7 @@ class MetaGraphService {
     public function publishPost(int $postId, string $title, string $body, ?string $imageUrl, bool $toFacebook, bool $toInstagram): array {
         $results = [];
 
-        $message = trim($title . "\n\n" . strip_tags($body));
+        $message = trim($title . "\n\n" . richTextToPlainText($body));
 
         if ($toFacebook) {
             $results['facebook'] = $this->publishToFacebook($postId, $message, $imageUrl);

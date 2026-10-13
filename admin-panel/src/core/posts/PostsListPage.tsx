@@ -1,3 +1,4 @@
+import { editorialPlainText } from '../utils/richText';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
@@ -150,7 +151,7 @@ export const PostsListPage: React.FC = () => {
                       </div>
 
                       <p className="text-xs text-muted line-clamp-2 max-w-2xl leading-relaxed">
-                        {post.body}
+                        {editorialPlainText(post.body)}
                       </p>
 
                       <div className="flex flex-wrap items-center gap-4 text-[11px] text-muted pt-1">

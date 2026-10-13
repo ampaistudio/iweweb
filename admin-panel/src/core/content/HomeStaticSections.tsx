@@ -3,7 +3,7 @@ import { api } from '../../api/client';
 import type { ActivityTypeItem } from '../../api/types';
 import { Card } from '../ui/Card';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { SectionPublishToggle } from './SectionPublishToggle';
 import { DirectReviewsManager } from './DirectReviewsManager';
 
@@ -123,11 +123,10 @@ export const HomeStaticSections: React.FC<HomeStaticSectionsProps> = ({
                 placeholder="y los Pirineos."
               />
             </div>
-            <Textarea
+            <RichTextEditor
               label="Texto descriptivo"
-              rows={2}
               value={form.weather_copy || ''}
-              onChange={(e) => onChange('weather_copy', e.target.value)}
+              onChange={(value) => onChange('weather_copy', value)}
               placeholder="Previsión meteorológica y mapa interactivo..."
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

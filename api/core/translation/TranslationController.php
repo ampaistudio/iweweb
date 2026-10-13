@@ -64,7 +64,8 @@ Tu misión es traducir con máxima naturalidad y fidelidad del {$sourceName} al 
 Reglas de traducción indispensables:
 1. Mantén un tono cercano, aventurero, dinámico pero profesional y pulcro.
 {$ruleToponyms}
-3. Devuelve EXCLUSIVAMENTE el texto traducido, sin explicaciones, sin saludos, sin comillas envolventes ni prefijos como "Traducción:".
+3. Si el contenido contiene HTML, conserva las etiquetas y la estructura (párrafos, títulos, listas y énfasis); traduce únicamente el texto visible y no agregues bloques de código Markdown.
+4. Devuelve EXCLUSIVAMENTE el texto traducido, sin explicaciones, sin saludos, sin comillas envolventes ni prefijos como "Traducción:".
 PROMPT;
 
         $userPrompt = "Traduce el siguiente contenido ({$fieldName}):\n\n{$text}";

@@ -25,13 +25,21 @@ export function formatTextParagraphs(text: string): string[] {
     .filter((p) => p.length > 0);
 }
 
+/** Extract readable text for excerpts, metadata and structured data. */
+export function richTextToPlainText(text: string): string {
+  const spaced = text.replace(/<\/(?:p|h[1-6]|li)>|<br\s*\/?>/gi, ' ');
+  const plain = typeof DOMParser === 'undefined' ? spaced.replace(/<[^>]*>/g, '')
+    : new DOMParser().parseFromString(spaced, 'text/html').body.textContent || '';
+  return plain.replace(/\s+/g, ' ').trim();
+}
+
 /**
  * Generates a clean text excerpt from a post body.
  */
 export function generateExcerpt(text: string, maxLength: number = 160): string {
   if (!text) return '';
   // Strip any raw tags if present
-  const clean = text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  const clean = richTextToPlainText(text);
   if (clean.length <= maxLength) return clean;
   return clean.slice(0, maxLength).trim() + '...';
 }

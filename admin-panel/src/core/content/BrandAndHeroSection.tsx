@@ -3,7 +3,7 @@ import type { DashboardLocale } from '../../api/types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { AiTranslateButton } from '../ui/AiTranslateButton';
 import type { NonEsLocale, PickerTarget } from './contentTypes';
 
@@ -153,11 +153,10 @@ export const BrandAndHeroSection: React.FC<BrandAndHeroSectionProps> = ({
                   placeholder="Un solo operador."
                 />
               </div>
-              <Textarea
+              <RichTextEditor key={activeLocale}
                 label="Texto descriptivo del Hero (Copy)"
-                rows={3}
                 value={form.hero_copy || ''}
-                onChange={(e) => onChange('hero_copy', e.target.value)}
+                onChange={(value) => onChange('hero_copy', value)}
                 placeholder="iWE, la agencia líder en turismo de experiencias..."
               />
               <Input
@@ -259,10 +258,9 @@ export const BrandAndHeroSection: React.FC<BrandAndHeroSectionProps> = ({
                       onTranslated={(val) => onTranslationChange(currentNonEs, 'hero_copy', val)}
                     />
                   </div>
-                  <Textarea
-                    rows={3}
+                  <RichTextEditor key={activeLocale}
                     value={translations[currentNonEs].hero_copy || ''}
-                    onChange={(e) => onTranslationChange(currentNonEs, 'hero_copy', e.target.value)}
+                    onChange={(value) => onTranslationChange(currentNonEs, 'hero_copy', value)}
                     placeholder={`Traducción de texto descriptivo (${activeLocale.toUpperCase()})...`}
                   />
                 </div>

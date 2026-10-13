@@ -28,6 +28,26 @@ class ContentController {
         'social_strava',
     ];
 
+    /** Only editorial values accept formatting; configuration values keep their contract. */
+    private function cleanValue(string $key, string $value): string {
+        if (in_array($key, ['hero_copy', 'mission_text', 'team_bio', 'tours_copy',
+            'contact_copy', 'weather_copy', 'privacy_policy_text'], true)) {
+            return sanitizeRichText($value);
+        }
+        if ($key === 'reviews_direct_items') {
+            $reviews = json_decode($value, true);
+            if (is_array($reviews)) {
+                foreach ($reviews as &$review) {
+                    if (is_array($review) && isset($review['quote'])) {
+                        $review['quote'] = sanitizeRichText((string)$review['quote']);
+                    }
+                }
+                return json_encode($reviews, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            }
+        }
+        return $value;
+    }
+
     public function __construct(PDO $pdo, array $config) {
         $this->pdo = $pdo;
         $this->config = $config;
@@ -100,6 +120,7 @@ class ContentController {
 
         $body = getRequestBody();
         $value = $body['content_value'] ?? $body['value'] ?? null;
+        if ($value !== null) $value = $this->cleanValue($key, (string)$value);
         $locale = strtolower(trim((string)($body['locale'] ?? 'es')));
         $translations = $body['translations'] ?? null;
 
@@ -150,7 +171,7 @@ class ContentController {
             if (is_array($translations) && !in_array($key, self::NON_TRANSLATABLE_KEYS, true)) {
                 foreach (['ca', 'en', 'fr'] as $loc) {
                     if (isset($translations[$loc])) {
-                        $tVal = trim((string)$translations[$loc]);
+                        $tVal = $this->cleanValue($key, trim((string)$translations[$loc]));
                         if ($tVal !== '') {
                             $stmtT = $this->pdo->prepare('
                                 INSERT INTO site_content_translations (content_key, locale, content_value, updated_at)

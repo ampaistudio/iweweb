@@ -1,4 +1,5 @@
-import { createElement, useEffect, type ReactNode } from "react";
+import { RichText } from '../components/RichText';
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSiteData } from "../context/SiteDataContext";
 import { updateSeo } from "../utils/seo";
@@ -13,22 +14,7 @@ function ArrowIcon() {
 
 function PolicyText({ text }: { text: string }) {
   if (text.trimStart().startsWith("<")) {
-    if (typeof DOMParser === "undefined") return <p>{text.replace(/<[^>]*>/g, "")}</p>;
-    const parsed = new DOMParser().parseFromString(text, "text/html");
-    const allowed = new Set(["h2", "h3", "p", "br", "ul", "ol", "li", "strong", "em"]);
-    const renderNode = (node: Node, key: number): ReactNode => {
-      if (node.nodeType === 3) return node.textContent;
-      if (node.nodeType !== 1) return null;
-      const tag = node.nodeName.toLowerCase();
-      if (tag === "script" || tag === "style") return null;
-      const children = Array.from(node.childNodes).map((child, index) => renderNode(child, index));
-      return allowed.has(tag)
-        ? createElement(tag, { key }, ...children)
-        : createElement("span", { key }, ...children);
-    };
-    return <div className="news-article-content" style={{ fontSize: "16px", lineHeight: "1.7" }}>
-      {Array.from(parsed.body.childNodes).map((node, index) => renderNode(node, index))}
-    </div>;
+    return <RichText className="news-article-content" value={text} />;
   }
 
   return (

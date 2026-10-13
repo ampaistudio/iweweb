@@ -1,3 +1,4 @@
+import { RichText } from '../RichText';
 import { useState } from "react";
 import { useSiteData } from "../../context/SiteDataContext";
 import { publicApi } from "../../api/client";
@@ -59,7 +60,7 @@ export function HomeContactSection() {
         <h2>{contactTitleLine1}<br /><em>{contactTitleLine2}</em></h2>
       </div>
       <div className="contact-copy">
-        <p>{contactCopy}</p>
+        <RichText value={contactCopy} />
         {subscribed ? (
           <p className="success-message">{newsletterSuccessMessage}</p>
         ) : (

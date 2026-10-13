@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { parseDirectReviews } from './contentTypes';
 
 export interface DirectReviewsManagerProps {
@@ -91,11 +91,10 @@ export const DirectReviewsManager: React.FC<DirectReviewsManagerProps> = ({
                   </select>
                 </div>
               </div>
-              <Textarea
+              <RichTextEditor
                 label="Texto de la reseña"
-                rows={2}
                 value={item.quote || ''}
-                onChange={(e) => handleUpdateReview(idx, { quote: e.target.value })}
+                onChange={(value) => handleUpdateReview(idx, { quote: value })}
                 placeholder="Escribe el testimonio del cliente..."
               />
             </div>

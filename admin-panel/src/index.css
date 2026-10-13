@@ -161,3 +161,15 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-surface-hover);
 }
+
+/* Shared presentation of editable long-form content. */
+.rich-text-content > :first-child { margin-top: 0; }
+.rich-text-content > :last-child { margin-bottom: 0; }
+.rich-text-content p { margin-bottom: 0.8em; }
+.rich-text-content ul { list-style: disc; }
+.rich-text-content ol { list-style: decimal; }
+.rich-text-content ul, .rich-text-content ol { padding-left: 1.5em; margin-bottom: 0.8em; }
+.rich-text-content h2 { font-size: 1.5em; font-weight: 700; margin: 1em 0 0.5em; }
+.rich-text-content h3 { font-size: 1.2em; font-weight: 700; margin: 1em 0 0.5em; }
+
+.rich-text-list .tiptap { min-height: 80px; }

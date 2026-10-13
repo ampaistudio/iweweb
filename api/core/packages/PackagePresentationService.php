@@ -85,7 +85,7 @@ class PackagePresentationService {
     private function cleanTextList($items): array {
         if (!is_array($items)) return [];
         return array_values(array_filter(array_map(
-            static fn($item) => is_string($item) ? trim($item) : '',
+            static fn($item) => is_string($item) ? sanitizeRichText($item) : '',
             $items
         )));
     }
@@ -163,7 +163,7 @@ class PackagePresentationService {
             $stmt->execute([
                 'id' => $id,
                 'intro_title' => trim((string)($data['intro_title'] ?? '')) ?: null,
-                'intro_text' => trim((string)($data['intro_text'] ?? '')) ?: null,
+                'intro_text' => sanitizeRichText((string)($data['intro_text'] ?? '')) ?: null,
                 'highlights' => json_encode($this->cleanTextList($data['highlights'] ?? []), JSON_UNESCAPED_UNICODE),
                 'itinerary' => json_encode($this->cleanTextList($data['itinerary'] ?? []), JSON_UNESCAPED_UNICODE),
             ]);
@@ -173,7 +173,7 @@ class PackagePresentationService {
             foreach (['ca', 'en', 'fr'] as $locale) {
                 $translated = $data['translations'][$locale] ?? [];
                 $introTitle = trim((string)($translated['intro_title'] ?? ''));
-                $introText = trim((string)($translated['intro_text'] ?? ''));
+                $introText = sanitizeRichText((string)($translated['intro_text'] ?? ''));
                 $highlights = $this->cleanTextList($translated['highlights'] ?? []);
                 $itinerary = $this->cleanTextList($translated['itinerary'] ?? []);
                 if ($introTitle === '' && $introText === '' && !$highlights && !$itinerary) {

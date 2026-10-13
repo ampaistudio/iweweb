@@ -2,6 +2,7 @@ import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import { toEditorHtml } from '../utils/richText';
 
 export interface RichTextEditorProps {
   label?: string;
@@ -42,7 +43,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   placeholder,
   id,
-  allowHeadings = false,
+  allowHeadings = true,
 }) => {
   const editor = useEditor({
     extensions: [
@@ -56,10 +57,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         placeholder: placeholder || '',
       }),
     ],
-    content: value || '',
+    content: toEditorHtml(value || ''),
     editorProps: {
       attributes: {
-        class: 'rich-text-content focus:outline-none min-h-[120px] text-sm text-primary leading-relaxed',
+        class: 'rich-text-content focus:outline-none min-h-[160px] text-sm text-primary leading-relaxed',
+        role: 'textbox',
+        'aria-label': label || 'Editor de texto',
+        'aria-multiline': 'true',
       },
     },
     onUpdate: ({ editor: e }) => {
@@ -70,7 +74,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   React.useEffect(() => {
     if (!editor) return;
     const current = editor.getHTML();
-    const incoming = value || '';
+    const incoming = toEditorHtml(value || '');
     if (incoming !== current && !editor.isFocused) {
       editor.commands.setContent(incoming, { emitUpdate: false });
     }
@@ -93,7 +97,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         } rounded-xl transition-all overflow-hidden`}
       >
         {editor && (
-          <div className="flex items-center gap-1 px-2 py-1.5 border-b border-border bg-surface-elevated/50">
+          <div className="flex flex-wrap items-center gap-1 px-2 py-1.5 border-b border-border bg-surface-elevated/50">
             <ToolbarButton
               label="Negrita"
               active={editor.isActive('bold')}
@@ -128,7 +132,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </ToolbarButton>
           </div>
         )}
-        <div className="px-3.5 py-3">
+        <div className="px-3.5 py-3 max-h-[60vh] overflow-y-auto">
           <EditorContent editor={editor} />
         </div>
       </div>

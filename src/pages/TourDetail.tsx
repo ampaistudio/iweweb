@@ -1,3 +1,4 @@
+import { RichText } from '../components/RichText';
 import { useState, useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useSiteData } from "../context/SiteDataContext";
@@ -274,10 +275,7 @@ function LoadedTourDetail({ tourId, fullActivity }: { tourId: string; fullActivi
           <div className="tour-intro-section">
             {activity.introTitle && <h2 className="tour-intro-title">{activity.introTitle}</h2>}
             {activity.introText && (
-              <div
-                className="tour-intro-text"
-                dangerouslySetInnerHTML={{ __html: activity.introText }}
-              />
+              <RichText className="tour-intro-text" value={activity.introText} />
             )}
           </div>
         )}
@@ -353,10 +351,7 @@ function LoadedTourDetail({ tourId, fullActivity }: { tourId: string; fullActivi
             </div>
 
             {/* Description */}
-            <div
-              className="tour-description-wrap"
-              dangerouslySetInnerHTML={{ __html: activity.description }}
-            />
+            <RichText className="tour-description-wrap" value={activity.description} />
 
             {/* Itinerary */}
             {activity.itinerary && activity.itinerary.length > 0 && (

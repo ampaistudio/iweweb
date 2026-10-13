@@ -1,9 +1,10 @@
+import { RichText } from '../components/RichText';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { publicApi } from '../api/client';
 import type { Post } from '../api/types';
 import { resolveMediaUrl } from '../utils/media';
-import { formatDate, formatTextParagraphs } from '../utils/sanitize';
+import { formatDate } from '../utils/sanitize';
 import { usePreferences } from '../context/PreferencesContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { updateSeo } from '../utils/seo';
@@ -104,7 +105,6 @@ export default function NewsDetail() {
 
   const imageUrl = resolveMediaUrl(post.cover_image_url || post.cover_filename);
   const dateStr = formatDate(post.published_at || post.created_at);
-  const paragraphs = formatTextParagraphs(post.body);
 
   return (
     <main className="news-detail-page page-width section-space">
@@ -130,11 +130,7 @@ export default function NewsDetail() {
           </div>
         )}
 
-        <div className="news-article-content">
-          {paragraphs.map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
-        </div>
+        <RichText className="news-article-content" value={post.body} />
 
         {post.social_links && post.social_links.length > 0 && (
           <div className="news-social-links">

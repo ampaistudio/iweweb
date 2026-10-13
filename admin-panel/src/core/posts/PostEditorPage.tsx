@@ -1,3 +1,4 @@
+import { editorialPlainText } from '../utils/richText';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../../api/client';
@@ -6,7 +7,7 @@ import { useToast } from '../ui/ToastContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { Toggle } from '../ui/Toggle';
 import { Badge } from '../ui/Badge';
 import { ImagePickerModal } from '../media/ImagePickerModal';
@@ -289,13 +290,11 @@ export const PostEditorPage: React.FC = () => {
                 required
               />
 
-              <Textarea
+              <RichTextEditor key={activeLocale}
                 label="Contenido del post (Español - Principal)"
-                rows={8}
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(value) => setBody(value)}
                 placeholder="Escribe aquí las novedades, detalles o anuncios para los clientes..."
-                required
               />
 
               {/* Cover Media Selector (Shared) */}
@@ -385,11 +384,10 @@ export const PostEditorPage: React.FC = () => {
                       onTranslated={(val) => updateTranslationField(currentNonEs, 'body', val)}
                     />
                   </div>
-                  <p className="text-xs text-muted italic">Base (ES): {body || '(vacío)'}</p>
-                  <Textarea
-                    rows={8}
+                  <p className="text-xs text-muted italic">Base (ES): {editorialPlainText(body) || '(vacío)'}</p>
+                  <RichTextEditor key={activeLocale}
                     value={translations[currentNonEs].body}
-                    onChange={(e) => updateTranslationField(currentNonEs, 'body', e.target.value)}
+                    onChange={(value) => updateTranslationField(currentNonEs, 'body', value)}
                     placeholder={`Cuerpo de la noticia traducido (${activeLocale.toUpperCase()})...`}
                   />
                 </div>
