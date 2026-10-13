@@ -216,9 +216,10 @@ class MenuController {
         requireAuth($this->pdo);
         $data = getRequestBody();
 
-        $stmtCheck = $this->pdo->prepare('SELECT id FROM menu_items WHERE id = :id');
+        $stmtCheck = $this->pdo->prepare('SELECT id, display_order FROM menu_items WHERE id = :id');
         $stmtCheck->execute(['id' => $id]);
-        if (!$stmtCheck->fetch()) {
+        $current = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+        if (!$current) {
             jsonError('Elemento de menú no encontrado.', 404);
         }
 
@@ -231,6 +232,11 @@ class MenuController {
 
         // Prevent circular parent dependency
         if ($parentId !== null) {
+            $stmtParent = $this->pdo->prepare('SELECT id FROM menu_items WHERE id = :id');
+            $stmtParent->execute(['id' => $parentId]);
+            if (!$stmtParent->fetch()) {
+                jsonError('El elemento padre especificado no existe.', 422, ['parent_id' => 'Padre no válido']);
+            }
             if ($parentId === $id) {
                 jsonError('Un elemento de menú no puede ser su propio padre.', 422, ['parent_id' => 'Jerarquía circular detectada']);
             }
@@ -259,7 +265,7 @@ class MenuController {
             'label'         => trim((string)$data['label']),
             'link_type'     => $data['link_type'],
             'target_value'  => trim((string)$data['target_value']),
-            'display_order' => (int)($data['display_order'] ?? 0),
+            'display_order' => array_key_exists('display_order', $data) ? (int)$data['display_order'] : (int)$current['display_order'],
             'published'     => isset($data['published']) ? ((bool)$data['published'] ? 1 : 0) : 1,
             'publish_at'    => !empty($data['publish_at']) ? $data['publish_at'] : null,
             'unpublish_at'  => !empty($data['unpublish_at']) ? $data['unpublish_at'] : null,
@@ -277,6 +283,12 @@ class MenuController {
      */
     public function delete(int $id): void {
         requireAuth($this->pdo);
+
+        $stmtChildren = $this->pdo->prepare('SELECT COUNT(*) FROM menu_items WHERE parent_id = :id');
+        $stmtChildren->execute(['id' => $id]);
+        if ((int)$stmtChildren->fetchColumn() > 0) {
+            jsonError('Primero mové o eliminá los subelementos antes de borrar este grupo.', 409);
+        }
 
         $stmt = $this->pdo->prepare('DELETE FROM menu_items WHERE id = :id');
         $stmt->execute(['id' => $id]);
@@ -317,6 +329,16 @@ class MenuController {
 
                 if ($parentId === $itemId) {
                     throw new InvalidArgumentException("Elemento {$itemId} no puede ser su propio padre.");
+                }
+                if ($parentId !== null) {
+                    $stmtParent = $this->pdo->prepare('SELECT id FROM menu_items WHERE id = :id');
+                    $stmtParent->execute(['id' => $parentId]);
+                    if (!$stmtParent->fetch()) {
+                        throw new InvalidArgumentException("El elemento padre {$parentId} no existe.");
+                    }
+                    if ($this->isDescendant($itemId, $parentId)) {
+                        throw new InvalidArgumentException("El elemento {$itemId} no puede moverse dentro de uno de sus descendientes.");
+                    }
                 }
 
                 $stmt->execute([

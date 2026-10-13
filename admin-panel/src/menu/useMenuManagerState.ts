@@ -86,15 +86,21 @@ export function useMenuManagerState() {
       desc.forEach((id) => excludedIds.add(id));
     }
 
-    const available = flatItems.filter((i) => !excludedIds.has(i.id));
+    const available: Array<{ value: string; label: string }> = [];
+    const visit = (items: MenuItem[], path: string[]) => {
+      for (const item of items) {
+        if (excludedIds.has(item.id) || !['route', 'anchor', 'external'].includes(item.link_type)) continue;
+        const nextPath = [...path, item.label];
+        available.push({ value: String(item.id), label: `${nextPath.join(' > ')} (ID: ${item.id})` });
+        visit(item.children || [], nextPath);
+      }
+    };
+    visit(treeItems, []);
     return [
       { value: '', label: '(Ninguno - Elemento principal en la raíz)' },
-      ...available.map((i) => ({
-        value: String(i.id),
-        label: `${i.parent_id ? '  ↳ ' : ''}${i.label} (ID: ${i.id})`,
-      })),
+      ...available,
     ];
-  }, [editingItem, flatItems, getDescendantIds]);
+  }, [editingItem, flatItems, treeItems, getDescendantIds]);
 
   const handleOpenCreate = (parentId?: number | null) => {
     setEditingItem(null);
@@ -306,4 +312,3 @@ export function useMenuManagerState() {
     handleMoveOrder,
   };
 }
-

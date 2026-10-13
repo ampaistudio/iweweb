@@ -34,6 +34,52 @@ export const getBadgeForLinkType = (type: MenuLinkType) => {
   }
 };
 
+const NestedMenuItems: React.FC<{
+  siblings: MenuItem[];
+  depth: number;
+  isReordering: boolean;
+  onCreateSubitem: MenuTreeListProps['onCreateSubitem'];
+  onEdit: MenuTreeListProps['onEdit'];
+  onTogglePublish: MenuTreeListProps['onTogglePublish'];
+  onDelete: MenuTreeListProps['onDelete'];
+  onMoveOrder: MenuTreeListProps['onMoveOrder'];
+}> = ({ siblings, depth, isReordering, onCreateSubitem, onEdit, onTogglePublish, onDelete, onMoveOrder }) => (
+  <div className={`space-y-2 ${depth > 1 ? 'ml-4 sm:ml-6 border-l border-border pl-3' : ''}`}>
+    {siblings.map((item, index) => (
+      <div key={item.id} className={`rounded-xl border ${item.published ? 'bg-surface border-border' : 'bg-surface/50 border-border/60 opacity-75'}`}>
+        <div className="p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-start gap-2.5 min-w-0">
+            <span className="text-sm text-muted">↳</span>
+            <div className="space-y-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-primary">{item.label}</span>
+                {getBadgeForLinkType(item.link_type)}
+                <Badge variant={item.published ? item.is_currently_visible ? 'success' : 'warning' : 'warning'} size="sm">
+                  {item.published ? item.is_currently_visible ? 'Publicado' : 'Programado' : 'Oculto'}
+                </Badge>
+              </div>
+              <span className="font-mono text-xs text-muted break-all">{item.target_value}</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5 self-end md:self-center">
+            <button type="button" onClick={() => onMoveOrder(siblings, index, 'up')} disabled={index === 0 || isReordering} className="p-1 text-muted disabled:opacity-30" aria-label={`Subir ${item.label}`}>⬆️</button>
+            <button type="button" onClick={() => onMoveOrder(siblings, index, 'down')} disabled={index === siblings.length - 1 || isReordering} className="p-1 text-muted disabled:opacity-30" aria-label={`Bajar ${item.label}`}>⬇️</button>
+            <Button variant="ghost" size="sm" onClick={() => onCreateSubitem(item.id)} aria-label={`Agregar subitem a ${item.label}`} title={`Agregar subitem a ${item.label}`}>➕</Button>
+            <Button variant={item.published ? 'secondary' : 'outline'} size="sm" onClick={() => onTogglePublish(item)} aria-label={`${item.published ? 'Ocultar' : 'Publicar'} ${item.label}`}>{item.published ? '👁️' : '✨'}</Button>
+            <Button variant="secondary" size="sm" onClick={() => onEdit(item)} aria-label={`Editar ${item.label}`}>✏️</Button>
+            <Button variant="ghost" size="sm" onClick={() => onDelete(item)} disabled={Boolean(item.children?.length)} aria-label={`Eliminar ${item.label}`} title={item.children?.length ? 'Primero mové o eliminá los subelementos' : 'Eliminar elemento'} className="text-danger-text">🗑️</Button>
+          </div>
+        </div>
+        {item.children && item.children.length > 0 && (
+          <div className="px-3 pb-3">
+            <NestedMenuItems siblings={item.children} depth={depth + 1} isReordering={isReordering} onCreateSubitem={onCreateSubitem} onEdit={onEdit} onTogglePublish={onTogglePublish} onDelete={onDelete} onMoveOrder={onMoveOrder} />
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
 export const MenuTreeList: React.FC<MenuTreeListProps> = ({
   filteredTree,
   loading,
@@ -195,118 +241,18 @@ export const MenuTreeList: React.FC<MenuTreeListProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(rootItem)}
+                      disabled={children.length > 0}
                       className="text-danger-text hover:text-danger hover:bg-danger-soft"
-                      title="Eliminar elemento"
+                      title={children.length > 0 ? 'Primero mové o eliminá los subelementos' : 'Eliminar elemento'}
                     >
                       🗑️
                     </Button>
                   </div>
                 </div>
 
-                {/* Children Sub-Tree */}
                 {children.length > 0 && (
-                  <div className="p-3 sm:p-4 space-y-2 bg-bg/40">
-                    {children.map((child, childIdx) => {
-                      const isFirstChild = childIdx === 0;
-                      const isLastChild = childIdx === children.length - 1;
-
-                      return (
-                        <div
-                          key={child.id}
-                          className={`p-3 sm:p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-3 ml-4 sm:ml-6 pl-4 relative before:content-[''] before:absolute before:-left-3 before:top-1/2 before:w-3 before:h-px before:bg-border transition-all ${
-                            child.published
-                              ? 'bg-surface border-border hover:border-border-strong'
-                              : 'bg-surface/50 border-border/60 opacity-75'
-                          }`}
-                        >
-                          <div className="flex items-start sm:items-center gap-2.5">
-                            <span className="text-sm text-muted">↳</span>
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-sm font-semibold text-primary">
-                                  {child.label}
-                                </span>
-                                {getBadgeForLinkType(child.link_type)}
-                                <Badge
-                                  variant={
-                                    child.published
-                                      ? child.is_currently_visible
-                                        ? 'success'
-                                        : 'warning'
-                                      : 'warning'
-                                  }
-                                  size="sm"
-                                >
-                                  {child.published
-                                    ? child.is_currently_visible
-                                      ? 'Publicado'
-                                      : 'Programado'
-                                    : 'Oculto'}
-                                </Badge>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
-                                <span className="font-mono bg-bg px-2 py-0.5 rounded border border-border/60">
-                                  {child.target_value}
-                                </span>
-                                {child.publish_at && (
-                                  <span>📅 {child.publish_at.substring(0, 16)}</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Subitem Actions */}
-                          <div className="flex flex-wrap items-center gap-1.5 self-end md:self-center">
-                            {/* Reorder Subitem */}
-                            <div className="flex items-center gap-0.5 bg-surface-elevated border border-border rounded-lg p-0.5">
-                              <button
-                                type="button"
-                                onClick={() => onMoveOrder(children, childIdx, 'up')}
-                                disabled={isFirstChild || isReordering}
-                                className="p-1 text-muted hover:text-primary hover:bg-surface-hover rounded disabled:opacity-30 cursor-pointer min-h-[26px] min-w-[26px]"
-                                title="Subir subitem"
-                              >
-                                ⬆️
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => onMoveOrder(children, childIdx, 'down')}
-                                disabled={isLastChild || isReordering}
-                                className="p-1 text-muted hover:text-primary hover:bg-surface-hover rounded disabled:opacity-30 cursor-pointer min-h-[26px] min-w-[26px]"
-                                title="Bajar subitem"
-                              >
-                                ⬇️
-                              </button>
-                            </div>
-
-                            <Button
-                              variant={child.published ? 'secondary' : 'outline'}
-                              size="sm"
-                              onClick={() => onTogglePublish(child)}
-                            >
-                              {child.published ? '👁️' : '✨'}
-                            </Button>
-
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => onEdit(child)}
-                            >
-                              ✏️
-                            </Button>
-
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onDelete(child)}
-                              className="text-danger-text hover:text-danger hover:bg-danger-soft"
-                            >
-                              🗑️
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="p-3 sm:p-4 bg-bg/40">
+                    <NestedMenuItems siblings={children} depth={1} isReordering={isReordering} onCreateSubitem={onCreateSubitem} onEdit={onEdit} onTogglePublish={onTogglePublish} onDelete={onDelete} onMoveOrder={onMoveOrder} />
                   </div>
                 )}
               </div>
@@ -317,4 +263,3 @@ export const MenuTreeList: React.FC<MenuTreeListProps> = ({
     </Card>
   );
 };
-

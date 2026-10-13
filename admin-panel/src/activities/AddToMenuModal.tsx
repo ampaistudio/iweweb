@@ -13,22 +13,19 @@ export interface AddToMenuModalProps {
   activityTitle: string;
 }
 
-/** Flattens the menu tree into "Sección" and "Sección > Subsección" options,
- * excluding items that don't make sense as a parent for an activity link
- * (activity/package leaf items themselves).
- */
+/** Lists editable menu destinations at any depth, with their full path. */
 function buildParentOptions(items: MenuItem[]): Array<{ value: string; label: string }> {
   const options: Array<{ value: string; label: string }> = [];
-  for (const root of items) {
-    if (root.link_type === 'route' || root.link_type === 'anchor' || root.link_type === 'external') {
-      options.push({ value: String(root.id), label: root.label });
-    }
-    for (const child of root.children || []) {
-      if (child.link_type === 'route' || child.link_type === 'anchor' || child.link_type === 'external') {
-        options.push({ value: String(child.id), label: `${root.label} > ${child.label}` });
+  const visit = (nodes: MenuItem[], path: string[]) => {
+    for (const item of nodes) {
+      const nextPath = [...path, item.label];
+      if (item.link_type === 'route' || item.link_type === 'anchor' || item.link_type === 'external') {
+        options.push({ value: String(item.id), label: nextPath.join(' > ') });
+        visit(item.children || [], nextPath);
       }
     }
-  }
+  };
+  visit(items, []);
   return options;
 }
 

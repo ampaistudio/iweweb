@@ -134,7 +134,7 @@ class ActivityTypeController {
             ');
             $stmtUpdate->execute([$newName, $displayOrder, $id]);
 
-            // If name changed, update activities that were referencing the old name
+            // Keep all related references consistent with the new display name.
             if ($newName !== $current['name']) {
                 $stmtCascade = $this->pdo->prepare('
                     UPDATE activities 
@@ -142,6 +142,9 @@ class ActivityTypeController {
                     WHERE type = ?
                 ');
                 $stmtCascade->execute([$newName, $current['name']]);
+                $this->copyCategoryContent((string)$current['name'], $newName);
+                $aliases = $this->rememberCategoryAnchors($id, (string)$current['name']);
+                $this->updateCategoryMenuAnchors($id, $aliases);
             }
 
             $this->pdo->commit();
@@ -154,7 +157,91 @@ class ActivityTypeController {
 
         } catch (Throwable $e) {
             $this->pdo->rollBack();
-            jsonError('Error al actualizar la categoría: ' . $e->getMessage(), 500);
+            jsonError('Error al actualizar la categoría: ' . $e->getMessage(), $e instanceof DomainException ? 409 : 500);
+        }
+    }
+
+    private function copyCategoryContent(string $oldName, string $newName): void {
+        $oldPrefix = 'activities_' . str_replace('-', '_', slugify($oldName)) . '_';
+        $newPrefix = 'activities_' . str_replace('-', '_', slugify($newName)) . '_';
+        if ($oldPrefix === $newPrefix) return;
+
+        $rows = $this->pdo->query("SELECT content_key, content_value FROM site_content WHERE content_key LIKE 'activities%'")
+            ->fetchAll(PDO::FETCH_ASSOC);
+        $sources = [];
+        $prefixes = [$oldPrefix];
+        if ($oldName === 'BTT') $prefixes[] = 'activities_bike_'; // Existing CMS key before migration 027.
+        foreach ($prefixes as $prefix) {
+            foreach ($rows as $row) {
+                $key = (string)$row['content_key'];
+                if (!str_starts_with($key, $prefix)) continue;
+                $suffix = substr($key, strlen($prefix));
+                if ($suffix !== '' && !isset($sources[$suffix])) $sources[$suffix] = $row;
+            }
+        }
+
+        $findContent = $this->pdo->prepare('SELECT content_value FROM site_content WHERE content_key = ?');
+        $insertContent = $this->pdo->prepare('INSERT INTO site_content (content_key, content_value) VALUES (?, ?)');
+        $findTranslations = $this->pdo->prepare('SELECT locale, content_value FROM site_content_translations WHERE content_key = ?');
+        $findTranslation = $this->pdo->prepare('SELECT content_value FROM site_content_translations WHERE content_key = ? AND locale = ?');
+        $insertTranslation = $this->pdo->prepare('INSERT INTO site_content_translations (content_key, locale, content_value) VALUES (?, ?, ?)');
+        foreach ($sources as $suffix => $row) {
+            $target = $newPrefix . $suffix;
+            if (mb_strlen($target, 'UTF-8') > 80) throw new DomainException('El nombre genera una clave de contenido demasiado larga.');
+            $findContent->execute([$target]);
+            $existing = $findContent->fetchColumn();
+            if ($existing === false) {
+                $insertContent->execute([$target, $row['content_value']]);
+            } elseif ($existing !== $row['content_value']) {
+                throw new DomainException('Ya existe contenido diferente para la categoría de destino: ' . $target);
+            }
+
+            $findTranslations->execute([$row['content_key']]);
+            foreach ($findTranslations->fetchAll(PDO::FETCH_ASSOC) as $translation) {
+                $findTranslation->execute([$target, $translation['locale']]);
+                $existingTranslation = $findTranslation->fetchColumn();
+                if ($existingTranslation === false) {
+                    $insertTranslation->execute([$target, $translation['locale'], $translation['content_value']]);
+                } elseif ($existingTranslation !== $translation['content_value']) {
+                    throw new DomainException('Ya existe una traducción diferente para la categoría de destino: ' . $target);
+                }
+            }
+        }
+    }
+
+    private function rememberCategoryAnchors(int $id, string $oldName): array {
+        $key = 'activity_type_' . $id . '_anchor_aliases';
+        $find = $this->pdo->prepare('SELECT content_value FROM site_content WHERE content_key = ?');
+        $find->execute([$key]);
+        $stored = $find->fetchColumn();
+        $aliases = $stored === false ? [] : json_decode((string)$stored, true);
+        if (!is_array($aliases)) throw new DomainException('Las anclas anteriores de la categoría no son válidas.');
+        $aliases[] = slugify($oldName);
+        if ($oldName === 'BTT') {
+            $aliases[] = 'bike';
+            $aliases[] = 'btt';
+            $featuredKey = 'footer_featured_activity_type_id';
+            $find->execute([$featuredKey]);
+            if ($find->fetchColumn() === false) {
+                $this->pdo->prepare('INSERT INTO site_content (content_key, content_value) VALUES (?, ?)')
+                    ->execute([$featuredKey, (string)$id]);
+            }
+        }
+        $aliases = array_values(array_unique(array_filter($aliases, static fn($alias) => is_string($alias) && preg_match('/^[a-z0-9-]+$/', $alias))));
+        $encoded = json_encode($aliases, JSON_THROW_ON_ERROR);
+        if ($stored === false) {
+            $this->pdo->prepare('INSERT INTO site_content (content_key, content_value) VALUES (?, ?)')->execute([$key, $encoded]);
+        } else {
+            $this->pdo->prepare('UPDATE site_content SET content_value = ? WHERE content_key = ?')->execute([$encoded, $key]);
+        }
+        return $aliases;
+    }
+
+    private function updateCategoryMenuAnchors(int $id, array $aliases): void {
+        $stmt = $this->pdo->prepare("UPDATE menu_items SET target_value = ? WHERE target_value = ? AND link_type = 'anchor'");
+        foreach ($aliases as $alias) {
+            $stmt->execute(['/#category-' . $id, '/#' . $alias]);
+            $stmt->execute(['#category-' . $id, '#' . $alias]);
         }
     }
 
@@ -222,4 +309,3 @@ class ActivityTypeController {
         }
     }
 }
-

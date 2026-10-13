@@ -130,7 +130,7 @@ export const MenuManagerPage: React.FC = () => {
           itemToDelete
             ? `¿Estás seguro de que quieres eliminar '${itemToDelete.label}'? ${
                 itemToDelete.children && itemToDelete.children.length > 0
-                  ? 'ATENCIÓN: Este elemento contiene subelementos que quedarán huérfanos o serán eliminados.'
+                  ? 'Primero mové o eliminá los subelementos de este grupo.'
                   : ''
               }`
             : ''
