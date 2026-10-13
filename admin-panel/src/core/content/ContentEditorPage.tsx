@@ -10,6 +10,7 @@ import { ToursAndContactSection } from './ToursAndContactSection';
 import { SeoSocialSection } from './SeoSocialSection';
 import { HomeStaticSections } from './HomeStaticSections';
 import { SocialLinksSection } from './SocialLinksSection';
+import { PrivacyPolicySection } from './PrivacyPolicySection';
 
 export const ContentEditorPage: React.FC = () => {
   const {
@@ -113,6 +114,14 @@ export const ContentEditorPage: React.FC = () => {
 
           {/* Tours & Contact Sections */}
           <ToursAndContactSection
+            form={form}
+            activeLocale={activeLocale}
+            translations={translations}
+            onChange={handleChange}
+            onTranslationChange={handleTranslationChange}
+          />
+
+          <PrivacyPolicySection
             form={form}
             activeLocale={activeLocale}
             translations={translations}

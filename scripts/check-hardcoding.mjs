@@ -10,7 +10,6 @@ const forbidden = [
   /\+?376\s*653\s*769/,
   /DEFAULT_SITE_CONTENT|DEFAULT_HERO_SLIDES|staticActivities/,
 ];
-const exceptions = new Set(['src/pages/Privacy.tsx']);
 const errors = [];
 
 function visit(directory) {
@@ -22,7 +21,6 @@ function visit(directory) {
     }
     if (!/\.(ts|tsx)$/.test(entry.name)) continue;
     const name = relative(root, fullPath);
-    if (exceptions.has(name)) continue;
     const source = readFileSync(fullPath, 'utf8');
     if (forbidden.some((pattern) => pattern.test(source))) errors.push(name);
     if (name.startsWith('src/data/') && /export\s+const\s+\w+\s*=\s*\[/.test(source)) {

@@ -11,6 +11,7 @@ export interface RichTextEditorProps {
   onChange: (html: string) => void;
   placeholder?: string;
   id?: string;
+  allowHeadings?: boolean;
 }
 
 const ToolbarButton: React.FC<{
@@ -41,11 +42,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   placeholder,
   id,
+  allowHeadings = false,
 }) => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
+        heading: allowHeadings ? { levels: [2, 3] } : false,
         codeBlock: false,
         blockquote: false,
         horizontalRule: false,
@@ -99,6 +101,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             >
               <strong>N</strong>
             </ToolbarButton>
+            {allowHeadings && <>
+              <ToolbarButton label="Título de sección" active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>H2</ToolbarButton>
+              <ToolbarButton label="Subtítulo" active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>H3</ToolbarButton>
+            </>}
             <ToolbarButton
               label="Itálica"
               active={editor.isActive('italic')}

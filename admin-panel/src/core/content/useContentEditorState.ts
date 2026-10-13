@@ -45,7 +45,7 @@ export function useContentEditorState() {
       const res = await api.content.list();
       if (res) {
         if (res.base || res.content) {
-          setForm(res.base || res.content);
+          setForm({ privacy_policy_text: '', privacy_policy_title: '', privacy_policy_eyebrow: '', privacy_policy_seo_description: '', ...(res.base || res.content) });
         }
         if (res.translations) {
           setTranslations({
