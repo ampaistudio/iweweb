@@ -6,6 +6,9 @@
     RewriteEngine On
     RewriteBase /api/
 
+    # Reject private storage before existing-file passthrough.
+    RewriteRule ^storage(?:/|$) - [F,L,NC]
+
     # Allow direct access to uploaded media files
     RewriteCond %{REQUEST_URI} ^/api/uploads/ [NC]
     RewriteCond %{REQUEST_FILENAME} -f

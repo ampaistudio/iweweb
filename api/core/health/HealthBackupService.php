@@ -153,7 +153,7 @@ class HealthBackupService {
         $filePath = realpath($this->backupsDir . '/' . $filename);
         $expectedDir = realpath($this->backupsDir);
 
-        if (!$filePath || !$expectedDir || !str_starts_with($filePath, $expectedDir) || !is_file($filePath)) {
+        if (!$filePath || !$expectedDir || dirname($filePath) !== $expectedDir || !is_file($filePath)) {
             return null;
         }
 
@@ -290,4 +290,3 @@ class HealthBackupService {
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }
-

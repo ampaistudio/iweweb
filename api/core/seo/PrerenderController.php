@@ -71,7 +71,7 @@ class PrerenderController {
         $defaultDesc  = $this->getSiteContent('seo_meta_description', '');
 
         try {
-            $stmt = $this->pdo->prepare('SELECT * FROM activities WHERE id = :id LIMIT 1');
+            $stmt = $this->pdo->prepare('SELECT * FROM activities WHERE id = :id AND published = 1 LIMIT 1');
             $stmt->execute([':id' => $tourId]);
             $activity = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -146,7 +146,11 @@ class PrerenderController {
         }
 
         header('Content-Type: text/html; charset=utf-8');
-        header('Cache-Control: public, max-age=3600');
+        // Recheck publication on every request, including after unpublishing.
+        header('Cache-Control: no-store');
+        if (!$activity) {
+            http_response_code(404);
+        }
         ?>
 <!doctype html>
 <html lang="es">
@@ -176,7 +180,7 @@ class PrerenderController {
 
     <!-- Schema.org JSON-LD for Search Engines & Generative AI Crawlers -->
     <script type="application/ld+json">
-<?= json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
+<?= json_encode($schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
     </script>
 
     <!-- Fallback redirect for regular web browsers that hit this URL directly -->
@@ -305,7 +309,7 @@ class PrerenderController {
 
     <!-- Schema.org JSON-LD for Search Engines & Generative AI Crawlers -->
     <script type="application/ld+json">
-<?= json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
+<?= json_encode($schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
     </script>
 
     <!-- Fallback redirect for regular web browsers -->

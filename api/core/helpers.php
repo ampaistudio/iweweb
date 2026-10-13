@@ -101,11 +101,21 @@ function getAuthenticatedUser(PDO $pdo): ?array {
     }
 
     $userId = (int)$_SESSION['user_id'];
-    $stmt = $pdo->prepare('SELECT id, email, display_name, role, must_change_password, created_at FROM users WHERE id = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, password_hash, display_name, role, must_change_password, created_at FROM users WHERE id = :id LIMIT 1');
     $stmt->execute(['id' => $userId]);
     $user = $stmt->fetch();
 
+    // Sessions are valid only for the credential verified at login. This also
+    // revokes legacy sessions and sessions predating an out-of-band reset.
+    $fingerprint = $_SESSION['auth_fingerprint'] ?? null;
+    if (!$user || !is_string($fingerprint)
+        || !hash_equals(hash('sha256', (string)$user['password_hash']), $fingerprint)) {
+        unset($_SESSION['user_id'], $_SESSION['auth_fingerprint']);
+        return null;
+    }
+
     if ($user) {
+        unset($user['password_hash']);
         $user['must_change_password'] = (bool)($user['must_change_password'] ?? false);
         return $user;
     }
@@ -168,12 +178,13 @@ function sanitizeRichText(string $html): string {
     $allowedTags = ['p', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'br'];
 
     $doc = new DOMDocument();
-    libxml_use_internal_errors(true);
+    $previousLibxmlErrors = libxml_use_internal_errors(true);
     $doc->loadHTML(
         '<?xml encoding="utf-8" ?><div id="sanitize-root">' . $html . '</div>',
         LIBXML_NOERROR | LIBXML_NOWARNING
     );
     libxml_clear_errors();
+    libxml_use_internal_errors($previousLibxmlErrors);
 
     $root = $doc->getElementById('sanitize-root');
     if (!$root) {
@@ -202,6 +213,7 @@ function sanitizeRichText(string $html): string {
             }
 
             if (!in_array($tag, $allowedTags, true)) {
+                $stripDisallowedNode($child);
                 // Unwrap: keep children (plain text/inline content), drop the tag itself.
                 while ($child->firstChild) {
                     $node->insertBefore($child->firstChild, $child);

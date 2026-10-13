@@ -156,7 +156,7 @@ class HeroSlideController {
             $posterFile = $_FILES['poster_file'];
             $posterMime = $finfo->file($posterFile['tmp_name']);
             if (in_array($posterMime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                $posterExt = pathinfo($posterFile['name'], PATHINFO_EXTENSION);
+                $posterExt = self::ALLOWED_MIME_TYPES[$posterMime][0];
                 $posterFilename = 'poster_' . bin2hex(random_bytes(16)) . '.' . $posterExt;
                 $posterTarget = $uploadDir . '/' . $posterFilename;
                 if (move_uploaded_file($posterFile['tmp_name'], $posterTarget)) {
@@ -382,23 +382,9 @@ class HeroSlideController {
             jsonError('Diapositiva no encontrada.', 404);
         }
 
-        // If it was an upload, clean up files from disk if they are in /api/uploads
-        $uploadDir = rtrim($this->config['media']['upload_dir'] ?? (__DIR__ . '/../../uploads'), '/');
-        if ($slide['media_source'] === 'upload' && str_contains($slide['src'], '/uploads/')) {
-            $filename = basename(parse_url($slide['src'], PHP_URL_PATH));
-            $filePath = $uploadDir . '/' . $filename;
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
-        }
-
-        if (!empty($slide['poster']) && str_contains($slide['poster'], '/uploads/')) {
-            $posterFile = basename(parse_url($slide['poster'], PHP_URL_PATH));
-            $posterPath = $uploadDir . '/' . $posterFile;
-            if (file_exists($posterPath)) {
-                @unlink($posterPath);
-            }
-        }
+        // Editable URLs do not prove file ownership. Removing a slide must not
+        // delete protected files or media still referenced by another record.
+        // Retain media on disk; physical cleanup requires verified ownership.
 
         $stmtDel = $this->pdo->prepare('DELETE FROM hero_slides WHERE id = :id');
         $stmtDel->execute(['id' => $id]);
@@ -438,4 +424,3 @@ class HeroSlideController {
         }
     }
 }
-

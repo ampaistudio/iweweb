@@ -37,6 +37,7 @@ class AuthController {
         // Prevent session fixation attack
         session_regenerate_id(true);
         $_SESSION['user_id'] = $user['id'];
+        $_SESSION['auth_fingerprint'] = hash('sha256', $user['password_hash']);
 
         unset($user['password_hash']);
         $user['must_change_password'] = (bool)($user['must_change_password'] ?? false);
@@ -176,6 +177,12 @@ class AuthController {
             jsonError('No se pudo actualizar la contraseña. Intentá nuevamente.', 500);
         }
 
+        // Recovery never renews a logged-in session, including this browser's.
+        if ((int)($_SESSION['user_id'] ?? 0) === (int)$resetToken['user_id']) {
+            unset($_SESSION['user_id'], $_SESSION['auth_fingerprint']);
+            session_regenerate_id(true);
+        }
+
         jsonSuccess(null, 'Contraseña actualizada correctamente. Ya podés iniciar sesión.');
     }
 
@@ -197,6 +204,11 @@ class AuthController {
             'hash' => $passwordHash,
             'id'   => $user['id'],
         ]);
+
+        // Preserve the authenticated password-change flow only in this browser.
+        // Other sessions retain the old fingerprint and fail the shared guard.
+        session_regenerate_id(true);
+        $_SESSION['auth_fingerprint'] = hash('sha256', $passwordHash);
 
         jsonSuccess(null, 'Contraseña actualizada correctamente.');
     }

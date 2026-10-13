@@ -61,9 +61,9 @@ class ActivityValidationService {
             'alt'           => $row['alt_text'],
             'alt_text'      => $row['alt_text'],
             'price'         => $row['price'] ?: null,
-            'description'   => $row['description'],
+            'description'   => sanitizeRichText((string)($row['description'] ?? '')),
             'intro_title'   => $row['intro_title'] ?? null,
-            'intro_text'    => $row['intro_text'] ?? null,
+            'intro_text'    => isset($row['intro_text']) ? sanitizeRichText((string)$row['intro_text']) : null,
             'highlights'    => $highlights,
             'display_order' => (int)$row['display_order'],
             'published'     => (bool)$row['published'],
@@ -72,4 +72,3 @@ class ActivityValidationService {
         ];
     }
 }
-

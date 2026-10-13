@@ -6,6 +6,8 @@
     RewriteEngine On
     RewriteBase /
 
+    RewriteRule ^api/storage(?:/|$) - [F,L,NC]
+
     # 1. Prerender for Social Crawlers & AI Search Bots — Tour detail pages (/tour/:id)
     # Matches: Facebook, WhatsApp, Twitter/X, Telegram, LinkedIn, Slack, Pinterest,
     # as well as Generative AI bots: GPTBot, Google-Extended, PerplexityBot, ClaudeBot, CCBot, etc.

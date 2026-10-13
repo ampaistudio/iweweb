@@ -1,0 +1,3 @@
+# Backups include database contents and credentials. Only the authenticated
+# health controller may stream them; temporary SQL/cache files are private too.
+Require all denied
