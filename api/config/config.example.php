@@ -13,11 +13,12 @@ return [
     'app' => [
         'name'        => 'iWE Dashboard API',
         'env'         => 'production', // 'development' or 'production'
-        'base_url'    => 'https://i-wildland.com/api',
+        'site_url'    => getenv('APP_SITE_URL') ?: 'https://example.com',
+        'base_url'    => getenv('APP_BASE_URL') ?: 'https://example.com/api',
         // Secret URL slug for the admin panel (must NOT be committed; set in config.local.php or env)
         'panel_slug'  => getenv('APP_PANEL_SLUG') ?: 'your-secret-panel-slug',
         'cors_origins'=> [
-            'https://i-wildland.com',
+            'https://example.com',
             'http://localhost:5173',
             'http://localhost:3000',
         ],
@@ -53,7 +54,7 @@ return [
     // Transactional Email (password reset) — sent via Hostinger's mail() relay
     // -------------------------------------------------------------------------
     'mail' => [
-        'from_address' => getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@i-wildland.com',
+        'from_address' => getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@example.com',
         'from_name'    => getenv('MAIL_FROM_NAME') ?: 'iWE Dashboard',
     ],
 

@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { useSiteData, isNavGroup } from "./context/SiteDataContext";
+import { useSiteData, type NavItem } from "./context/SiteDataContext";
 import { languages, usePreferences } from "./context/PreferencesContext";
+import {
+  getCategoryAnchor,
+  getEffectiveCategories,
+  isCategorySectionRenderable,
+} from "./utils/activitySections";
+import { resolveMediaUrl } from "./utils/media";
+
+export interface AppOutletContext {
+  setReviewsVisible: (visible: boolean) => void;
+}
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -13,6 +23,60 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
     >
       <path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.4" />
     </svg>
+  );
+}
+
+function NavTreeItems({
+  items,
+  openGroups,
+  toggleGroup,
+  onNavigate,
+  depth = 0,
+}: {
+  items: NavItem[];
+  openGroups: Set<string>;
+  toggleGroup: (id: string) => void;
+  onNavigate?: () => void;
+  depth?: number;
+}) {
+  return (
+    <div className={`nav-tree-level nav-tree-depth-${depth}`}>
+      {items.map((item) => {
+        const expanded = openGroups.has(item.id);
+        const hasChildren = item.children.length > 0;
+        const link = item.href.startsWith("/") && !item.href.includes("#")
+          ? <Link to={item.href} onClick={onNavigate}>{item.label}</Link>
+          : <a href={item.href} onClick={onNavigate}>{item.label}</a>;
+
+        return (
+          <div className="nav-tree-item" key={item.id}>
+            <div className="nav-tree-row">
+              {link}
+              {hasChildren && (
+                <button
+                  type="button"
+                  className="nav-tree-toggle"
+                  aria-label={`${expanded ? "Cerrar" : "Abrir"} ${item.label}`}
+                  aria-expanded={expanded}
+                  onClick={() => toggleGroup(item.id)}
+                >
+                  <ArrowIcon direction={expanded ? "left" : "right"} />
+                </button>
+              )}
+            </div>
+            {hasChildren && expanded && (
+              <NavTreeItems
+                items={item.children}
+                openGroups={openGroups}
+                toggleGroup={toggleGroup}
+                onNavigate={onNavigate}
+                depth={depth + 1}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -113,6 +177,36 @@ function SocialIcon({ name }: { name: string }) {
   }
 }
 
+function renderSocialBadgeIcon(icon: string | undefined, label: string) {
+  const trimmed = icon?.trim() || "";
+  if (!trimmed) {
+    const defaultName = label.includes("Twitter") || label.includes("X") ? "x" : label;
+    return <SocialIcon name={defaultName} />;
+  }
+
+  // 1. Is it an image file reference / URL?
+  const isImageRef =
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("data:image/") ||
+    /\.(?:svg|png|jpe?g|webp|gif|avif|ico)$/i.test(trimmed);
+
+  if (isImageRef) {
+    const resolved = resolveMediaUrl(trimmed);
+    return <img src={resolved} alt={label} className="w-4 h-4 object-contain inline-block mr-1" />;
+  }
+
+  // 2. Is it an emoji / pictograph?
+  const isEmoji = /\p{Extended_Pictographic}/u.test(trimmed);
+  if (isEmoji) {
+    return <span className="inline-block mr-1 text-sm leading-none" aria-hidden="true">{trimmed}</span>;
+  }
+
+  // 3. Named icon identifier (e.g. "instagram", "facebook", "strava", etc.)
+  return <SocialIcon name={trimmed} />;
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -130,8 +224,28 @@ function App() {
     });
   };
   const location = useLocation();
+  const [reviewsVisible, setReviewsVisible] = useState(false);
   const { theme, toggleTheme, fontScale, cycleFontScale, language, setLanguage } = usePreferences();
-  const { navSections, getContent } = useSiteData();
+  const { navSections, getContent, activities, categories, categoryItems } = useSiteData();
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setReviewsVisible(false);
+    }
+  }, [location.pathname]);
+
+  const toursPublished = getContent("tours_section_published") !== "false" && getContent("tours_section_published") !== "0";
+
+  const categoryList = getEffectiveCategories(categories, activities);
+  const featuredCategoryId = Number(getContent("footer_featured_activity_type_id"));
+  const bikeCategory = categoryList.find((cat) =>
+    categoryItems.some((item) => item.id === featuredCategoryId && item.name === cat)
+  ) ?? categoryList.find((cat) => cat === "BTT");
+  const isBikeVisible = Boolean(
+    bikeCategory && isCategorySectionRenderable(bikeCategory, activities, getContent)
+  );
+  const bikeCategoryId = categoryItems.find((item) => item.name === bikeCategory)?.id;
+  const bikeAnchor = bikeCategory ? getCategoryAnchor(bikeCategory, bikeCategoryId) : "";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -146,6 +260,7 @@ function App() {
   const contactAddress = getContent("contact_address");
   const contactPhone = getContent("contact_phone");
   const logoUrl = getContent("logo_url");
+  const resolvedLogoUrl = resolveMediaUrl(logoUrl);
   const logoHeight = getContent("logo_height");
   const logoHeightNum = parseInt(logoHeight, 10) || 44;
   const currentLogoHeight = scrolled ? Math.min(logoHeightNum, 52) : logoHeightNum;
@@ -155,8 +270,8 @@ function App() {
     <div className="site-shell">
       <header className={`site-header ${headerVariantClass} ${scrolled ? "site-header-scrolled" : ""}`}>
         <Link className="brand-mark" to="/" aria-label="iWE Isard Wildland Experience home">
-          {logoUrl ? (
-            <img src={logoUrl} alt="iWE Isard Wildland Experience" className="brand-logo-image" style={logoStyle} />
+          {resolvedLogoUrl ? (
+            <img src={resolvedLogoUrl} alt="iWE Isard Wildland Experience" className="brand-logo-image" style={logoStyle} />
           ) : (
             <span className="brand-logo-placeholder" aria-hidden="true" style={logoStyle}>
               <span className="brand-logo-symbol">iWE</span>
@@ -167,7 +282,7 @@ function App() {
 
         <nav className="desktop-nav" aria-label="Main navigation">
           {navSections.map((section) => (
-            <div className="nav-dropdown" key={section.label}>
+            <div className="nav-dropdown" key={section.id}>
               {section.anchor.startsWith('/') && !section.anchor.includes('#') ? (
                 <Link to={section.anchor}>{section.label}</Link>
               ) : (
@@ -175,49 +290,7 @@ function App() {
               )}
               {section.items.length > 0 && (
                 <div className="nav-dropdown-menu">
-                  {section.items.map((item, idx) => {
-                    if (isNavGroup(item)) {
-                      const groupKey = `${section.label}:${item.label}`;
-                      const isOpen = openGroups.has(groupKey);
-                      return (
-                        <div key={item.label || idx} className="nav-dropdown-group">
-                          <button
-                            type="button"
-                            className="nav-dropdown-subheading"
-                            aria-expanded={isOpen}
-                            onClick={() => toggleGroup(groupKey)}
-                          >
-                            {item.label}
-                            <ArrowIcon direction={isOpen ? "left" : "right"} />
-                          </button>
-                          {isOpen && (
-                            <div className="nav-dropdown-nested">
-                              {item.items.map((leaf) =>
-                                leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
-                                  <Link to={leaf.href} key={leaf.id || leaf.href}>
-                                    {leaf.title}
-                                  </Link>
-                                ) : (
-                                  <a href={leaf.href} key={leaf.id || leaf.href}>
-                                    {leaf.title}
-                                  </a>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }
-                    return item.href.startsWith('/') && !item.href.includes('#') ? (
-                      <Link to={item.href} key={item.id || item.href}>
-                        {item.title}
-                      </Link>
-                    ) : (
-                      <a href={item.href} key={item.id || item.href}>
-                        {item.title}
-                      </a>
-                    );
-                  })}
+                  <NavTreeItems items={section.items} openGroups={openGroups} toggleGroup={toggleGroup} />
                 </div>
               )}
             </div>
@@ -274,7 +347,7 @@ function App() {
         {menuOpen && (
           <nav className="mobile-nav" aria-label="Mobile navigation">
             {navSections.map((section) => (
-              <div className="mobile-nav-group" key={section.label}>
+              <div className="mobile-nav-group" key={section.id}>
                 {section.anchor.startsWith('/') && !section.anchor.includes('#') ? (
                   <Link to={section.anchor} onClick={() => setMenuOpen(false)}>
                     {section.label}
@@ -286,84 +359,30 @@ function App() {
                 )}
                 {section.items.length > 0 && (
                   <div className="mobile-nav-subitems">
-                    {section.items.map((item, idx) => {
-                      if (isNavGroup(item)) {
-                        const groupKey = `${section.label}:${item.label}`;
-                        const isOpen = openGroups.has(groupKey);
-                        return (
-                          <div key={item.label || idx} className="mobile-nav-nested-group">
-                            <button
-                              type="button"
-                              className="mobile-nav-subheading"
-                              aria-expanded={isOpen}
-                              onClick={() => toggleGroup(groupKey)}
-                            >
-                              {item.label}
-                              <ArrowIcon direction={isOpen ? "left" : "right"} />
-                            </button>
-                            {isOpen && (
-                              <div className="mobile-nav-nested">
-                                {item.items.map((leaf) =>
-                                  leaf.href.startsWith('/') && !leaf.href.includes('#') ? (
-                                    <Link
-                                      to={leaf.href}
-                                      key={leaf.id || leaf.href}
-                                      onClick={() => setMenuOpen(false)}
-                                    >
-                                      {leaf.title}
-                                    </Link>
-                                  ) : (
-                                    <a
-                                      href={leaf.href}
-                                      key={leaf.id || leaf.href}
-                                      onClick={() => setMenuOpen(false)}
-                                    >
-                                      {leaf.title}
-                                    </a>
-                                  )
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
-                      return item.href.startsWith('/') && !item.href.includes('#') ? (
-                        <Link
-                          to={item.href}
-                          key={item.id || item.href}
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          {item.title}
-                        </Link>
-                      ) : (
-                        <a
-                          href={item.href}
-                          key={item.id || item.href}
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          {item.title}
-                        </a>
-                      );
-                    })}
+                    <NavTreeItems
+                      items={section.items}
+                      openGroups={openGroups}
+                      toggleGroup={toggleGroup}
+                      onNavigate={() => setMenuOpen(false)}
+                    />
                   </div>
                 )}
               </div>
             ))}
-            <a href="/#contact" onClick={() => setMenuOpen(false)}>Contacto <ArrowIcon /></a>
           </nav>
         )}
 
       </header>
 
-      <Outlet />
+      <Outlet context={{ setReviewsVisible } satisfies AppOutletContext} />
 
       <footer className="site-footer">
         <div className="page-width footer-top">
           <div className="footer-col footer-col-brand">
             <Link className="brand-mark footer-brand" to="/" aria-label="iWE Isard Wildland Experience home">
-              {logoUrl ? (
+              {resolvedLogoUrl ? (
                 <img
-                  src={logoUrl}
+                  src={resolvedLogoUrl}
                   alt={getContent("business_name")}
                   className="footer-logo-image"
                 />
@@ -387,10 +406,10 @@ function App() {
           <div className="footer-col footer-col-links">
             <h4 className="footer-heading">{getContent("footer_nav_heading")}</h4>
             <div className="footer-links">
-              <a href="/#bike">Bike</a>
-              <a href="/#tours">Tours en Andorra</a>
+              {isBikeVisible && <a href={`/#${bikeAnchor}`}>{bikeCategory}</a>}
+              {toursPublished && <a href="/#tours">Tours en Andorra</a>}
               <Link to="/novedades">Novedades</Link>
-              <a href="/#stories">Opiniones</a>
+              {reviewsVisible && <a href="/#stories">Opiniones</a>}
               <Link to="/privacidad">Privacidad</Link>
               <a href="/#contact">Contacto</a>
             </div>
@@ -434,26 +453,19 @@ function App() {
                 }
                 return items
                   .filter((item) => item.url && item.url.trim() !== "")
-                  .map((item) => {
-                    const isIconUrl = item.icon?.startsWith("http://") || item.icon?.startsWith("https://") || item.icon?.startsWith("/");
-                    return (
-                      <a
-                        key={item.label}
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="footer-social-badge"
-                        aria-label={`Seguir en ${item.label}`}
-                      >
-                        {isIconUrl ? (
-                          <img src={item.icon} alt={item.label} className="w-4 h-4 object-contain inline-block mr-1" />
-                        ) : (
-                          <SocialIcon name={item.icon || (item.label.includes("Twitter") || item.label.includes("X") ? "x" : item.label)} />
-                        )}
-                        <span>{item.label}</span>
-                      </a>
-                    );
-                  });
+                  .map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="footer-social-badge"
+                      aria-label={`Seguir en ${item.label}`}
+                    >
+                      {renderSocialBadgeIcon(item.icon, item.label)}
+                      <span>{item.label}</span>
+                    </a>
+                  ));
               })()}
             </div>
           </div>

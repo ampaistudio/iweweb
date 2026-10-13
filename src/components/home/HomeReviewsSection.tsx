@@ -16,7 +16,11 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   );
 }
 
-export function HomeReviewsSection() {
+export interface HomeReviewsSectionProps {
+  onVisibilityChange?: (visible: boolean) => void;
+}
+
+export function HomeReviewsSection({ onVisibilityChange }: HomeReviewsSectionProps = {}) {
   const [platformReviews, setPlatformReviews] = useState<UnifiedReview[]>([]);
   const [isGoogleMock, setIsGoogleMock] = useState(true);
   const [isTripadvisorMock, setIsTripadvisorMock] = useState(true);
@@ -165,8 +169,16 @@ export function HomeReviewsSection() {
   const reviewsTabGoogle = getContent("reviews_tab_google");
   const reviewsTabTripadvisor = getContent("reviews_tab_tripadvisor");
   const reviewsTabDirect = getContent("reviews_tab_direct");
+  const isSectionVisible = Boolean((isGoogleVisible || isTripadvisorVisible || isDirectVisible) && visibleAllReviews.length > 0);
 
-  if (!(isGoogleVisible || isTripadvisorVisible || isDirectVisible) || visibleAllReviews.length === 0) {
+  useEffect(() => {
+    onVisibilityChange?.(isSectionVisible);
+    return () => {
+      onVisibilityChange?.(false);
+    };
+  }, [isSectionVisible, onVisibilityChange]);
+
+  if (!isSectionVisible) {
     return null;
   }
 

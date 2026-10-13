@@ -77,41 +77,48 @@ function CheckIcon() {
 
 function TourDetail() {
   const { tourId } = useParams<{ tourId: string }>();
-  const { getActivity, activities, loading: globalLoading, getContent } = useSiteData();
   const { language } = usePreferences();
+  if (!tourId) return <Navigate to="/" replace />;
+  return <TourDetailRequest key={`${tourId}:${language}`} tourId={tourId} />;
+}
 
+function TourDetailRequest({ tourId }: { tourId: string }) {
+  const { language } = usePreferences();
   const [fullActivity, setFullActivity] = useState<RawApiActivity | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
+    setFailed(false);
     if (tourId) {
       publicApi.activities
         .get(tourId, language)
         .then((data) => {
           if (isMounted && data) {
             setFullActivity(data);
+          } else if (isMounted) {
+            setFailed(true);
           }
         })
         .catch(() => {
-          // Fallback to static or global context
+          if (isMounted) setFailed(true);
         });
     }
     return () => {
       isMounted = false;
     };
-  }, [tourId, language]);
+  }, [tourId, language, attempt]);
 
-  if (!tourId) {
-    return <Navigate to="/" replace />;
+  if (failed) {
+    return <main className="tour-detail page-width section-space" role="alert">
+      <p>No se pudo cargar esta experiencia.</p>
+      <button type="button" onClick={() => setAttempt(value => value + 1)}>Reintentar</button>
+      <Link to="/">Volver al inicio</Link>
+    </main>;
   }
 
-  const baseActivity = getActivity(tourId);
-
-  if (!baseActivity && !fullActivity && !globalLoading) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (!baseActivity && !fullActivity && globalLoading) {
+  if (!fullActivity) {
     return (
       <main className="tour-detail page-width section-space">
         <div className="news-loading-state">
@@ -121,25 +128,29 @@ function TourDetail() {
       </main>
     );
   }
+  return <LoadedTourDetail tourId={tourId} fullActivity={fullActivity} />;
+}
 
-  // Merge full dynamic data with fallback
+function LoadedTourDetail({ tourId, fullActivity }: { tourId: string; fullActivity: RawApiActivity }) {
+  const { getActivity, activities, getContent } = useSiteData();
+  const baseActivity = getActivity(tourId);
+
+  // Detail content belongs to the current route and language request.
   const activity = {
-    id: fullActivity?.id || baseActivity!.id,
-    title: fullActivity?.title || baseActivity!.title,
-    region: fullActivity?.region || baseActivity!.region,
-    country: fullActivity?.country || baseActivity!.country,
-    type: fullActivity?.type || baseActivity!.type,
-    level: fullActivity?.level || baseActivity!.level,
-    duration: fullActivity?.duration || baseActivity!.duration,
-    price: fullActivity?.price ?? baseActivity?.price,
-    description: fullActivity?.description || baseActivity!.description,
-    introTitle: fullActivity?.intro_title || baseActivity?.intro_title,
-    introText: fullActivity?.intro_text || baseActivity?.intro_text,
-    highlights: (fullActivity?.highlights && fullActivity.highlights.length > 0)
-      ? fullActivity.highlights
-      : baseActivity?.highlights || [],
-    image: fullActivity?.image_url || fullActivity?.image || baseActivity!.image,
-    alt: fullActivity?.alt_text || fullActivity?.alt || baseActivity!.alt,
+    id: fullActivity.id,
+    title: fullActivity.title,
+    region: fullActivity.region || "",
+    country: fullActivity.country || "",
+    type: fullActivity.type,
+    level: fullActivity.level || "",
+    duration: fullActivity.duration || "",
+    price: fullActivity.price,
+    description: fullActivity.description || "",
+    introTitle: fullActivity.intro_title,
+    introText: fullActivity.intro_text,
+    highlights: fullActivity.highlights || [],
+    image: fullActivity.image_url || fullActivity.image || "",
+    alt: fullActivity.alt_text || fullActivity.alt || fullActivity.title,
     itinerary: baseActivity?.itinerary,
     technicalSpecs: baseActivity?.technicalSpecs,
   };
@@ -163,7 +174,7 @@ function TourDetail() {
         "@type": "TouristTrip",
         "name": activity.title,
         "description": activity.introText || activity.description || `${activity.type} en ${activity.region}, Andorra.`,
-        "image": resolveMediaUrl(activity.image),
+        "image": activity.image ? resolveMediaUrl(activity.image) : undefined,
         "touristType": activity.type,
         "itinerary": activity.itinerary && activity.itinerary.length > 0 ? activity.itinerary : undefined,
         "offers": {
@@ -194,25 +205,34 @@ function TourDetail() {
     };
   }, [activity.id, activity.title, activity.description, activity.introText, activity.image, activity.type, activity.region, activity.price, activity.itinerary, getContent]);
 
-  // Build gallery images array
-  const rawImages = fullActivity?.images || baseActivity?.images;
-  const galleryImages: ActivityImage[] = (rawImages && rawImages.length > 0)
-    ? rawImages.map((img) => ({
-        ...img,
-        image_url: resolveMediaUrl(img.image_url),
-        poster_url: img.poster_url ? resolveMediaUrl(img.poster_url) : undefined,
-      }))
-    : [
-        {
-          id: 0,
-          activity_id: activity.id,
-          image_url: resolveMediaUrl(activity.image),
-          media_type: "image",
-          alt_text: activity.alt,
-          display_order: 0,
-          is_cover: true,
-        },
-      ];
+  // Build gallery images array: resolve and filter valid gallery media first
+  const rawImages = fullActivity.images;
+  const validGalleryMedia: ActivityImage[] = Array.isArray(rawImages)
+    ? rawImages
+        .filter((img) => typeof img?.image_url === "string" && img.image_url.trim() !== "")
+        .map((img) => ({
+          ...img,
+          image_url: resolveMediaUrl(img.image_url),
+          poster_url: img.poster_url ? resolveMediaUrl(img.poster_url) : undefined,
+        }))
+    : [];
+
+  const hasCoverImage = typeof activity.image === "string" && activity.image.trim() !== "";
+  const galleryImages: ActivityImage[] = validGalleryMedia.length > 0
+    ? validGalleryMedia
+    : (hasCoverImage
+        ? [
+            {
+              id: 0,
+              activity_id: activity.id,
+              image_url: resolveMediaUrl(activity.image),
+              media_type: "image",
+              alt_text: activity.alt || activity.title,
+              display_order: 0,
+              is_cover: true,
+            },
+          ]
+        : []);
 
   // Map to HeroSlide array for TourHero
   const heroSlides: HeroSlide[] = galleryImages.map((img) => {
@@ -394,7 +414,7 @@ function TourDetail() {
               {related.map((item) => (
                 <Link className="tour-item" to={`/tour/${item.id}`} key={item.id}>
                   <div className="tour-image-wrap">
-                    <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
+                    {item.image && <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />}
                     <span className="tour-arrow"><ArrowIcon /></span>
                   </div>
                   <div className="tour-details">

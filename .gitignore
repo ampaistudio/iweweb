@@ -13,3 +13,5 @@ api/storage/cache/*
 !api/storage/cache/.gitkeep
 graphify-out/
 .claude-flow/
+# Local audit reports, browser fixtures, session files and generated builds.
+.audit/

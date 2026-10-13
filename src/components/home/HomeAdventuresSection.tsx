@@ -2,6 +2,14 @@ import { Link } from "react-router-dom";
 import { type Activity } from "../../data/activities";
 import { useSiteData } from "../../context/SiteDataContext";
 import { resolveMediaUrl } from "../../utils/media";
+import {
+  getCategoryAnchor,
+  getCategoryAliases,
+  getCategoryContentPrefix,
+  getEffectiveCategories,
+  getCategoryNameAnchor,
+  isCategorySectionRenderable,
+} from "../../utils/activitySections";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -16,18 +24,6 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   );
 }
 
-function getCategoryAnchor(categoryName: string): string {
-  const slug = categoryName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return slug === 'btt' ? 'bike' : slug;
-}
-
-function getCategoryContentPrefix(categoryName: string): string {
-  const slug = categoryName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
-    .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-  return `activities_${slug}`;
-}
-
 function ActivityGrid({ type, activities }: { type: string; activities: Activity[] }) {
   const filtered = activities.filter((activity) => activity.type === type);
 
@@ -40,7 +36,7 @@ function ActivityGrid({ type, activities }: { type: string; activities: Activity
       {filtered.map((activity) => (
         <Link className="tour-item" id={activity.id} to={`/tour/${activity.id}`} key={activity.id}>
           <div className="tour-image-wrap">
-            <img src={activity.image} alt={activity.alt} loading="lazy" decoding="async" />
+            {activity.image && <img src={activity.image} alt={activity.alt} loading="lazy" decoding="async" />}
             <span className="tour-arrow"><ArrowIcon /></span>
           </div>
           <div className="tour-details">
@@ -55,28 +51,49 @@ function ActivityGrid({ type, activities }: { type: string; activities: Activity
 }
 
 export function HomeAdventuresSection() {
-  const { activities, categories, getContent } = useSiteData();
+  const { activities, categories, categoryItems, getContent } = useSiteData();
 
-  const categoryList = categories.length > 0
-    ? categories
-    : Array.from(new Set(activities.map((a) => a.type)));
+  const categoryList = getEffectiveCategories(categories, activities);
+  const reservedAnchors = new Set(categoryItems.map((item) => `category-${item.id}`));
+  const claimedAliases = new Set<string>();
 
   return (
-    <>
+    <div id="activities">
       {categoryList.map((categoryName) => {
-        const anchor = getCategoryAnchor(categoryName);
-        const prefix = getCategoryContentPrefix(categoryName);
-        const eyebrow = getContent(`${prefix}_eyebrow`);
-        const title = getContent(`${prefix}_title`) || categoryName;
-        const image = getContent(`${prefix}_image`);
-        const hasActivities = activities.some((a) => a.type === categoryName);
+        if (!isCategorySectionRenderable(categoryName, activities, getContent)) {
+          return null;
+        }
 
-        const isHoliday = anchor === 'andorra-holiday-snow';
-        if (!hasActivities && !image) return null;
+        const categoryId = categoryItems.find((item) => item.name === categoryName)?.id;
+        const anchor = getCategoryAnchor(categoryName, categoryId);
+        const aliases = getCategoryAliases(categoryName, categoryId, getContent).filter((alias) => {
+          if (alias === anchor || reservedAnchors.has(alias) || claimedAliases.has(alias)) return false;
+          claimedAliases.add(alias);
+          return true;
+        });
+        const prefix = getCategoryContentPrefix(categoryName);
+        const isBike = aliases.includes("bike");
+        const isHoliday = getCategoryNameAnchor(categoryName) === "andorra-holiday-snow" || aliases.includes("andorra-holiday-snow");
+
+        const eyebrow =
+          getContent(`${prefix}_eyebrow`) ||
+          (isBike ? getContent("activities_bike_eyebrow") : "") ||
+          (isHoliday ? getContent("activities_holiday_eyebrow") : "");
+        const title =
+          getContent(`${prefix}_title`) ||
+          (isBike ? getContent("activities_bike_title") : "") ||
+          (isHoliday ? getContent("activities_holiday_title") : "") ||
+          categoryName;
+        const image =
+          getContent(`${prefix}_image`) ||
+          (isBike ? getContent("activities_bike_image") || getContent("activities_btt_image") : "") ||
+          (isHoliday ? getContent("activities_holiday_image") || getContent("activities_andorra_holiday_snow_image") : "");
+        const hasActivities = activities.some((a) => a.type === categoryName);
 
         return (
           <section id={anchor} key={categoryName} className="adventures-section section-space">
-            {isHoliday && <span id="holiday" />}
+            {aliases.map((alias) => <span id={alias} key={alias} />)}
+            {isHoliday && !aliases.includes("holiday") && <span id="holiday" />}
             <div className="page-width">
               <div className="section-heading-row">
                 <div>
@@ -97,6 +114,6 @@ export function HomeAdventuresSection() {
           </section>
         );
       })}
-    </>
+    </div>
   );
 }

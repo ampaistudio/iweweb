@@ -1,32 +1,23 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Activity, ActivityType } from '../data/activities';
 import { publicApi } from '../api/client';
-import type { RawApiActivity, SiteContentMap, MenuItem } from '../api/types';
+import type { RawApiActivity, SiteContentMap, MenuItem, ActivityTypeItem } from '../api/types';
 import type { HeroSlide } from '../components/HeroSlideshow';
 import { resolveMediaUrl } from '../utils/media';
 import { usePreferences } from './PreferencesContext';
 
-export interface NavLeaf {
-  title: string;
+export interface NavItem {
+  label: string;
   id: string;
   href: string;
+  children: NavItem[];
 }
-
-export interface NavGroup {
-  label: string;
-  items: NavLeaf[];
-}
-
-export type NavItemOrGroup = NavLeaf | NavGroup;
 
 export interface NavSection {
+  id: string;
   label: string;
   anchor: string;
-  items: NavItemOrGroup[];
-}
-
-export function isNavGroup(item: NavItemOrGroup): item is NavGroup {
-  return 'items' in item;
+  items: NavItem[];
 }
 
 function resolveHref(linkType: string, targetValue: string): string {
@@ -39,26 +30,15 @@ function resolveHref(linkType: string, targetValue: string): string {
   return targetValue;
 }
 
-function buildNavItems(children?: MenuItem[]): NavItemOrGroup[] {
+function buildNavItems(children?: MenuItem[]): NavItem[] {
   if (!children || children.length === 0) return [];
 
-  return children.map((child): NavItemOrGroup => {
-    if (child.children && child.children.length > 0) {
-      return {
-        label: child.label,
-        items: child.children.map((grandchild) => ({
-          title: grandchild.label,
-          id: String(grandchild.id),
-          href: resolveHref(grandchild.link_type, grandchild.target_value),
-        })),
-      };
-    }
-    return {
-      title: child.label,
+  return children.map((child): NavItem => ({
+      label: child.label,
       id: String(child.id),
       href: resolveHref(child.link_type, child.target_value),
-    };
-  });
+      children: buildNavItems(child.children),
+    }));
 }
 
 function transformMenuTree(menuTree: MenuItem[], siteContent: SiteContentMap): NavSection[] {
@@ -70,6 +50,7 @@ function transformMenuTree(menuTree: MenuItem[], siteContent: SiteContentMap): N
       : undefined;
 
     return {
+      id: String(rootNode.id),
       label: rootNode.label,
       anchor: hasPackages ? `/#packages-${rootNode.id}` : fallbackAnchor || rootNode.target_value,
       items: buildNavItems(rootNode.children),
@@ -108,6 +89,7 @@ function normalizeRawActivity(raw: RawApiActivity): Activity {
 interface SiteDataContextValue {
   activities: Activity[];
   categories: string[];
+  categoryItems: ActivityTypeItem[];
   content: SiteContentMap;
   heroSlides: HeroSlide[];
   navSections: NavSection[];
@@ -126,6 +108,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   const { language } = usePreferences();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoryItems, setCategoryItems] = useState<ActivityTypeItem[]>([]);
   const [content, setContent] = useState<SiteContentMap>({});
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [navSections, setNavSections] = useState<NavSection[]>([]);
@@ -144,6 +127,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         const rawTypes = await publicApi.activityTypes.list();
         if (isMounted && Array.isArray(rawTypes) && rawTypes.length > 0) {
           setCategories(rawTypes.map((t) => t.name));
+          setCategoryItems(rawTypes);
         }
       } catch {
         // Transparent empty fallback
@@ -249,6 +233,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
       value={{
         activities,
         categories,
+        categoryItems,
         content,
         heroSlides,
         navSections,

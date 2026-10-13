@@ -35,6 +35,13 @@ function HeroSlideshow({ slides }: { slides: HeroSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
+    setActiveIndex((current) => {
+      if (slides.length === 0) return 0;
+      return current >= slides.length ? 0 : current;
+    });
+  }, [slides]);
+
+  useEffect(() => {
     if (slides.length < 2) return;
     const timer = setInterval(() => {
       setActiveIndex((current) => (current + 1) % slides.length);

@@ -10,8 +10,14 @@ import { HomeAdventuresSection } from "../components/home/HomeAdventuresSection"
 import { HomeWeatherSection } from "../components/home/HomeWeatherSection";
 import { HomeReviewsSection } from "../components/home/HomeReviewsSection";
 import { HomeContactSection } from "../components/home/HomeContactSection";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useOutletContext } from "react-router-dom";
 import { resolveMediaUrl } from "../utils/media";
+import {
+  getCategoryAnchor,
+  getEffectiveCategories,
+  isCategorySectionRenderable,
+} from "../utils/activitySections";
+import type { AppOutletContext } from "../App";
 
 function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
   return (
@@ -27,7 +33,9 @@ function ArrowIcon({ direction = "right" }: { direction?: "right" | "left" }) {
 }
 
 function Home() {
-  const { heroSlides, getContent } = useSiteData();
+  const outletContext = useOutletContext<AppOutletContext | null>();
+  const location = useLocation();
+  const { heroSlides, getContent, activities, categories, categoryItems } = useSiteData();
   const { language } = usePreferences();
   const [packages, setPackages] = useState<Package[]>([]);
 
@@ -50,11 +58,28 @@ function Home() {
   }, [language]);
 
   useEffect(() => {
-    const anchor = window.location.hash.slice(1);
-    if (anchor.startsWith('packages-') && packages.some((pkg) => `packages-${pkg.menu_parent_id}` === anchor)) {
-      document.getElementById(anchor)?.scrollIntoView();
-    }
-  }, [packages]);
+    const anchor = location.hash.slice(1);
+    if (!anchor) return;
+
+    let frame = 0;
+    const scrollToAnchor = () => {
+      const target = document.getElementById(anchor);
+      if (!target) return false;
+      frame = window.requestAnimationFrame(() => target.scrollIntoView());
+      return true;
+    };
+
+    if (scrollToAnchor()) return () => window.cancelAnimationFrame(frame);
+
+    const observer = new MutationObserver(() => {
+      if (scrollToAnchor()) observer.disconnect();
+    });
+    observer.observe(document.getElementById("top") ?? document.body, { childList: true, subtree: true });
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+    };
+  }, [location.hash]);
 
   useEffect(() => {
     const title = getContent("seo_meta_title");
@@ -63,7 +88,7 @@ function Home() {
     updateSeo({
       title,
       description,
-      image: image || undefined,
+      image: image ? resolveMediaUrl(image) : undefined,
     });
   }, [getContent]);
 
@@ -114,6 +139,13 @@ function Home() {
   const calendarEventsName = getContent("calendar_events_name");
   const calendarEventsPlace = getContent("calendar_events_place");
 
+  const categoryList = getEffectiveCategories(categories, activities);
+  const firstRenderable = categoryList.find((cat) =>
+    isCategorySectionRenderable(cat, activities, getContent)
+  );
+  const firstCategoryId = categoryItems.find((item) => item.name === firstRenderable)?.id;
+  const heroActivitiesAnchor = firstRenderable ? getCategoryAnchor(firstRenderable, firstCategoryId) : "";
+
   return (
     <main id="top">
       <section className="hero-section">
@@ -124,7 +156,7 @@ function Home() {
           <h1>{heroTitleLine1}<br /><em>{heroTitleLine2}</em></h1>
           <p className="hero-copy">{heroCopy}</p>
           <div className="hero-actions">
-            <a className="button button-light" href="#bike">{heroCtaActivities} <ArrowIcon /></a>
+            {firstRenderable && <a className="button button-light" href={`#${heroActivitiesAnchor}`}>{heroCtaActivities} <ArrowIcon /></a>}
             <a
               className="text-link light-link"
               href={heroWhatsappUrl}
@@ -141,7 +173,7 @@ function Home() {
       <section id="mission" className="mission-section page-width section-space">
         <div className="mission-image-wrap reveal-up">
           <img
-            src={missionImage || undefined}
+            src={resolveMediaUrl(missionImage) || undefined}
             alt="Roc del Quer, Andorra"
             loading="lazy"
             decoding="async"
@@ -164,7 +196,7 @@ function Home() {
       <section id="team" className="why-section">
         <div className="why-image-panel">
           <img
-            src={teamImage || undefined}
+            src={resolveMediaUrl(teamImage) || undefined}
             alt="Equipo de iWE guiando una experiencia de montaña"
             loading="lazy"
             decoding="async"
@@ -221,7 +253,7 @@ function Home() {
 
       <HomeWeatherSection />
 
-      <HomeReviewsSection />
+      <HomeReviewsSection onVisibilityChange={outletContext?.setReviewsVisible} />
 
       <HomeContactSection />
     </main>
