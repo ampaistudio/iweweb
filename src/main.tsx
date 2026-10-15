@@ -9,12 +9,14 @@ import PackageDetail from "./pages/PackageDetail";
 import NewsList from "./pages/NewsList";
 import NewsDetail from "./pages/NewsDetail";
 import Privacy from "./pages/Privacy";
+import NotFound from "./pages/NotFound";
+import SiteErrorBoundary from "./components/SiteErrorBoundary";
 import { PreferencesProvider } from "./context/PreferencesContext";
 import { SiteDataProvider } from "./context/SiteDataContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <PreferencesProvider>
+    <SiteErrorBoundary><PreferencesProvider>
       <SiteDataProvider>
         <BrowserRouter>
           <Routes>
@@ -25,10 +27,11 @@ createRoot(document.getElementById("root")!).render(
               <Route path="novedades" element={<NewsList />} />
               <Route path="novedades/:slug" element={<NewsDetail />} />
               <Route path="privacidad" element={<Privacy />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
         </BrowserRouter>
       </SiteDataProvider>
-    </PreferencesProvider>
+    </PreferencesProvider></SiteErrorBoundary>
   </StrictMode>
 );

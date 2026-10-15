@@ -8,6 +8,7 @@ import {
   isCategorySectionRenderable,
 } from "./utils/activitySections";
 import { resolveMediaUrl } from "./utils/media";
+import { getSystemMessages } from "./utils/systemMessages";
 
 export interface AppOutletContext {
   setReviewsVisible: (visible: boolean) => void;
@@ -226,7 +227,7 @@ function App() {
   const location = useLocation();
   const [reviewsVisible, setReviewsVisible] = useState(false);
   const { theme, toggleTheme, fontScale, cycleFontScale, language, setLanguage } = usePreferences();
-  const { navSections, getContent, activities, categories, categoryItems } = useSiteData();
+  const { navSections, getContent, activities, categories, categoryItems, loading, loadErrors, retryLoad } = useSiteData();
 
   useEffect(() => {
     if (location.pathname !== "/") {
@@ -373,6 +374,11 @@ function App() {
         )}
 
       </header>
+
+      {!loading && loadErrors.length > 0 && <div className="site-load-warning" role="alert">
+        <span>{getSystemMessages(language).unavailable}</span>
+        <button type="button" onClick={retryLoad}>{getSystemMessages(language).retry}</button>
+      </div>}
 
       <Outlet context={{ setReviewsVisible } satisfies AppOutletContext} />
 

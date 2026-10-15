@@ -5,6 +5,8 @@
  * Handles user authentication, session initialization, logout and current user verification.
  */
 
+require_once __DIR__ . '/AuthRateLimiter.php';
+
 class AuthController {
     private PDO $pdo;
     private array $config;
@@ -25,6 +27,17 @@ class AuthController {
         if (empty($email) || empty($password)) {
             jsonError('Email y contraseña son obligatorios.', 422);
         }
+
+        try {
+            $limiter = new AuthRateLimiter();
+            $client = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+            $allowed = $limiter->consume('login-ip', $client, 50, 900);
+            $allowed = $limiter->consume('login-account', strtolower($email), 30, 900) && $allowed;
+            $allowed = $limiter->consume('login-pair', $client . ':' . strtolower($email), 10, 900) && $allowed;
+        } catch (RuntimeException $e) {
+            jsonError('El acceso no está disponible temporalmente.', 503);
+        }
+        if (!$allowed) jsonError('Demasiados intentos. Volvé a probar en unos minutos.', 429);
 
         $stmt = $this->pdo->prepare('SELECT id, email, password_hash, display_name, role, must_change_password, created_at FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => strtolower($email)]);
@@ -97,6 +110,18 @@ class AuthController {
             jsonError('Ingresa un email válido.', 422);
         }
 
+        try {
+            $limiter = new AuthRateLimiter();
+            $client = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+            $allowed = $limiter->consume('forgot-ip', $client, 20, 3600);
+            $allowed = $limiter->consume('forgot-address', $email, 3, 3600) && $allowed;
+        } catch (RuntimeException $e) {
+            jsonError('La recuperación no está disponible temporalmente.', 503);
+        }
+        if (!$allowed) {
+            jsonSuccess(null, 'Si el email existe en nuestro sistema, vas a recibir un enlace para restablecer tu contraseña.');
+        }
+
         $stmt = $this->pdo->prepare('SELECT id, email, display_name FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
@@ -148,6 +173,16 @@ class AuthController {
         if (empty($token) || strlen($newPassword) < 8) {
             jsonError('Token inválido o contraseña demasiado corta (mínimo 8 caracteres).', 422);
         }
+
+        try {
+            $limiter = new AuthRateLimiter();
+            $client = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+            $allowed = $limiter->consume('reset-ip', $client, 30, 900);
+            $allowed = $limiter->consume('reset-token', hash('sha256', $token), 10, 900) && $allowed;
+        } catch (RuntimeException $e) {
+            jsonError('La recuperación no está disponible temporalmente.', 503);
+        }
+        if (!$allowed) jsonError('Demasiados intentos. Volvé a probar en unos minutos.', 429);
 
         $tokenHash = hash('sha256', $token);
 

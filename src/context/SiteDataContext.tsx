@@ -98,6 +98,8 @@ interface SiteDataContextValue {
   isContentFallback: boolean;
   isHeroSlidesFallback: boolean;
   isMenuFallback: boolean;
+  loadErrors: string[];
+  retryLoad: () => void;
   getActivity: (id: string) => Activity | undefined;
   getContent: (key: string) => string;
 }
@@ -117,102 +119,62 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   const [isContentFallback, setIsContentFallback] = useState(false);
   const [isHeroSlidesFallback, setIsHeroSlidesFallback] = useState(false);
   const [isMenuFallback, setIsMenuFallback] = useState(false);
+  const [loadErrors, setLoadErrors] = useState<string[]>([]);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setActivities([]);
+    setCategories([]);
+    setCategoryItems([]);
+    setContent({});
+    setHeroSlides([]);
+    setNavSections([]);
+    setLoadErrors([]);
 
     async function loadData() {
-      // 0. Fetch activity categories dynamically from DB
-      try {
-        const rawTypes = await publicApi.activityTypes.list();
-        if (isMounted && Array.isArray(rawTypes) && rawTypes.length > 0) {
-          setCategories(rawTypes.map((t) => t.name));
-          setCategoryItems(rawTypes);
-        }
-      } catch {
-        // Transparent empty fallback
-      }
+      const [typesResult, activitiesResult, contentResult, slidesResult, menuResult] = await Promise.allSettled([
+        publicApi.activityTypes.list(),
+        publicApi.activities.list({ locale: language }),
+        publicApi.content.get(language),
+        publicApi.heroSlides.list(),
+        publicApi.menu.list({ locale: language }),
+      ]);
+      if (!isMounted) return;
 
-      // 1. Fetch activities with resilient fallback passing selected language
-      try {
-        const rawActivities = await publicApi.activities.list({ locale: language });
-        if (isMounted && Array.isArray(rawActivities) && rawActivities.length > 0) {
-          const normalized = rawActivities.map(normalizeRawActivity);
-          setActivities(normalized);
-          setIsActivitiesFallback(false);
-        }
-      } catch {
-        if (isMounted) {
-          setActivities([]);
-          setIsActivitiesFallback(true);
-        }
-      }
+      const typesOk = typesResult.status === 'fulfilled' && Array.isArray(typesResult.value);
+      const activitiesOk = activitiesResult.status === 'fulfilled' && Array.isArray(activitiesResult.value);
+      const contentOk = contentResult.status === 'fulfilled' && contentResult.value?.content !== null
+        && typeof contentResult.value?.content === 'object';
+      const slidesOk = slidesResult.status === 'fulfilled' && Array.isArray(slidesResult.value);
+      const menuOk = menuResult.status === 'fulfilled' && Array.isArray(menuResult.value);
 
-      // 2. Fetch institutional content with resilient fallback passing selected language
-      let loadedContent: SiteContentMap = {};
-      try {
-        const contentRes = await publicApi.content.get(language);
-        if (isMounted && contentRes?.content) {
-          loadedContent = contentRes.content;
-          setContent(contentRes.content);
-          setIsContentFallback(false);
-        }
-      } catch {
-        if (isMounted) {
-          setContent({});
-          setIsContentFallback(true);
-        }
-      }
-
-      // 3. Fetch hero slides with resilient fallback
-      try {
-        const rawSlides = await publicApi.heroSlides.list();
-        if (isMounted && Array.isArray(rawSlides) && rawSlides.length > 0) {
-          const normalized: HeroSlide[] = rawSlides.map((s) => {
-            const resolvedSrc = resolveMediaUrl(s.src);
-            const resolvedPoster = s.poster ? resolveMediaUrl(s.poster) : undefined;
-            if (s.slide_type === 'video') {
-              return {
-                type: 'video',
-                src: resolvedSrc,
-                poster: resolvedPoster,
-                alt: s.alt,
-              };
-            }
-            return {
-              type: 'image',
-              src: resolvedSrc,
-              alt: s.alt,
-            };
-          });
-          setHeroSlides(normalized);
-          setIsHeroSlidesFallback(false);
-        }
-      } catch {
-        if (isMounted) {
-          setHeroSlides([]);
-          setIsHeroSlidesFallback(true);
-        }
-      }
-
-      // 4. Fetch navigation menu with resilient fallback passing selected language
-      try {
-        const rawMenu = await publicApi.menu.list({ locale: language });
-        if (isMounted && Array.isArray(rawMenu) && rawMenu.length > 0) {
-          const transformed = transformMenuTree(rawMenu, loadedContent);
-          setNavSections(transformed);
-          setIsMenuFallback(false);
-        }
-      } catch {
-        if (isMounted) {
-          setNavSections([]);
-          setIsMenuFallback(true);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
+      const types = typesOk ? typesResult.value : [];
+      const loadedContent: SiteContentMap = contentOk ? contentResult.value.content : {};
+      setCategories(types.map((item) => item.name));
+      setCategoryItems(types);
+      setActivities(activitiesOk ? activitiesResult.value.map(normalizeRawActivity) : []);
+      setContent(loadedContent);
+      setHeroSlides(slidesOk ? slidesResult.value.map((slide): HeroSlide => ({
+        type: slide.slide_type === 'video' ? 'video' : 'image',
+        src: resolveMediaUrl(slide.src),
+        poster: slide.poster ? resolveMediaUrl(slide.poster) : undefined,
+        alt: slide.alt,
+      })) : []);
+      setNavSections(menuOk ? transformMenuTree(menuResult.value, loadedContent) : []);
+      setIsActivitiesFallback(!activitiesOk);
+      setIsContentFallback(!contentOk);
+      setIsHeroSlidesFallback(!slidesOk);
+      setIsMenuFallback(!menuOk);
+      setLoadErrors([
+        ...(!typesOk ? ['categories'] : []),
+        ...(!activitiesOk ? ['activities'] : []),
+        ...(!contentOk ? ['content'] : []),
+        ...(!slidesOk ? ['slides'] : []),
+        ...(!menuOk ? ['menu'] : []),
+      ]);
+      setLoading(false);
     }
 
     loadData();
@@ -220,7 +182,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [language]);
+  }, [language, loadAttempt]);
 
   const getActivity = (id: string): Activity | undefined => {
     return activities.find((item) => item.id === id);
@@ -242,6 +204,8 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         isContentFallback,
         isHeroSlidesFallback,
         isMenuFallback,
+        loadErrors,
+        retryLoad: () => setLoadAttempt((attempt) => attempt + 1),
         getActivity,
         getContent,
       }}

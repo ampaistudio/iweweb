@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../media/MediaController.php';
+
 class HeroSlideController {
     private PDO $pdo;
     private array $config;
@@ -136,6 +138,25 @@ class HeroSlideController {
         $uniqueFilename = 'hero_' . bin2hex(random_bytes(16)) . '.' . $finalExt;
         $uploadDir = rtrim($this->config['media']['upload_dir'] ?? (__DIR__ . '/../../uploads'), '/');
 
+        $posterFile = $_FILES['poster_file'] ?? null;
+        if (is_array($posterFile) && ($posterFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            if (($posterFile['error'] ?? null) !== UPLOAD_ERR_OK || !is_uploaded_file((string)($posterFile['tmp_name'] ?? ''))) {
+                jsonError('No se pudo recibir el póster.', 422);
+            }
+            if (($posterFile['size'] ?? 0) > self::MAX_IMAGE_SIZE_BYTES) {
+                jsonError('El póster supera el límite de 8 MB.', 422);
+            }
+            $posterMime = $finfo->file($posterFile['tmp_name']);
+            $posterInfo = @getimagesize($posterFile['tmp_name']);
+            if (!in_array($posterMime, ['image/jpeg', 'image/png', 'image/webp'], true)
+                || $posterInfo === false || $posterInfo[0] < 1 || $posterInfo[1] < 1
+                || $posterInfo[0] * $posterInfo[1] > 16000000) {
+                jsonError('El póster debe ser una imagen JPG, PNG o WebP válida.', 422);
+            }
+        } else {
+            $posterFile = null;
+        }
+
         if (!is_dir($uploadDir)) {
             if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
                 jsonError('No se pudo crear el directorio de subidas en el servidor.', 500);
@@ -152,17 +173,14 @@ class HeroSlideController {
 
         // Poster handling (optional for uploaded videos)
         $posterUrl = null;
-        if (isset($_FILES['poster_file']) && is_array($_FILES['poster_file']) && $_FILES['poster_file']['error'] === UPLOAD_ERR_OK) {
-            $posterFile = $_FILES['poster_file'];
-            $posterMime = $finfo->file($posterFile['tmp_name']);
-            if (in_array($posterMime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                $posterExt = self::ALLOWED_MIME_TYPES[$posterMime][0];
-                $posterFilename = 'poster_' . bin2hex(random_bytes(16)) . '.' . $posterExt;
-                $posterTarget = $uploadDir . '/' . $posterFilename;
-                if (move_uploaded_file($posterFile['tmp_name'], $posterTarget)) {
-                    $posterUrl = $publicBase . '/' . $posterFilename;
-                }
+        if ($posterFile !== null) {
+            $posterFilename = 'poster_' . bin2hex(random_bytes(16)) . '.webp';
+            $posterTarget = $uploadDir . '/' . $posterFilename;
+            if (!MediaController::optimizeToWebp($posterFile['tmp_name'], $posterTarget, $posterMime, 1920, 1920, 85)) {
+                @unlink($targetPath);
+                jsonError('No se pudo procesar el póster como imagen segura.', 422);
             }
+            $posterUrl = $publicBase . '/' . $posterFilename;
         } elseif (!empty($_POST['poster'])) {
             $posterUrl = trim((string)$_POST['poster']);
         }

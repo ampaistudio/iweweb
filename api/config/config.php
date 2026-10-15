@@ -53,6 +53,10 @@ $defaultConfig = [
             'image/webp' => ['webp'],
         ],
     ],
+    'storage' => [
+        // This directory must remain outside the public website directory.
+        'backups_dir' => getenv('IWE_BACKUPS_DIR') ?: dirname(__DIR__, 3) . '/iwe-private-backups',
+    ],
     'meta' => [
         'page_id'           => getenv('META_PAGE_ID') ?: '',
         'page_access_token' => getenv('META_PAGE_ACCESS_TOKEN') ?: '',

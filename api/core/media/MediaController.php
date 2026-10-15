@@ -246,6 +246,10 @@ class MediaController {
         if (!$media) {
             jsonError('Archivo multimedia no encontrado.', 404);
         }
+        $filename = (string)$media['filename'];
+        if (!preg_match('/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/', $filename)) {
+            jsonError('El nombre del archivo multimedia no es válido para borrado.', 409);
+        }
 
         // 1. Check core references (posts)
         $stmtPost = $this->pdo->prepare('SELECT id, title FROM posts WHERE cover_media_id = :id LIMIT 1');
@@ -263,11 +267,48 @@ class MediaController {
             }
         }
 
+        // Check every current surface that can contain this exact filename, including
+        // galleries, posters, translated CMS values, and package media.
+        $referenceColumns = [
+            'activities' => ['image_url', 'description', 'intro_text'],
+            'activity_images' => ['image_url', 'poster_url'],
+            'activity_translations' => ['description', 'intro_text'],
+            'hero_slides' => ['src', 'poster'],
+            'packages' => ['image_url', 'description'],
+            'package_translations' => ['description'],
+            'package_media' => ['media_url', 'poster_url'],
+            'package_content' => ['intro_text', 'highlights_json', 'itinerary_json'],
+            'package_content_translations' => ['intro_text', 'highlights_json', 'itinerary_json'],
+            'site_content' => ['content_value'],
+            'site_content_translations' => ['content_value'],
+            'posts' => ['body'],
+            'post_translations' => ['body'],
+        ];
+        try {
+            foreach ($referenceColumns as $table => $columns) {
+                foreach ($columns as $column) {
+                    $reference = $this->pdo->prepare("SELECT 1 FROM `$table` WHERE LOCATE(:filename, `$column`) > 0 LIMIT 1");
+                    $reference->execute(['filename' => $filename]);
+                    if ($reference->fetchColumn()) {
+                        jsonError('No se puede eliminar la imagen porque sigue en uso en el sitio.', 409);
+                    }
+                }
+            }
+        } catch (PDOException $e) {
+            jsonError('No se pudo comprobar el uso de la imagen; se conservó el archivo.', 503);
+        }
+
         // 3. Remove from disk
         $uploadDir = rtrim($this->config['media']['upload_dir'] ?? (__DIR__ . '/../../uploads'), '/');
-        $filePath = $uploadDir . '/' . $media['filename'];
+        $filePath = $uploadDir . '/' . $filename;
+        $realUploadDir = realpath($uploadDir);
+        if ($realUploadDir === false || is_link($filePath) || (file_exists($filePath) && dirname((string)realpath($filePath)) !== $realUploadDir)) {
+            jsonError('No se pudo verificar la ruta del archivo multimedia.', 409);
+        }
         if (file_exists($filePath)) {
-            @unlink($filePath);
+            if (!@unlink($filePath)) {
+                jsonError('No se pudo eliminar el archivo multimedia del disco.', 500);
+            }
         }
 
         // 4. Delete from database

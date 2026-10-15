@@ -279,7 +279,7 @@ class PrerenderController {
         }
 
         header('Content-Type: text/html; charset=utf-8');
-        header('Cache-Control: public, max-age=3600');
+        header('Cache-Control: no-store');
         ?>
 <!doctype html>
 <html lang="es">

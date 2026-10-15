@@ -72,6 +72,11 @@ return [
         ],
     ],
 
+    // Store SQL and configuration backups outside the public website directory.
+    'storage' => [
+        'backups_dir' => getenv('IWE_BACKUPS_DIR') ?: dirname(__DIR__, 3) . '/iwe-private-backups',
+    ],
+
     // -------------------------------------------------------------------------
     // Meta Graph API (Facebook & Instagram Sync)
     // -------------------------------------------------------------------------

@@ -5,13 +5,13 @@
  * Scans api/uploads/ and the media database table for non-WebP image uploads (PNG, JPG, JPEG),
  * converts them to WebP using MediaController::optimizeToWebp(), updates all DB references
  * across media, activities, activity_images, hero_slides, packages, and site_content tables,
- * and safely removes original files after verification.
+ * and preserves original files until all references are independently checked.
  */
 
 declare(strict_types=1);
 
 // Prevent web access
-if (php_sapi_name() !== 'cli' && empty($_SERVER['argv'])) {
+if (PHP_SAPI !== 'cli') {
     header('HTTP/1.1 403 Forbidden');
     echo 'Este script solo puede ser ejecutado desde la línea de comandos (CLI).';
     exit(1);
@@ -126,6 +126,18 @@ foreach ($filesToProcess as $item) {
         continue;
     }
 
+    if (file_exists($webpPath)) {
+        if ($item['in_db']) {
+            $stats['fail_count']++;
+            $stats['errors'][] = "[CONFLICTO] Existe un WebP para {$oldFilename}, pero media aún apunta al original.";
+            echo "❌ [CONFLICTO WEBP] {$oldFilename}\n";
+        } else {
+            $stats['skip_count']++;
+            echo "⏭️ [YA CONVERTIDO] {$oldFilename}\n";
+        }
+        continue;
+    }
+
     // Perform WebP conversion using MediaController::optimizeToWebp
     $converted = MediaController::optimizeToWebp($sourcePath, $webpPath, $mime, 1920, 1920, 85);
 
@@ -206,10 +218,8 @@ foreach ($filesToProcess as $item) {
 
         $pdo->commit();
 
-        // Safely remove original file after successful DB commit
-        if (file_exists($sourcePath) && $sourcePath !== $webpPath) {
-            @unlink($sourcePath);
-        }
+        // Keep the original: URLs in JSON, query strings or future content may still refer to it.
+        // Physical cleanup requires a complete reference inventory and separate approval.
 
         $stats['success_count']++;
         $stats['total_size_before'] += $sizeBefore;

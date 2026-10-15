@@ -34,7 +34,7 @@ class SiteHealthController {
         $this->pdo = $pdo;
         $this->config = $config;
         $this->rootDir = realpath(__DIR__ . '/../../../') ?: dirname(__DIR__, 3);
-        $this->backupsDir = __DIR__ . '/../../storage/backups';
+        $this->backupsDir = trim((string)($config['storage']['backups_dir'] ?? ''));
         $this->cacheDir = __DIR__ . '/../../storage/cache';
 
         $this->ensureDirectories();
@@ -47,9 +47,23 @@ class SiteHealthController {
     }
 
     private function ensureDirectories(): void {
-        if (!is_dir($this->backupsDir)) {
-            @mkdir($this->backupsDir, 0755, true);
+        if ($this->backupsDir === '' || $this->backupsDir[0] !== '/') {
+            throw new RuntimeException('Configurá un directorio absoluto y privado para respaldos.');
         }
+        if (!is_dir($this->backupsDir) && !@mkdir($this->backupsDir, 0700, true)) {
+            throw new RuntimeException('No se pudo crear el directorio privado de respaldos.');
+        }
+        $backupPath = realpath($this->backupsDir);
+        if ($backupPath === false || !is_writable($backupPath)) {
+            throw new RuntimeException('El directorio privado de respaldos no está disponible.');
+        }
+        $publicRoots = array_filter([realpath($this->rootDir), realpath((string)($_SERVER['DOCUMENT_ROOT'] ?? ''))]);
+        foreach ($publicRoots as $publicRoot) {
+            if ($backupPath === $publicRoot || str_starts_with($backupPath, $publicRoot . DIRECTORY_SEPARATOR)) {
+                throw new RuntimeException('El directorio de respaldos debe estar fuera del sitio público.');
+            }
+        }
+        $this->backupsDir = $backupPath;
         if (!is_dir($this->cacheDir)) {
             @mkdir($this->cacheDir, 0755, true);
         }
