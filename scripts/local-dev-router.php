@@ -7,18 +7,13 @@
  * production. This script replicates just that one rule for local testing.
  * It is not used in production and is not referenced by any deployed code.
  */
-$uri = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/');
-
-if (preg_match('#(?:^|/)\.\.(?:/|$)|^/api/storage(?:/|$)#i', $uri)) {
-    http_response_code(403);
-    exit;
-}
+require_once __DIR__ . '/../api/core/PublicFilePolicy.php';
+$uri = publicRequestPath($_SERVER['REQUEST_URI'] ?? '/');
+rejectPrivateRequest($uri);
 
 if (preg_match('#^/api/uploads/#', $uri)) {
-    $uploads = realpath(__DIR__ . '/../api/uploads');
-    $file = realpath(__DIR__ . '/..' . $uri);
-    if ($uploads && $file && str_starts_with($file, $uploads . DIRECTORY_SEPARATOR)
-        && is_file($file) && preg_match('/\.(?:jpe?g|png|webp|gif|avif|mp4|webm)$/i', $file)) {
+    $file = containedPublicFile(__DIR__ . '/../api/uploads', __DIR__ . '/..' . $uri, dirname(__DIR__), true);
+    if ($file !== null && publicAssetExtension($file, true)) {
         return false; // let the built-in server serve the static file directly
     }
     http_response_code(404);

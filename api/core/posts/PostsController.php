@@ -360,9 +360,9 @@ class PostsController {
 
             if ($status === 'published' && ($publishFb || $publishIg)) {
                 $socialResults = $this->metaService->publishPost($id, $title, $fullBodyText, $imageUrl, $publishFb, $publishIg);
-            } elseif ($retryPlatform === 'facebook') {
+            } elseif ($status === 'published' && $retryPlatform === 'facebook') {
                 $socialResults['facebook'] = $this->metaService->publishToFacebook($id, $title . "\n\n" . richTextToPlainText($fullBodyText), $imageUrl);
-            } elseif ($retryPlatform === 'instagram') {
+            } elseif ($status === 'published' && $retryPlatform === 'instagram') {
                 $socialResults['instagram'] = $this->metaService->publishToInstagram($id, $title . "\n\n" . richTextToPlainText($fullBodyText), $imageUrl);
             }
 
@@ -460,7 +460,11 @@ class PostsController {
         }
 
         $baseUrl = rtrim($this->config['app']['base_url'] ?? '', '/');
-        return $baseUrl . '/uploads/' . $filename;
+        if (str_starts_with($baseUrl, '/')) {
+            $baseUrl = rtrim((string)$this->config['app']['site_url'], '/') . $baseUrl;
+        }
+
+        return $baseUrl . '/uploads/' . rawurlencode($filename);
     }
 
     private function sanitizeReferenceChannels(mixed $input): ?string {

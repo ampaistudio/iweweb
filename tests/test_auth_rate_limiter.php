@@ -16,5 +16,6 @@ if (count($files) !== 2 || str_contains(file_get_contents($files[0]), '203.0.113
     throw new RuntimeException('Throttle files leaked client identifiers');
 }
 foreach ($files as $file) unlink($file);
+unlink($dir . '/.lock');
 rmdir($dir);
 echo "PASS repeated attempts throttled; separate client allowed; identifiers hashed\n";

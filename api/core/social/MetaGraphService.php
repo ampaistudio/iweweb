@@ -24,6 +24,32 @@ class MetaGraphService {
         return !empty($this->metaConfig['page_id']) && !empty($this->metaConfig['page_access_token']);
     }
 
+    /** List recent posts from the configured professional account, newest first. */
+    public function instagramPublications(): Generator {
+        $account = (string)($this->metaConfig['ig_user_id'] ?? '');
+        $token = (string)($this->metaConfig['page_access_token'] ?? '');
+        $version = $this->metaConfig['api_version'] ?? 'v21.0';
+        if ($account === '' || $token === '') {
+            throw new RuntimeException('Instagram no configurado.');
+        }
+
+        $url = "https://graph.facebook.com/{$version}/" . rawurlencode($account) . '/media';
+        $params = ['fields' => 'id,caption,permalink,timestamp,media_type', 'access_token' => $token, 'limit' => 50];
+        for ($page = 0; $page < 10; $page++) {
+            $response = $this->makeHttpRequest('GET', $url, $params);
+            if (!isset($response['data']) || !is_array($response['data'])) {
+                throw new RuntimeException('Meta no devolvió las publicaciones de Instagram.');
+            }
+            yield from $response['data'];
+            $cursor = $response['paging']['cursors']['after'] ?? null;
+            if (empty($response['paging']['next']) || !is_string($cursor) || $cursor === '') {
+                return;
+            }
+            $params['after'] = $cursor;
+        }
+        throw new RuntimeException('La consulta llegó al límite de páginas. Usá una fecha de inicio más reciente.');
+    }
+
     /**
      * Publish post to selected platforms (Facebook / Instagram)
      */
@@ -103,8 +129,8 @@ class MetaGraphService {
             $response = $this->makeHttpRequest('POST', $url, $postData);
             
             if (isset($response['id'])) {
-                $externalId = (string)$response['id'];
-                $permalink = "https://www.facebook.com/{$externalId}";
+                $externalId = (string)($response['post_id'] ?? $response['id']);
+                $permalink = $this->fetchMetaPermalink($version, $externalId, $token, 'permalink_url');
                 $this->recordSocialLink($postId, 'facebook', $externalId, $permalink, 'synced', null);
                 return ['status' => 'synced', 'external_post_id' => $externalId, 'permalink' => $permalink];
             }
@@ -169,7 +195,7 @@ class MetaGraphService {
 
             if (isset($publishRes['id'])) {
                 $externalId = (string)$publishRes['id'];
-                $permalink = "https://www.instagram.com/p/{$externalId}/";
+                $permalink = $this->fetchMetaPermalink($version, $externalId, $token, 'permalink');
                 $this->recordSocialLink($postId, 'instagram', $externalId, $permalink, 'synced', null);
                 return ['status' => 'synced', 'external_post_id' => $externalId, 'permalink' => $permalink];
             }
@@ -283,7 +309,7 @@ class MetaGraphService {
 
             if (isset($publishRes['id'])) {
                 $externalId = (string)$publishRes['id'];
-                $permalink = "https://www.instagram.com/p/{$externalId}/";
+                $permalink = $this->fetchMetaPermalink($version, $externalId, $token, 'permalink');
                 $this->recordActivitySocialLink($activityId, 'instagram', $externalId, $permalink, 'synced', null);
                 return ['status' => 'synced', 'external_post_id' => $externalId, 'permalink' => $permalink];
             }
@@ -348,6 +374,20 @@ class MetaGraphService {
             'sync_error'       => $syncError,
             'synced_at'        => $syncStatus === 'synced' ? date('Y-m-d H:i:s') : null,
         ]);
+    }
+
+    private function fetchMetaPermalink(string $version, string $externalId, string $token, string $field): ?string {
+        $url = "https://graph.facebook.com/{$version}/" . rawurlencode($externalId);
+        try {
+            $response = $this->makeHttpRequest('GET', $url, ['fields' => $field, 'access_token' => $token]);
+        } catch (Throwable) {
+            // Meta has already published the post. A link lookup failure must not trigger a repost.
+            return null;
+        }
+        $link = $response[$field] ?? null;
+        return is_string($link) && str_starts_with($link, 'https://') && filter_var($link, FILTER_VALIDATE_URL)
+            ? $link
+            : null;
     }
 
     /**

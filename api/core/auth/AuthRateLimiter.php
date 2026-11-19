@@ -20,8 +20,32 @@ class AuthRateLimiter {
     }
 
     public function consume(string $scope, string $identity, int $limit, int $windowSeconds): bool {
+        $lock = @fopen($this->directory . '/.lock', 'c+');
+        if ($lock === false) throw new RuntimeException('No se pudo bloquear el límite de acceso.');
+        @chmod($this->directory . '/.lock', 0600);
+        try {
+            if (!flock($lock, LOCK_EX)) throw new RuntimeException('No se pudo bloquear el límite de acceso.');
+            return $this->consumeLocked($scope, $identity, $limit, $windowSeconds);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    private function consumeLocked(string $scope, string $identity, int $limit, int $windowSeconds): bool {
+        $now = time();
+        $entries = 0;
+        foreach (new DirectoryIterator($this->directory) as $entry) {
+            if (!preg_match('/^[a-f0-9]{64}\.json$/D', $entry->getFilename())) continue;
+            $saved = json_decode((string)@file_get_contents($entry->getPathname()), true);
+            // Legacy counters used windows of at most one hour.
+            $expires = (int)($saved['expires'] ?? ((int)($saved['started'] ?? $entry->getMTime()) + 3600));
+            if ($expires <= $now && @unlink($entry->getPathname())) continue;
+            $entries++;
+        }
         $key = hash('sha256', $scope . "\0" . $identity);
         $path = $this->directory . '/' . $key . '.json';
+        if (!is_file($path) && $entries >= 2048) return false;
         $handle = @fopen($path, 'c+');
         if ($handle === false) throw new RuntimeException('No se pudo comprobar el límite de acceso.');
         @chmod($path, 0600);
@@ -37,7 +61,7 @@ class AuthRateLimiter {
             }
             $count++;
             rewind($handle);
-            if (!ftruncate($handle, 0) || fwrite($handle, json_encode(['started' => $started, 'count' => $count])) === false
+            if (!ftruncate($handle, 0) || fwrite($handle, json_encode(['started' => $started, 'count' => $count, 'expires' => $started + $windowSeconds])) === false
                 || !fflush($handle)) {
                 throw new RuntimeException('No se pudo guardar el límite de acceso.');
             }

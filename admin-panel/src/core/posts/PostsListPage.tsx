@@ -56,10 +56,14 @@ export const PostsListPage: React.FC = () => {
   const handleRetrySocial = async (postId: number, platform: 'facebook' | 'instagram') => {
     setRetryingPostId(postId);
     try {
-      await api.posts.update(postId, {
-        retry_platform: platform,
-      });
-      toast.success(`Reintento de publicación enviado a ${platform}.`, 'Sincronización disparada');
+      const saved = await api.posts.update(postId, { retry_platform: platform });
+      const result = saved.social_sync?.[platform];
+      const label = platform === 'facebook' ? 'Facebook' : 'Instagram';
+      if (result?.status === 'synced') {
+        toast.success(`Publicada en ${label}.`);
+      } else {
+        toast.error(result?.error || 'El servidor no confirmó la publicación.', label);
+      }
       // Reload posts to update status
       await loadPosts();
     } catch (err: unknown) {

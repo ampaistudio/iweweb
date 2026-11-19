@@ -32,8 +32,8 @@ class AuthController {
             $limiter = new AuthRateLimiter();
             $client = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
             $allowed = $limiter->consume('login-ip', $client, 50, 900);
-            $allowed = $limiter->consume('login-account', strtolower($email), 30, 900) && $allowed;
-            $allowed = $limiter->consume('login-pair', $client . ':' . strtolower($email), 10, 900) && $allowed;
+            $allowed = $allowed && $limiter->consume('login-account', strtolower($email), 30, 900);
+            $allowed = $allowed && $limiter->consume('login-pair', $client . ':' . strtolower($email), 10, 900);
         } catch (RuntimeException $e) {
             jsonError('El acceso no está disponible temporalmente.', 503);
         }
@@ -114,7 +114,7 @@ class AuthController {
             $limiter = new AuthRateLimiter();
             $client = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
             $allowed = $limiter->consume('forgot-ip', $client, 20, 3600);
-            $allowed = $limiter->consume('forgot-address', $email, 3, 3600) && $allowed;
+            $allowed = $allowed && $limiter->consume('forgot-address', $email, 3, 3600);
         } catch (RuntimeException $e) {
             jsonError('La recuperación no está disponible temporalmente.', 503);
         }
@@ -178,7 +178,7 @@ class AuthController {
             $limiter = new AuthRateLimiter();
             $client = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
             $allowed = $limiter->consume('reset-ip', $client, 30, 900);
-            $allowed = $limiter->consume('reset-token', hash('sha256', $token), 10, 900) && $allowed;
+            $allowed = $allowed && $limiter->consume('reset-token', hash('sha256', $token), 10, 900);
         } catch (RuntimeException $e) {
             jsonError('La recuperación no está disponible temporalmente.', 503);
         }

@@ -6,7 +6,18 @@
     RewriteEngine On
     RewriteBase /
 
-    RewriteRule ^api/storage(?:/|$) - [F,L,NC]
+    # Private project material must never reach existing-file passthrough.
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L,NC]
+    RewriteRule ^(?:src|tests|scripts|node_modules|content|dist|graphify-out)(?:/|$) - [F,L,NC]
+    RewriteRule ^api/(?:config|core|migrations|scripts|storage)(?:/|$) - [F,L,NC]
+    RewriteRule \.(?:sql|sqlite3?|db|log|ini|env|bak|old|orig|save|swp|lock|map|ts|tsx|py|sh)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:package(?:-lock)?\.json|composer\.(?:json|lock)|tsconfig\.json)$ - [F,L,NC]
+    RewriteCond %{REQUEST_URI} !^/(?:api/)?index\.php$
+    RewriteRule \.(?:php[0-9]?|phtml|phar)(?:/|$) - [F,L,NC]
+    RewriteCond %{REQUEST_URI} !\.(?:jpe?g|png|webp|gif|avif|mp4|webm)$ [NC]
+    RewriteRule ^api/uploads/ - [F,L,NC]
+    RewriteCond %{REQUEST_URI} !\.(?:js|mjs|css|svg|jpe?g|png|webp|gif|avif|ico|woff2?|ttf|mp4|webm)$ [NC]
+    RewriteRule ^assets/ - [F,L,NC]
 
     # 1. Prerender for Social Crawlers & AI Search Bots — Tour detail pages (/tour/:id)
     # Matches: Facebook, WhatsApp, Twitter/X, Telegram, LinkedIn, Slack, Pinterest,
@@ -25,10 +36,13 @@
     # 4. Block direct access to physical admin-panel folder (Security by Design - NAES §9)
     RewriteRule ^admin-panel(/.*)?$ - [F,L]
 
-    # 5. Pass existing files and directories through without rewriting
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+    # Resolve public file paths in PHP as well, rejecting symlink escapes.
+    RewriteRule ^(?:assets|api/uploads)/ index.php [L]
+
+    # Only entry points and explicit root public files bypass the controller.
+    RewriteRule ^(?:index\.php|index\.html|robots\.txt|favicon\.ico|api/index\.php)$ - [L]
+    RewriteRule ^\.well-known/acme-challenge/[A-Za-z0-9_-]+$ - [L]
+    RewriteRule ^api(?:/|$) api/index.php [QSA,L]
 
     # 6. Front Controller: Route dynamic requests (secret panel slug & SPA fallback) to index.php
     RewriteRule ^ index.php [L]

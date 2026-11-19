@@ -79,6 +79,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   return (data?.data !== undefined ? data.data : data) as T;
 }
 
+export interface MaintenanceState { automatic: boolean; busy: boolean; online: boolean; message: string }
+
 export const api = {
   auth: {
     login: (email: string, password: string) =>
@@ -205,7 +207,7 @@ export const api = {
       publish_to_instagram?: boolean;
       translations?: Record<string, { title?: string; body?: string }>;
     }) =>
-      request<{ id: number; title: string; slug: string; status: string; social_sync: Record<string, unknown> }>(
+      request<{ id: number; title: string; slug: string; status: string; social_sync: Partial<Record<'facebook' | 'instagram', { status: 'synced' | 'failed'; error?: string }>> }>(
         '/posts',
         {
           method: 'POST',
@@ -225,7 +227,7 @@ export const api = {
         translations?: Record<string, { title?: string; body?: string }>;
       }
     ) =>
-      request<{ id: number; title: string; slug: string; status: string; social_sync: Record<string, unknown> }>(
+      request<{ id: number; title: string; slug: string; status: string; social_sync: Partial<Record<'facebook' | 'instagram', { status: 'synced' | 'failed'; error?: string }>> }>(
         `/posts/${id}`,
         {
           method: 'PUT',
@@ -365,6 +367,9 @@ export const api = {
   },
 
   health: {
+    maintenance: (command?: { start: true } | { automatic: boolean }) =>
+      request<MaintenanceState>('/health/maintenance', command
+        ? { method: 'POST', body: JSON.stringify(command) } : { method: 'GET' }),
     getStatus: (refresh?: boolean) =>
       request<SiteHealthStatusResponse>(`/health/status${refresh ? '?refresh=true' : ''}`, { method: 'GET' }),
     createBackup: () =>

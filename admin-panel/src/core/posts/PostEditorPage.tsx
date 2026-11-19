@@ -197,12 +197,23 @@ export const PostEditorPage: React.FC = () => {
         translations,
       };
 
-      if (isEdit && id) {
-        await api.posts.update(Number(id), payload);
-        toast.success('Publicación actualizada con éxito.', 'Guardado');
-      } else {
-        await api.posts.create(payload);
-        toast.success('Publicación creada con éxito.', 'Post publicado');
+      const saved = isEdit && id
+        ? await api.posts.update(Number(id), payload)
+        : await api.posts.create(payload);
+      toast.success(saved.status === 'published' ? 'Novedad publicada en el sitio.' : 'Borrador guardado.');
+      if (saved.status === 'published') {
+        for (const [platform, selected, label] of [
+          ['facebook', publishFb, 'Facebook'],
+          ['instagram', publishIg, 'Instagram'],
+        ] as const) {
+          if (!selected) continue;
+          const result = saved.social_sync?.[platform];
+          if (result?.status === 'synced') {
+            toast.success(`Publicada en ${label}.`);
+          } else {
+            toast.error(result?.error || 'El servidor no confirmó la publicación.', label);
+          }
+        }
       }
       navigate('/posts');
     } catch (err: unknown) {

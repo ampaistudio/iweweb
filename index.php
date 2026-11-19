@@ -9,35 +9,42 @@
 
 declare(strict_types=1);
 
-// CLI Server (php -S) static file pass-through & routing
-if (php_sapi_name() === 'cli-server') {
-    $rawUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
-    
-    // Block direct access to physical admin-panel folder
-    if (str_starts_with($rawUri, '/admin-panel')) {
-        http_response_code(403);
-        echo 'Access Forbidden';
-        exit;
-    }
+require_once __DIR__ . '/api/core/PublicFilePolicy.php';
+$requestUri = publicRequestPath($_SERVER['REQUEST_URI'] ?? '/');
+rejectPrivateRequest($requestUri);
 
-    // Pass existing static files (except PHP files)
-    $staticFile = __DIR__ . $rawUri;
-    if ($rawUri !== '/' && is_file($staticFile) && !str_ends_with($rawUri, '.php')) {
-        return false;
+// An opt-in loopback preview serves the release selected by the local worker.
+$releaseRoot = __DIR__;
+$webRoot = __DIR__;
+if (PHP_SAPI === 'cli-server' && getenv('IWE_LOCAL_RELEASES') === '1'
+    && in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
+    require_once __DIR__ . '/api/core/health/LocalMaintenance.php';
+    $private = realpath(LocalMaintenance::directory());
+    $active = realpath($private . '/active');
+    if ($active !== false && dirname($active) === $private && str_starts_with(basename($active), 'release-')) {
+        $releaseRoot = $active;
     }
-
-    // Delegate /api requests to api/index.php
-    if (str_starts_with($rawUri, '/api')) {
-        require __DIR__ . '/api/index.php';
-        exit;
-    }
+    $webRoot = $releaseRoot . '/dist';
 }
 
-// Block direct access to physical admin-panel folder (defense-in-depth)
-$requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
-if (str_starts_with($requestUri, '/admin-panel')) {
-    http_response_code(403);
-    echo 'Access Forbidden';
+// Use the same file containment checks under PHP's server and Apache.
+$staticFile = null;
+if (in_array($requestUri, ['/index.html', '/robots.txt', '/favicon.ico'], true)) {
+    $candidate = realpath($webRoot . $requestUri);
+    if ($candidate !== false && $candidate === $webRoot . $requestUri && is_file($candidate)) $staticFile = $candidate;
+} elseif (str_starts_with($requestUri, '/assets/')) {
+    if (publicAssetExtension($requestUri)) $staticFile = containedPublicFile($webRoot . '/assets', $webRoot . $requestUri, $releaseRoot);
+    if ($staticFile === null) { http_response_code(404); exit; }
+} elseif (str_starts_with($requestUri, '/api/uploads/')) {
+    if (publicAssetExtension($requestUri, true)) $staticFile = containedPublicFile(__DIR__ . '/api/uploads', __DIR__ . $requestUri, __DIR__, true);
+    if ($staticFile === null) { http_response_code(404); exit; }
+}
+if ($staticFile !== null) {
+    serveStaticAsset($staticFile);
+    exit;
+}
+if ($requestUri === '/api' || str_starts_with($requestUri, '/api/')) {
+    require __DIR__ . '/api/index.php';
     exit;
 }
 
@@ -53,18 +60,22 @@ $firstSegment = $segments[0] ?? '';
 // Check if request matches the dynamically configured secret panel slug
 if ($panelSlug !== '' && $firstSegment === $panelSlug) {
     $subpath = implode('/', array_slice($segments, 1));
-    $distDir = __DIR__ . '/' . $panelDir . '/dist';
+    $distDir = $releaseRoot . '/' . $panelDir . '/dist';
 
     // 1. If requesting a static asset under /<slug>/...
     if ($subpath !== '') {
         $candidateFile = $distDir . '/' . $subpath;
-        $realCandidate = realpath($candidateFile);
-        $realDist = realpath($distDir);
+        $realCandidate = containedPublicFile($distDir, $candidateFile, $releaseRoot);
 
-        if ($realCandidate !== false && $realDist !== false && str_starts_with($realCandidate, $realDist) && is_file($realCandidate)) {
+        if ($realCandidate !== null) {
             serveStaticAsset($realCandidate);
             exit;
         }
+    }
+
+    if ($subpath !== '' && pathinfo($subpath, PATHINFO_EXTENSION) !== '') {
+        http_response_code(404);
+        exit;
     }
 
     // 2. Otherwise serve admin panel SPA index.html with dynamically injected base
@@ -99,7 +110,7 @@ if ($panelSlug !== '' && $firstSegment === $panelSlug) {
 }
 
 // Main Website SPA Fallback
-$mainIndex = __DIR__ . '/index.html';
+$mainIndex = $webRoot . '/index.html';
 if (file_exists($mainIndex)) {
     header('Content-Type: text/html; charset=UTF-8');
     readfile($mainIndex);
@@ -128,7 +139,12 @@ function serveStaticAsset(string $filePath): void {
         'woff' => 'font/woff',
         'woff2'=> 'font/woff2',
         'ttf'  => 'font/ttf',
-        'json' => 'application/json; charset=UTF-8',
+        'gif' => 'image/gif',
+        'avif' => 'image/avif',
+        'mp4' => 'video/mp4',
+        'webm' => 'video/webm',
+        'html' => 'text/html; charset=UTF-8',
+        'txt' => 'text/plain; charset=UTF-8',
     ];
 
     $mime = $mimes[$ext] ?? 'application/octet-stream';
@@ -141,6 +157,42 @@ function serveStaticAsset(string $filePath): void {
         header('Cache-Control: public, max-age=3600');
     }
 
-    header('Content-Length: ' . (string)filesize($filePath));
-    readfile($filePath);
+    // Preserve browser video seeking when media passes through this boundary.
+    $size = filesize($filePath);
+    $start = 0;
+    $end = $size - 1;
+    header('Accept-Ranges: bytes');
+    $range = $_SERVER['HTTP_RANGE'] ?? '';
+    if ($range !== '' && preg_match('/^bytes=(\d*)-(\d*)$/D', $range, $match)) {
+        if ($match[1] === '' && $match[2] !== '') {
+            $start = max(0, $size - (int)$match[2]);
+        } else {
+            $start = (int)$match[1];
+            $end = $match[2] !== '' ? min($end, (int)$match[2]) : $end;
+        }
+        if ($size === 0 || $start > $end || ($match[1] === '' && $match[2] === '')) {
+            http_response_code(416);
+            header('Content-Range: bytes */' . $size);
+            header('Content-Length: 0');
+            return;
+        }
+        http_response_code(206);
+        header("Content-Range: bytes {$start}-{$end}/{$size}");
+    }
+    $remaining = max(0, $end - $start + 1);
+    header('Content-Length: ' . $remaining);
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'HEAD') return;
+    $stream = fopen($filePath, 'rb');
+    if ($stream === false) return;
+    try {
+        fseek($stream, $start);
+        while ($remaining > 0 && !feof($stream)) {
+            $chunk = fread($stream, min(65536, $remaining));
+            if ($chunk === false || $chunk === '') break;
+            echo $chunk;
+            $remaining -= strlen($chunk);
+        }
+    } finally {
+        fclose($stream);
+    }
 }

@@ -9,6 +9,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/ReviewsCache.php';
+
 class ReviewsController
 {
     private PDO $pdo;
@@ -35,9 +37,8 @@ class ReviewsController
             try {
                 $url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=" . urlencode($placeId) . "&fields=name,rating,reviews,user_ratings_total&language=es&key=" . urlencode($apiKey);
                 $ctx = stream_context_create(['http' => ['timeout' => 4]]);
-                $resp = @file_get_contents($url, false, $ctx);
-                if ($resp !== false) {
-                    $json = json_decode($resp, true);
+                $json = (new ReviewsCache())->fetch('google', $url, $ctx);
+                if ($json !== null) {
                     if (isset($json['result'])) {
                         jsonSuccess([
                             'source'             => 'google',
@@ -86,9 +87,8 @@ class ReviewsController
                         'header'  => "Accept: application/json\r\n",
                     ]
                 ]);
-                $resp = @file_get_contents($url, false, $ctx);
-                if ($resp !== false) {
-                    $json = json_decode($resp, true);
+                $json = (new ReviewsCache())->fetch('tripadvisor', $url, $ctx);
+                if ($json !== null) {
                     if (isset($json['data'])) {
                         jsonSuccess([
                             'source'        => 'tripadvisor',

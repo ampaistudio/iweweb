@@ -2,6 +2,8 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 const require = createRequire(process.env.IWE_TEST_RUNTIME_PACKAGE || import.meta.url);
 const { chromium } = require('playwright');
+const web = process.env.IWE_TEST_WEB_URL || 'http://127.0.0.1:5173';
+const panel = process.env.IWE_TEST_PANEL_URL || 'http://127.0.0.1:5174';
 const browser = await chromium.launch({ headless: true, channel: 'chrome' });
 const page = await browser.newPage();
 page.setDefaultTimeout(10000);
@@ -42,7 +44,7 @@ await page.route('**/api/**', async (route) => {
   await route.fulfill({status:200, contentType:'application/json',body:JSON.stringify({success:true,data})});
 });
 try {
-  await page.goto('http://127.0.0.1:5174/content');
+  await page.goto(panel + '/content');
   const hero = page.getByRole('textbox',{name:'Texto descriptivo del Hero (Copy)',exact:true});
   await hero.waitFor();
   assert.equal(await hero.locator('p').count(),2,'Legacy paragraphs collapsed on opening');
@@ -68,7 +70,7 @@ try {
   await hero.locator('strong').waitFor();
   console.log('PASS dashboard: 8 editors, legacy paragraphs, bold, save/reload, locale isolation');
 
-  await page.goto('http://127.0.0.1:5174/posts/1');
+  await page.goto(panel + '/posts/1');
   await page.getByRole('textbox',{name:'Contenido del post (Español - Principal)'}).locator('strong').waitFor();
   await page.getByRole('button',{name:/English/}).click();
   await page.locator('.tiptap').fill('English news');
@@ -76,7 +78,7 @@ try {
   await page.locator('.tiptap strong').waitFor();
   console.log('PASS news editor: existing formatting and locale switching');
 
-  await page.goto('http://127.0.0.1:5174/packages');
+  await page.goto(panel + '/packages');
   await page.getByText('Paquete de prueba',{exact:true}).waitFor();
   await page.getByRole('button',{name:/Editar/}).click();
   await page.getByRole('textbox',{name:'Descripción del Paquete (Español)',exact:true}).locator('strong').waitFor();
@@ -85,14 +87,14 @@ try {
 
   base.mission_text = rich; base.team_bio = rich; base.weather_copy = rich; base.contact_copy = rich;
   base.tours_copy = rich;
-  await page.goto('http://127.0.0.1:5173/');
+  await page.goto(web + '/');
   await page.locator('.hero-copy strong').waitFor();
   await page.locator('.large-copy strong').waitFor();
-  await page.goto('http://127.0.0.1:5173/paquete/test');
+  await page.goto(web + '/paquete/test');
   await page.locator('.tour-description-wrap strong').waitFor();
   assert.equal(await page.locator('.tour-itinerary-list strong').innerText(),'destacado');
   assert.equal(await page.locator('meta[name="description"]').getAttribute('content'),'Detalle Texto destacado & claro Uno');
-  await page.goto('http://127.0.0.1:5173/novedades/test');
+  await page.goto(web + '/novedades/test');
   await page.locator('.news-article-content strong').waitFor();
   console.log('PASS public web: institutional text, package body/list and news render formatting; metadata is plain text');
 

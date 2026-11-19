@@ -473,9 +473,14 @@ try {
 
     // --- Site Health, Diagnostics & Backups Endpoints ---
     if ($resource === 'health') {
-        $healthController = new SiteHealthController($pdo, $config);
         $sub = $segments[1] ?? '';
 
+        if ($sub === 'maintenance' && in_array($method, ['GET','POST'], true)) {
+            requireAdmin($pdo);
+            require_once __DIR__ . '/core/health/LocalMaintenance.php';
+            LocalMaintenance::handle($method);
+        }
+        $healthController = new SiteHealthController($pdo, $config);
         if ($sub === 'status' && $method === 'GET') {
             $healthController->getStatus();
         } elseif ($sub === 'backup' && $method === 'POST') {

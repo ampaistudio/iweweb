@@ -6,6 +6,7 @@ import { HealthSeverityBadge } from './HealthSeverityBadge';
 import { SystemRuntimeSection } from './SystemRuntimeSection';
 import { BackupsManagerSection } from './BackupsManagerSection';
 import { DependenciesTableSection } from './DependenciesTableSection';
+import { UpdatePlanSection } from './UpdatePlanSection';
 import { TelegramAlertsSection } from './TelegramAlertsSection';
 
 export const SiteHealthPage: React.FC = () => {
@@ -125,6 +126,8 @@ export const SiteHealthPage: React.FC = () => {
         creatingBackup={creatingBackup}
         onCreateBackup={handleCreateBackup}
       />
+
+      <UpdatePlanSection />
 
       {/* SECTION 3: Frontend & Dashboard Dependencies Table */}
       {healthData && (
