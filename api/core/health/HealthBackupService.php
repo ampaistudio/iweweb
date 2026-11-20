@@ -172,7 +172,7 @@ class HealthBackupService {
         $mysqldumpPath = $this->findMysqldumpBinary();
         if ($mysqldumpPath && function_exists('exec')) {
             $cmd = sprintf(
-                '%s --host=%s --port=%s --user=%s %s %s > %s 2>&1',
+                '%s --host=%s --port=%s --user=%s --single-transaction --no-tablespaces --loose-set-gtid-purged=OFF %s %s > %s 2>/dev/null',
                 escapeshellcmd($mysqldumpPath),
                 escapeshellarg((string)$host),
                 escapeshellarg((string)$port),
